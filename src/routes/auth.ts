@@ -87,3 +87,30 @@ auth.post('/login', async (c) => {
 })
 
 export default auth
+
+
+// 🧪 API สำหรับทดสอบระบบสุ่มชื่อ (GET /api/auth/test-nickname)
+auth.get('/test-nickname', async (c) => {
+  let nickname = ''
+  let source = ''
+  const prompt = 'สร้างนามแฝงภาษาไทยสั้นๆ 1 ชื่อ ที่ให้อารมณ์อบอุ่น ปลอดภัย ฮีลใจ (ตอบเฉพาะชื่อ ไม่ต้องใส่เครื่องหมายอัญประกาศหรือคำอธิบายเพิ่มเติม)'
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.0-flash-lite',
+      contents: prompt,
+    })
+    nickname = response.text?.trim() || fallbackNicknames[0]
+    source = 'Google Gemini AI 🤖'
+  } catch (err) {
+    const randomIndex = Math.floor(Math.random() * fallbackNicknames.length)
+    nickname = fallbackNicknames[randomIndex]
+    source = 'Local Fallback Pool 🛡️'
+  }
+
+  return c.json({
+    success: true,
+    source: source,
+    nickname: nickname
+  })
+})
