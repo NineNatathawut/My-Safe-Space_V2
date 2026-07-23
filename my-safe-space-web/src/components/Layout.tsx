@@ -10,36 +10,34 @@ export default function Layout() {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex justify-center">
-      {/* Container หลักขนาดเท่าจอมือถือ */}
-      <div className="w-full max-w-md bg-white min-h-screen flex flex-col border-x border-gray-200">
-        
-        {/* Header สั้นๆ */}
-        <header className="p-4 border-b flex justify-between items-center bg-white sticky top-0 z-10">
-          <h1 className="font-bold text-lg text-indigo-600">🏠 บ้านพักใจ</h1>
-          {token && (
-            <button 
-              onClick={handleLogout}
-              className="text-xs text-red-500 border border-red-200 px-2 py-1 rounded"
-            >
-              ออกจากระบบ
-            </button>
-          )}
-        </header>
-
-        {/* เนื้อหาแต่ละหน้าจะเปลี่ยนตรงนี้ */}
-        <main className="flex-1 p-4">
-          <Outlet />
-        </main>
-
-        {/* เมนูด้านล่าง (Nav Bar) */}
-        {token && (
-          <nav className="p-3 border-t bg-white flex justify-around text-sm sticky bottom-0">
-            <Link to="/" className="font-medium text-gray-700">หน้าฟีด</Link>
-            <Link to="/profile" className="font-medium text-gray-700">โปรไฟล์</Link>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* 🟢 Navbar ด้านบน (Responsive) */}
+      <header className="bg-white border-b p-4">
+        <div className="container mx-auto max-w-5xl flex justify-between items-center">
+          <h1 className="text-xl font-bold text-indigo-600">บ้านพักใจ</h1>
+          
+          <nav className="flex gap-4">
+            {token ? (
+              <>
+                <Link to="/" className="hover:underline">หน้าหลัก</Link>
+                <Link to="/profile" className="hover:underline">โปรไฟล์</Link>
+                <button onClick={handleLogout} className="text-red-500 hover:underline">
+                  ออกจากระบบ
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="hover:underline">เข้าสู่ระบบ</Link>
+              </>
+            )}
           </nav>
-        )}
-      </div>
+        </div>
+      </header>
+
+      {/* 🟢 พื้นที่เนื้อหาหลัก (ขยายตามจอ แต่ไม่เกิน 5xl) */}
+      <main className="flex-1 container mx-auto max-w-5xl p-4 mt-4">
+        <Outlet />
+      </main>
     </div>
   );
 }
