@@ -1,19 +1,17 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../api/axios';
+import { useAuth } from '../contexts/AuthContext';
 
-// 🌟 คลังคำศัพท์สำหรับสุ่มฉายา
 const ADJECTIVES = ['ใจฟู', 'สีพาสเทล', 'ใจเย็น', 'หวานน้อย', 'ยิ้มแฉ่ง', 'กอดอุ่น', 'แสนดี', 'ละมุน'];
 const NOUNS = ['แมวน้อย', 'ก้อนเมฆ', 'คาปิบาร่า', 'ชานม', 'ทานตะวัน', 'ใบไม้', 'ดวงดาว', 'กระต่าย'];
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
-  // 🌟 State สำหรับจัดการ Pop-up นามแฝง
   const [showPopup, setShowPopup] = useState(false);
   const [nickname, setNickname] = useState('');
 
@@ -22,43 +20,32 @@ export default function Login() {
     setIsLoading(true);
     setError('');
 
-    try {
-      const response = await api.post('/api/auth/login', {
-        email,
-        password,
-      });
+    const result = await login(email, password);
 
-      const token = 
-        response.data.token || 
-        response.data.access_token || 
-        response.data.data?.session?.access_token ||
-        response.data.session?.access_token;
-
-      if (token) {
-        localStorage.setItem('token', token);
-        
-        // 🎯 1. สุ่มนามแฝงทันทีที่ล็อกอินผ่าน
-        const randomAdj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
-        const randomNoun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
-        const generatedName = `${randomNoun}${randomAdj}`;
-        
-        setNickname(generatedName);
-        localStorage.setItem('alias_name', generatedName); // เก็บชื่อไว้ใช้ตอนโพสต์
-
-        // 🎯 2. โชว์ Pop-up น่ารักๆ
-        setShowPopup(true);
-
-        // 🎯 3. หน่วงเวลา 3 วินาที แล้วพาเด้งเข้าห้องระบายอัตโนมัติ
-        setTimeout(() => {
-          navigate('/');
-        }, 3000);
-
-      } else {
-        setError('ล็อกอินสำเร็จ แต่ระบบหา Token ไม่เจอ');
+    if (result.success && result.user) {
+      if (result.user.role === 'admin') {
+        setIsLoading(false);
+        navigate('/resources');
+        return;
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
-    } finally {
+
+      const randomAdj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+      const randomNoun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
+      const generatedName = `${randomNoun}${randomAdj}`;
+
+      setNickname(generatedName);
+      localStorage.setItem('alias_name', generatedName);
+
+      setShowPopup(true);
+
+      setTimeout(() => {
+        navigate('/');
+      }, 3000);
+    } else {
+      setError(result.error || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+    }
+
+    if (!showPopup) {
       setIsLoading(false);
     }
   };
@@ -114,7 +101,7 @@ export default function Login() {
         </p>
       </div>
 
-      {/* 🔴 Pop-up สุ่มนามแฝง (จะโชว์เมื่อ showPopup เป็น true) */}
+      {/* 🔴 Pop-up สุ่มนามแฝง (จะโชว์เฉพาะ User ทั่วไปเมื่อ showPopup เป็น true) */}
       {showPopup && (
         <div className="absolute inset-0 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-3xl shadow-xl border border-purple-100 text-center animate-bounce-in max-w-sm w-full mx-4">
@@ -129,13 +116,13 @@ export default function Login() {
             </div>
             
             <p className="text-xs text-purple-400 animate-pulse">
-              กำลังพากำลังพาไปหน้าหลัก.. 🚀
+              กำลังพาไปหน้าหลัก.. 🚀
             </p>
           </div>
         </div>
       )}
 
-      {/* 🎨 เพิ่ม CSS Animation ง่ายๆ สำหรับ Pop-up ในหน้านี้ */}
+      {/* 🎨 CSS Animation สำหรับ Pop-up */}
       <style>{`
         @keyframes bounce-in {
           0% { transform: scale(0.8); opacity: 0; }

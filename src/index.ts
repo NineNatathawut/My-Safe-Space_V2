@@ -71,7 +71,28 @@ const optionalAuthMiddleware = async (c: any, next: any) => {
 }
 
 // ==========================================
-// 📝 3. API: บันทึกข้อความระบายความรู้สึก (Posts)
+// 🧑‍💻 3. API: ตรวจสอบ Token และดึงข้อมูลผู้ใช้
+// ==========================================
+
+// 🟢 API: ดึงข้อมูลผู้ใช้ปัจจุบัน (GET /api/auth/me)
+app.get('/api/auth/me', authMiddleware, async (c) => {
+  const user = c.get('user')
+
+  const isAdmin = user.email === 'admin@banpakjai.com' || user.user_metadata?.role === 'admin'
+  const nickname = user.user_metadata?.nickname || 'ผู้ใช้งาน'
+
+  return c.json({
+    success: true,
+    user: {
+      email: user.email,
+      nickname: nickname,
+      role: isAdmin ? 'admin' : 'user',
+    }
+  })
+})
+
+// ==========================================
+// 📝 4. API: บันทึกข้อความระบายความรู้สึก (Posts)
 // ==========================================
 
 // 🟢 API: สร้างโพสต์ (POST /api/posts)
@@ -235,32 +256,56 @@ app.get('/api/posts/me', authMiddleware, async (c) => {
   }, 200)
 })
 
-// 🔴 API: ลบโพสต์ของตัวเอง (DELETE /api/posts/:id)
+// 🔴 API: ลบโพสต์ (DELETE /api/posts/:id)
 app.delete('/api/posts/:id', authMiddleware, async (c) => {
   const user = c.get('user') 
   const postId = c.req.param('id')
 
-  const { data, error } = await supabase
-    .from('posts')
-    .delete()
-    .eq('id', postId)
-    .eq('user_id', user.id)
-    .select()
+  try {
+    // 🌟 1. เช็คสิทธิ์ว่าเป็น Admin หรือไม่ (เช็คจากอีเมลหรือ metadata)
+    const isAdmin = user.email === 'admin@banpakjai.com' || user.user_metadata?.role === 'admin'
 
-  if (error) {
-    return c.json({ error: `Database Error: ${error.message}` }, 500)
-  }
+    // 🌟 2. ถ้า *ไม่ใช่* Admin ให้เช็คว่าเป็นเจ้าของโพสต์จริงๆ ไหม
+    if (!isAdmin) {
+      const { data: ownerCheck } = await supabase
+        .from('posts')
+        .select('id')
+        .eq('id', postId)
+        .eq('user_id', user.id)
+        .single()
 
-  if (data.length === 0) {
-    return c.json({ 
-      error: 'ไม่พบโพสต์ที่ต้องการลบ หรือคุณไม่มีสิทธิ์ลบโพสต์นี้' 
-    }, 403)
+      if (!ownerCheck) {
+        return c.json({ 
+          error: 'ไม่พบโพสต์ หรือคุณไม่มีสิทธิ์ลบโพสต์นี้' 
+        }, 403)
+      }
+    }
+
+    // 🌟 3. ลบข้อมูลที่ผูกอยู่กับโพสต์นี้ก่อน (ลบ hugs และ comments) เพื่อป้องกัน Database Error (500)
+    await supabase.from('hugs').delete().eq('post_id', postId)
+    await supabase.from('comments').delete().eq('post_id', postId)
+
+    // 🌟 4. สั่งลบโพสต์หลักออกจากฐานข้อมูล
+    const { data, error } = await supabase
+      .from('posts')
+      .delete()
+      .eq('id', postId)
+      .select()
+
+    if (error) {
+      console.error('Supabase Delete Error:', error)
+      return c.json({ error: `Database Error: ${error.message}` }, 500)
+    }
+    
+    return c.json({
+      success: true,
+      message: '🗑️ ลบข้อความออกจากพื้นที่ปลอดภัยเรียบร้อยแล้ว'
+    }, 200)
+
+  } catch (err) {
+    console.error('Error deleting post:', err)
+    return c.json({ error: 'Server error' }, 500)
   }
-  
-  return c.json({
-    success: true,
-    message: '🗑️ ลบข้อความออกจากพื้นที่ปลอดภัยเรียบร้อยแล้ว'
-  }, 200)
 })
 
 // 🟡 API: แก้ไขข้อความระบายความรู้สึก (PUT /api/posts/:id)
@@ -408,6 +453,8 @@ app.get('/api/posts/:id/comments', async (c) => {
     comments: data 
   }, 200)
 })
+
+
 
 const port = 3000
 console.log(`🚀 API Server is running on http://localhost:${port}`)
