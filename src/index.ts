@@ -1,7 +1,9 @@
+import 'dotenv/config';
+
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import 'dotenv/config'
+
 import { createClient } from '@supabase/supabase-js'
 
 import authRouter from './routes/auth.js'
@@ -9,6 +11,12 @@ import authRouter from './routes/auth.js'
 type Variables = {
   user: any
 }
+
+// 1. เพิ่มการสร้าง supabaseAdmin ด้านบนของไฟล์
+export const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+);
 
 const app = new Hono<{ Variables: Variables }>()
 
@@ -18,8 +26,27 @@ const app = new Hono<{ Variables: Variables }>()
 app.use('*', cors({
   origin: 'http://localhost:5173',
   allowHeaders: ['Content-Type', 'Authorization'],
-  allowMethods: ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE'],
+  allowMethods: ['POST', 'GET', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
 }))
+
+// ==========================================
+// 🚨 Global Error Handler (ดัก Error ที่หนีจาก routes ทั้งหมด)
+// ==========================================
+app.onError((err, c) => {
+  console.error('❌ Unhandled Error:', err)
+  return c.json({
+    success: false,
+    error: err.message || 'Internal Server Error'
+  }, 500)
+})
+
+// ==========================================
+// 🔍 404 Handler
+// ==========================================
+app.notFound((c) => {
+  console.warn(`⚠️ 404 — ${c.req.method} ${c.req.url}`)
+  return c.json({ success: false, error: 'Not Found' }, 404)
+})
 
 export const supabaseUrl = process.env.SUPABASE_URL!
 export const supabaseKey = process.env.SUPABASE_KEY!
@@ -454,6 +481,349 @@ app.get('/api/posts/:id/comments', async (c) => {
   }, 200)
 })
 
+
+
+// ==========================================
+// 📊 6. API: จัดการแบบประเมิน (Assessment CRUD)
+// ==========================================
+
+// 🟢 GET /api/assessments/active — ดึงแบบประเมินที่เผยแพร่แล้ว (ไม่ต้อง Auth, ไว้ให้ User ทำ)
+app.get('/api/assessments/active', async (c) => {
+  const { data: assessmentData, error: assessmentError } = await supabase
+    .from('assessments')
+    .select('*')
+    .eq('status', 'PUBLISHED')
+    .eq('type', 'INTERNAL')
+    .order('created_at', { ascending: false })
+    .limit(1)
+
+  if (assessmentError || !assessmentData || assessmentData.length === 0) {
+    return c.json({ success: false, error: assessmentError?.message || 'ไม่พบแบบประเมิน' }, 404)
+  }
+
+  const assessment = assessmentData[0]
+
+  const { data: questionsData } = await supabase
+    .from('assessment_questions')
+    .select('*')
+    .eq('assessment_id', assessment.id)
+    .order('order_index', { ascending: true })
+
+  const questionsWithChoices: any[] = []
+  for (const q of questionsData || []) {
+    const { data: choicesData } = await supabase
+      .from('question_choices')
+      .select('*')
+      .eq('question_id', q.id)
+      .order('order_index', { ascending: true })
+
+    questionsWithChoices.push({
+      ...q,
+      type: q.type || 'RADIO',
+      choices: choicesData || [],
+    })
+  }
+
+  const { data: rulesData } = await supabase
+    .from('interpretation_rules')
+    .select('*')
+    .eq('assessment_id', assessment.id)
+    .order('min_score', { ascending: true })
+
+  return c.json({
+    success: true,
+    assessment: {
+      ...assessment,
+      questions: questionsWithChoices,
+      interpretation_rules: rulesData || [],
+    },
+  })
+})
+
+// 🟢 GET /api/assessments — ดึงแบบประเมินทั้งหมด (Admin)
+app.get('/api/assessments', authMiddleware, async (c) => {
+  const { data, error } = await supabase
+    .from('assessments')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    return c.json({ success: false, error: error.message }, 500)
+  }
+
+  return c.json({ success: true, assessments: data || [] })
+})
+
+// 🟢 GET /api/assessments/:id — ดึงแบบประเมินตาม ID (พร้อม questions + choices + rules)
+app.get('/api/assessments/:id', authMiddleware, async (c) => {
+  const id = c.req.param('id')
+
+  const { data: assessment, error: aError } = await supabase
+    .from('assessments')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (aError || !assessment) {
+    return c.json({ success: false, error: 'ไม่พบแบบประเมิน' }, 404)
+  }
+
+  const { data: questionsData } = await supabase
+    .from('assessment_questions')
+    .select('*')
+    .eq('assessment_id', id)
+    .order('order_index', { ascending: true })
+
+  const questionsWithChoices: any[] = []
+  for (const q of questionsData || []) {
+    const { data: choicesData } = await supabase
+      .from('question_choices')
+      .select('*')
+      .eq('question_id', q.id)
+      .order('order_index', { ascending: true })
+
+    questionsWithChoices.push({
+      ...q,
+      type: q.type || 'RADIO',
+      choices: choicesData || [],
+    })
+  }
+
+  const { data: rulesData } = await supabase
+    .from('interpretation_rules')
+    .select('*')
+    .eq('assessment_id', id)
+    .order('min_score', { ascending: true })
+
+  return c.json({
+    success: true,
+    assessment: {
+      ...assessment,
+      questions: questionsWithChoices,
+      interpretation_rules: rulesData || [],
+    },
+  })
+})
+
+// 🟢 POST /api/assessments — สร้างแบบประเมินใหม่ (พร้อม questions + choices + rules)
+app.post('/api/assessments', authMiddleware, async (c) => {
+  let body: any
+  let assessmentId: string | undefined
+
+  try {
+    body = await c.req.json()
+    // 1. สร้าง assessment หลัก
+    const { data: newAssessment, error: aError } = await supabaseAdmin
+      .from('assessments')
+      .insert({
+        title: body.title,
+        description: body.description || null,
+        category: body.category || 'General Mental Health',
+        cover_image_url: body.cover_image_url || null,
+        estimated_time_mins: body.estimated_time_mins ?? 5,
+        version: body.version ?? 1,
+        type: body.type,
+        status: body.status,
+        scoring_method: body.scoring_method || 'TOTAL_SCORE',
+        external_url: body.external_url || null,
+        open_in_new_tab: body.open_in_new_tab ?? true,
+      })
+      .select('id')
+      .single()
+
+    if (aError || !newAssessment) throw aError
+    assessmentId = newAssessment.id
+
+    // 2. สร้าง questions
+    if (body.questions && body.questions.length > 0) {
+      const questionsToInsert = body.questions.map((q: any) => ({
+        assessment_id: assessmentId,
+        question_text: q.question_text,
+        type: q.type,
+        order_index: q.order_index,
+        is_required: q.is_required ?? true,
+        help_text: q.help_text || null,
+        placeholder: q.placeholder || null,
+        media_url: q.media_url || null,
+      }))
+
+      const { data: insertedQuestions, error: qError } = await supabaseAdmin
+        .from('assessment_questions')
+        .insert(questionsToInsert)
+        .select('id, order_index')
+
+      if (qError || !insertedQuestions) throw qError
+
+      // 3. สร้าง choices
+      const choicesToInsert: any[] = []
+      for (const question of body.questions) {
+        if (question.choices && question.choices.length > 0) {
+          const inserted = insertedQuestions.find(
+            (iq: any) => iq.order_index === question.order_index
+          )
+          if (!inserted) continue
+          for (const choice of question.choices) {
+            choicesToInsert.push({
+              question_id: inserted.id,
+              choice_text: choice.choice_text,
+              score: choice.score,
+              weight: choice.weight ?? 1.0,
+              order_index: choice.order_index,
+            })
+          }
+        }
+      }
+
+      if (choicesToInsert.length > 0) {
+        const { error: cError } = await supabaseAdmin
+          .from('question_choices')
+          .insert(choicesToInsert)
+        if (cError) throw cError
+      }
+    }
+
+    // 4. สร้าง interpretation rules
+    if (body.interpretation_rules && body.interpretation_rules.length > 0) {
+      const rulesToInsert = body.interpretation_rules.map((r: any) => ({
+        assessment_id: assessmentId,
+        min_score: r.min_score,
+        max_score: r.max_score,
+        title: r.title,
+        description: r.description || null,
+        recommendation: r.recommendation || null,
+        color_code: r.color_code || 'indigo',
+      }))
+
+      const { error: rError } = await supabaseAdmin
+        .from('interpretation_rules')
+        .insert(rulesToInsert)
+      if (rError) throw rError
+    }
+
+    return c.json({ success: true, id: assessmentId }, 201)
+  } catch (err: any) {
+    if (assessmentId) {
+      await supabaseAdmin.from('assessments').delete().eq('id', assessmentId)
+    }
+    return c.json({ success: false, error: err.message || 'Unknown error' }, 500)
+  }
+})
+
+// 🟡 PUT /api/assessments/:id — อัปเดตข้อมูลทั่วไปของแบบประเมิน
+app.put('/api/assessments/:id', authMiddleware, async (c) => {
+  try {
+    const id = c.req.param('id')
+    const body = await c.req.json()
+
+    const { error } = await supabaseAdmin
+      .from('assessments')
+      .update({ ...body, updated_at: new Date().toISOString() })
+      .eq('id', id)
+
+    if (error) throw error
+
+    return c.json({ success: true })
+  } catch (err: any) {
+    console.error('❌ PUT assessment error:', err)
+    return c.json({ success: false, error: err.message || 'Unknown error' }, 500)
+  }
+})
+
+// 🟡 PATCH /api/assessments/:id/status — เปลี่ยนสถานะ (DRAFT / PUBLISHED / ARCHIVED)
+app.patch('/api/assessments/:id/status', authMiddleware, async (c) => {
+  try {
+    const id = c.req.param('id')
+    const body = await c.req.json()
+
+    const { error } = await supabaseAdmin
+      .from('assessments')
+      .update({ status: body.status, updated_at: new Date().toISOString() })
+      .eq('id', id)
+
+    if (error) throw error
+
+    return c.json({ success: true })
+  } catch (err: any) {
+    console.error('❌ PATCH status error:', err)
+    return c.json({ success: false, error: err.message || 'Unknown error' }, 500)
+  }
+})
+
+// 🟡 PATCH /api/assessments/:id/toggles — อัปเดต is_active_pre / is_active_post
+app.patch('/api/assessments/:id/toggles', authMiddleware, async (c) => {
+  try {
+    const id = c.req.param('id')
+    const body = await c.req.json()
+
+    const { error } = await supabaseAdmin
+      .from('assessments')
+      .update({
+        is_active_pre: body.is_active_pre,
+        is_active_post: body.is_active_post,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+
+    if (error) throw error
+
+    return c.json({ success: true })
+  } catch (err: any) {
+    console.error('❌ PATCH toggles error:', err)
+    return c.json({ success: false, error: err.message || 'Unknown error' }, 500)
+  }
+})
+
+// 🔴 DELETE /api/assessments/:id — ลบแบบประเมิน (CASCADE)
+app.delete('/api/assessments/:id', authMiddleware, async (c) => {
+  try {
+    const id = c.req.param('id')
+
+    const { error } = await supabaseAdmin
+      .from('assessments')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
+
+    return c.json({ success: true })
+  } catch (err: any) {
+    console.error('❌ DELETE assessment error:', err)
+    return c.json({ success: false, error: err.message || 'Unknown error' }, 500)
+  }
+})
+
+
+// 🧪 Route สำหรับทดสอบ SUPABASE_SERVICE_KEY
+app.get('/api/test-admin', async (c) => {
+  try {
+    // ทดลอง Query ตาราง assessments ผ่าน supabaseAdmin
+    const { data, error, count } = await supabaseAdmin
+      .from('assessments')
+      .select('*', { count: 'exact' })
+      .limit(1);
+
+    if (error) {
+      return c.json({
+        success: false,
+        message: '❌ Key หรือการเชื่อมต่อมีปัญหา',
+        error: error.message
+      }, 400);
+    }
+
+    return c.json({
+      success: true,
+      message: '✅ SUPABASE_SERVICE_KEY ใช้งานได้ปกติ! (Bypass RLS เรียบร้อย)',
+      total_assessments: count,
+      sample_data: data
+    });
+  } catch (err: any) {
+    return c.json({
+      success: false,
+      message: '❌ เกิดข้อผิดพลาดใน Server',
+      error: err.message
+    }, 500);
+  }
+});
 
 
 const port = 3000

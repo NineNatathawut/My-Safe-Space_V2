@@ -19,7 +19,7 @@ export default function AdminLogin() {
 
     if (result.success && result.user) {
       if (result.user.role === 'admin') {
-        navigate('/admin/dashboard');
+        navigate('/profile');
       } else {
         setError('บัญชีนี้ไม่มีสิทธิ์เข้าถึงระบบจัดการหลังบ้าน');
       }

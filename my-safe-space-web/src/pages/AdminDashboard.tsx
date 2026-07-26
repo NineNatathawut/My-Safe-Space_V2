@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AdminAssessmentManager } from '../components/AdminAssessmentManager';
 
 // 📂 Mock ข้อมูลแบบประเมินที่มีในระบบ
 const MOCK_ASSESSMENTS = [
@@ -181,14 +182,10 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* 📊 Tab: ระบบจัดการแบบประเมิน (โค้ดเดิม) */}
+        {/* 📊 Tab: ระบบจัดการแบบประเมิน */}
         {activeTab === 'assessment' && (
-          <div className="space-y-6 animate-fadeIn">
-            {/* โค้ดส่วน Assessment จากเวอร์ชันก่อนหน้า */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-               <h2 className="text-lg font-bold text-gray-800">📊 ระบบจัดการแบบประเมิน</h2>
-               <p className="text-gray-500 text-sm">ส่วนนี้ประกอบด้วย Toggle Switch และ Import/Edit ตามที่พัฒนาไว้แล้ว</p>
-            </div>
+          <div className="animate-fadeIn">
+            <AdminAssessmentManager />
           </div>
         )}
 

@@ -10,7 +10,9 @@ import PostDetail from './pages/PostDetail';
 import Resources from './pages/Resources';
 import Profile from './pages/Profile';
 import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
+
+import Assessment from './pages/Assessment';
+import AdminCreateAssessment from './pages/AdminCreateAssessment';
 
 function AdminRoute({ children }: { children: ReactNode }) {
   const { isAdmin, isLoading } = useAuth();
@@ -31,14 +33,15 @@ function AppContent() {
           <Route path="post/:id" element={<PostDetail />} />
           <Route path="resources" element={<Resources />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="/assessment" element={<Assessment />} />
         </Route>
 
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route
-          path="/admin/dashboard"
+          path="/admin/assessments/create"
           element={
             <AdminRoute>
-              <AdminDashboard />
+              <AdminCreateAssessment />
             </AdminRoute>
           }
         />
