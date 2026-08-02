@@ -98,12 +98,17 @@ export const AdminAssessmentManager: React.FC = () => {
   };
 
   // ── ลบ ──
-  const handleDelete = async (assessment: Assessment) => {
-    if (!window.confirm(`ยืนยันลบ "${assessment.title}" ?`)) return;
+const handleDelete = async (assessment: Assessment) => {
+    if (!confirm(`คุณต้องการลบแบบประเมิน "${assessment.title}" ใช่หรือไม่?`)) {
+      return;
+    }
+
     const success = await deleteAssessment(assessment.id);
     if (success) {
       setAssessments((prev) => prev.filter((a) => a.id !== assessment.id));
-      if (activeAssessment?.id === assessment.id) setActiveAssessment(null);
+      if (activeAssessment?.id === assessment.id) {
+        setActiveAssessment(null);
+      }
     } else {
       alert('ไม่สามารถลบแบบประเมินได้ กรุณาลองใหม่อีกครั้ง');
     }

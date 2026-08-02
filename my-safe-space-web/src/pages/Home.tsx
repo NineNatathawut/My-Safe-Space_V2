@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../contexts/AuthContext';
+import PodcastWidget from '../components/PodcastWidget';
 
 // 📝 Interface สำหรับโครงสร้างข้อมูลโพสต์
 interface Post {
@@ -10,6 +11,7 @@ interface Post {
   content: string;
   emotion: string;
   alias_name: string;
+  poster_role?: string;
   created_at: string;
   hug_count: number;
   comment_count: number;
@@ -261,6 +263,9 @@ const handleDeletePost = async (postId: string) => {
         </div>
       </section>
 
+      {/* 🎧 พอดแคสต์ฮีลใจ */}
+      <PodcastWidget />
+
       {/* 🍃 3. ลานสายลม */}
       <section className="px-4">
         <div className="flex items-center justify-between mb-8">
@@ -307,7 +312,8 @@ const handleDeletePost = async (postId: string) => {
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-2xl border border-gray-100 shadow-sm">{post.emotion}</div>
                         <div>
-                          <span className="font-medium text-gray-800">{post.alias_name}</span>
+                          <Link to={`/user/${post.user_id}`} className="font-medium text-gray-800 hover:text-indigo-600 transition-colors">{post.alias_name}</Link>
+                          {post.poster_role === 'expert' && <span className="inline-flex items-center gap-0.5 text-xs px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full font-medium">🩺 ผู้เชี่ยวชาญ</span>}
                           <div className="text-xs text-gray-400">{formatDate(post.created_at)}</div>
                         </div>
                       </div>

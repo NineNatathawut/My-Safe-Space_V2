@@ -1,6 +1,10 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { HOSPITALS_DATABASE, type Hospital } from '../data/hospitals';
+import PodcastCard from '../components/PodcastCard';
+import { loadPodcasts, savePodcasts } from '../data/podcasts';
+import type { PodcastEpisode } from '../types/podcast';
 
 // 📚 ข้อมูลหมวดหมู่บทความทั้งหมด
 const ARTICLE_CATEGORIES = [
@@ -104,6 +108,39 @@ export default function Resources() {
         return saved ? JSON.parse(saved) : INITIAL_BREATHING;
     });
 
+    // 🎧 Podcast States
+    const [podcasts, setPodcasts] = useState<PodcastEpisode[]>(() => loadPodcasts());
+    const [podcastCategory, setPodcastCategory] = useState('ทั้งหมด');
+    const [newPodcast, setNewPodcast] = useState({
+        title: '',
+        speaker: '',
+        category: 'การหายใจ',
+        durationSec: 300,
+        audioUrl: '',
+        externalUrl: '',
+        externalLabel: '',
+    });
+
+    const podcastSectionRef = useRef<HTMLElement | null>(null);
+    const [searchParams] = useSearchParams();
+
+    const podcastCategories = useMemo(
+        () => ['ทั้งหมด', ...Array.from(new Set(podcasts.map((p) => p.category)))],
+        [podcasts]
+    );
+
+    const filteredPodcasts = useMemo(() => {
+        if (podcastCategory === 'ทั้งหมด') return podcasts;
+        return podcasts.filter((p) => p.category === podcastCategory);
+    }, [podcasts, podcastCategory]);
+
+    // 📍 ถ้ามี ?tab=podcast ให้เลื่อนไปที่ Section พอดแคสต์อัตโนมัติ
+    useEffect(() => {
+        if (searchParams.get('tab') === 'podcast' && podcastSectionRef.current) {
+            podcastSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [searchParams]);
+
     // 🫁 Interactive Breathing States
     const [isBreathingActive, setIsBreathingActive] = useState(false);
     const [breathPhase, setBreathPhase] = useState<'idle' | 'inhale' | 'hold' | 'exhale'>('idle');
@@ -178,6 +215,7 @@ export default function Resources() {
             localStorage.setItem('resources_videos', JSON.stringify(videos));
             localStorage.setItem('resources_tips', JSON.stringify(tips));
             localStorage.setItem('resources_breathing', JSON.stringify(breathingConfig));
+            savePodcasts(podcasts);
             alert('บันทึกการแก้ไขเรียบร้อยแล้ว!');
         }
         setIsEditMode(!isEditMode);
@@ -215,6 +253,30 @@ export default function Resources() {
         if (!newTip.title.trim() || !newTip.desc.trim()) return alert('กรุณากรอกข้อมูลเคล็ดลับให้ครบถ้วน');
         setTips([...tips, { ...newTip, id: Date.now() }]);
         setNewTip({ icon: '🌸', title: '', desc: '' });
+    };
+
+    const handleAddPodcast = () => {
+        if (!newPodcast.title.trim()) return alert('กรุณากรอกชื่อตอนพอดแคสต์');
+        const newEpisode: PodcastEpisode = {
+            id: `podcast-${Date.now()}`,
+            title: newPodcast.title.trim(),
+            speaker: newPodcast.speaker.trim() || 'ผู้พูดไร้นาม',
+            category: newPodcast.category,
+            durationSec: Number(newPodcast.durationSec) || 300,
+            audioUrl: newPodcast.audioUrl.trim() || undefined,
+            externalUrl: newPodcast.externalUrl.trim() || undefined,
+            externalLabel: newPodcast.externalLabel.trim() || undefined,
+        };
+        setPodcasts([...podcasts, newEpisode]);
+        setNewPodcast({
+            title: '',
+            speaker: '',
+            category: 'การหายใจ',
+            durationSec: 300,
+            audioUrl: '',
+            externalUrl: '',
+            externalLabel: '',
+        });
     };
 
     // Hospital Autocomplete
@@ -762,6 +824,149 @@ export default function Resources() {
                             </div>
                         ))}
                     </div>
+                </section>
+
+                {/* 🎧 พอดแคสต์ฮีลใจ */}
+                <section ref={podcastSectionRef} className="space-y-6">
+                    <div className="flex justify-between items-center border-b pb-3">
+                        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                            <span>🎧</span> พอดแคสต์ฮีลใจ
+                        </h2>
+                    </div>
+
+                    {isEditMode && (
+                        <div className="p-5 bg-amber-50 border-2 border-dashed border-amber-300 rounded-2xl space-y-3">
+                            <span className="font-bold text-sm text-amber-900 block">➕ เพิ่มตอนพอดแคสต์ใหม่</span>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-xs font-bold text-amber-900 block">ชื่อตอน</label>
+                                    <input
+                                        type="text"
+                                        placeholder="เช่น เสียงนุ่มก่อนนอน"
+                                        value={newPodcast.title}
+                                        onChange={(e) => setNewPodcast({ ...newPodcast, title: e.target.value })}
+                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-amber-900 block">ผู้พูด</label>
+                                    <input
+                                        type="text"
+                                        placeholder="เช่น พี่กระต่ายใจฟู"
+                                        value={newPodcast.speaker}
+                                        onChange={(e) => setNewPodcast({ ...newPodcast, speaker: e.target.value })}
+                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-xs font-bold text-amber-900 block">หมวดหมู่</label>
+                                    <select
+                                        value={newPodcast.category}
+                                        onChange={(e) => setNewPodcast({ ...newPodcast, category: e.target.value })}
+                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
+                                    >
+                                        {['การหายใจ', 'Mindfulness', 'จัดการความเครียด', 'การนอนหลับ', 'กำลังใจ'].map((cat) => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-amber-900 block">ระยะเวลา (วินาที)</label>
+                                    <input
+                                        type="number"
+                                        min="30"
+                                        value={newPodcast.durationSec}
+                                        onChange={(e) => setNewPodcast({ ...newPodcast, durationSec: Number(e.target.value) })}
+                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="text-xs font-bold text-amber-900 block">🎵 ลิงก์ไฟล์เสียงตรง (mp3 URL) — เว้นว่างถ้าใช้ลิงก์ภายนอก</label>
+                                <input
+                                    type="url"
+                                    placeholder="https://example.com/audio.mp3"
+                                    value={newPodcast.audioUrl}
+                                    onChange={(e) => setNewPodcast({ ...newPodcast, audioUrl: e.target.value })}
+                                    className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-xs font-bold text-amber-900 block">🔗 ลิงก์ภายนอก (Spotify/YouTube)</label>
+                                    <input
+                                        type="url"
+                                        placeholder="https://open.spotify.com/..."
+                                        value={newPodcast.externalUrl}
+                                        onChange={(e) => setNewPodcast({ ...newPodcast, externalUrl: e.target.value })}
+                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-amber-900 block">ชื่อลิงก์ภายนอก</label>
+                                    <input
+                                        type="text"
+                                        placeholder="เช่น Spotify, YouTube"
+                                        value={newPodcast.externalLabel}
+                                        onChange={(e) => setNewPodcast({ ...newPodcast, externalLabel: e.target.value })}
+                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleAddPodcast}
+                                className="bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-amber-700 transition-colors"
+                            >
+                                + เพิ่มตอนนี้
+                            </button>
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-2 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+                        {podcastCategories.map((cat) => (
+                            <button
+                                key={cat}
+                                onClick={() => setPodcastCategory(cat)}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shadow-sm ${podcastCategory === cat
+                                    ? 'bg-purple-600 text-white shadow-purple-200'
+                                    : 'bg-white text-gray-600 hover:bg-purple-50 border border-gray-200'
+                                    }`}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
+
+                    {filteredPodcasts.length === 0 ? (
+                        <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
+                            <p className="text-gray-400">ไม่พบพอดแคสต์ในหมวดหมู่ "{podcastCategory}"</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filteredPodcasts.map((episode) => (
+                                <div key={episode.id} className="relative group">
+                                    <PodcastCard episode={episode} />
+
+                                    {isEditMode && (
+                                        <button
+                                            onClick={() => setPodcasts(podcasts.filter((p) => p.id !== episode.id))}
+                                            className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full shadow-md hover:bg-red-700 text-xs z-10"
+                                            title="ลบตอนนี้"
+                                        >
+                                            🗑️
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </section>
 
                 {/* 💡 6. เคล็ดลับดูแลสุขภาพจิตประจำวัน */}
