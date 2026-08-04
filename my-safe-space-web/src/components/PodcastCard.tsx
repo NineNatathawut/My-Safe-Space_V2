@@ -13,7 +13,8 @@ function styleForCategory(category: string) {
   return CATEGORY_STYLE[category] || { emoji: '🎧', gradient: 'from-purple-100 via-indigo-50 to-blue-100' };
 }
 
-function formatDuration(durationSec: number): string {
+function formatDuration(durationSec?: number): string {
+  if (!durationSec || durationSec <= 0) return '';
   const minutes = Math.max(1, Math.round(durationSec / 60));
   return `${minutes} นาที`;
 }
@@ -28,10 +29,11 @@ export default function PodcastCard({
   const { current, isPlaying, play } = usePodcastPlayer();
   const isCurrent = current?.id === episode.id;
   const isCurrentPlaying = isCurrent && isPlaying;
+  const isSpotifyEmbed = !!episode.embedUrl && !episode.audioUrl;
   const style = styleForCategory(episode.category);
 
   const handlePlayClick = () => {
-    if (episode.audioUrl) {
+    if (episode.audioUrl || episode.embedUrl) {
       play(episode);
     } else if (episode.externalUrl) {
       window.open(episode.externalUrl, '_blank', 'noopener,noreferrer');
@@ -49,9 +51,15 @@ export default function PodcastCard({
           </div>
         )}
 
-        <span className="absolute bottom-2 left-2 text-[11px] font-bold bg-black/40 text-white px-2.5 py-1 rounded-full backdrop-blur">
-          ⏱️ {formatDuration(episode.durationSec)}
-        </span>
+        {isSpotifyEmbed ? (
+          <span className="absolute bottom-2 left-2 text-[11px] font-bold bg-[#1DB954] text-white px-2.5 py-1 rounded-full backdrop-blur">
+            Spotify
+          </span>
+        ) : episode.durationSec ? (
+          <span className="absolute bottom-2 left-2 text-[11px] font-bold bg-black/40 text-white px-2.5 py-1 rounded-full backdrop-blur">
+            ⏱️ {formatDuration(episode.durationSec)}
+          </span>
+        ) : null}
       </div>
 
       <div className="p-4 flex flex-col flex-1">
@@ -70,16 +78,21 @@ export default function PodcastCard({
           <button
             type="button"
             onClick={handlePlayClick}
-            aria-label={isCurrentPlaying ? 'หยุดเล่น' : 'เล่น'}
+            aria-label={isCurrentPlaying ? 'หยุดเล่น' : isSpotifyEmbed ? 'เปิดตัวเล่น Spotify' : 'เล่น'}
+            title={isSpotifyEmbed ? 'เปิดตัวเล่น Spotify' : undefined}
             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 ${
               isCurrentPlaying
                 ? 'bg-purple-700 text-white hover:bg-purple-800'
+                : isSpotifyEmbed
+                ? 'bg-[#1DB954] text-white hover:bg-[#1aa34a]'
                 : 'bg-purple-600 text-white hover:bg-purple-700'
             } shadow-sm`}
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               {isCurrentPlaying ? (
                 <path d="M8 5h3v14H8V5zm5 0h3v14h-3V5z" />
+              ) : isSpotifyEmbed ? (
+                <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z" />
               ) : (
                 <path d="M8 5v14l11-7L8 5z" />
               )}

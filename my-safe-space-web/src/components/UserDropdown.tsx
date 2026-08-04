@@ -55,7 +55,7 @@ export default function UserDropdown() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-lg border border-gray-100 py-2 z-50 animate-fadeIn">
+        <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-lg border border-gray-100 py-2 z-[100] animate-fadeIn">
           <div className="px-4 py-3 border-b border-gray-100">
             <p className="text-sm font-medium text-gray-800 truncate">{nickname}</p>
             <p className="text-xs text-gray-400 truncate">{user?.email}</p>

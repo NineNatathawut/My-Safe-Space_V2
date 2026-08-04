@@ -633,57 +633,59 @@ app.get('/api/posts/:id/comments', async (c) => {
 // 📊 6. API: จัดการแบบประเมิน (Assessment CRUD)
 // ==========================================
 
-// 🟢 GET /api/assessments/active — ดึงแบบประเมินที่เผยแพร่แล้ว (ไม่ต้อง Auth, ไว้ให้ User ทำ)
+// 🟢 GET /api/assessments/active — ดึงแบบประเมินที่เผยแพร่แล้วทั้งหมด (ไม่ต้อง Auth, ไว้ให้ User ทำ)
 app.get('/api/assessments/active', async (c) => {
   const { data: assessmentData, error: assessmentError } = await supabase
     .from('assessments')
     .select('*')
     .eq('status', 'PUBLISHED')
-    .eq('type', 'INTERNAL')
     .order('created_at', { ascending: false })
-    .limit(1)
 
-  if (assessmentError || !assessmentData || assessmentData.length === 0) {
-    return c.json({ success: false, error: assessmentError?.message || 'ไม่พบแบบประเมิน' }, 404)
+  if (assessmentError) {
+    return c.json({ success: false, error: assessmentError.message }, 500)
   }
 
-  const assessment = assessmentData[0]
-
-  const { data: questionsData } = await supabase
-    .from('assessment_questions')
-    .select('*')
-    .eq('assessment_id', assessment.id)
-    .order('order_index', { ascending: true })
-
-  const questionsWithChoices: any[] = []
-  for (const q of questionsData || []) {
-    const { data: choicesData } = await supabase
-      .from('question_choices')
+  const assessments: any[] = []
+  for (const assessment of assessmentData || []) {
+    const { data: questionsData } = await supabase
+      .from('assessment_questions')
       .select('*')
-      .eq('question_id', q.id)
+      .eq('assessment_id', assessment.id)
       .order('order_index', { ascending: true })
 
-    questionsWithChoices.push({
-      ...q,
-      type: q.type || 'RADIO',
-      choices: choicesData || [],
-    })
-  }
+    const questionsWithChoices: any[] = []
+    for (const q of questionsData || []) {
+      const { data: choicesData } = await supabase
+        .from('question_choices')
+        .select('*')
+        .eq('question_id', q.id)
+        .order('order_index', { ascending: true })
 
-  const { data: rulesData } = await supabase
-    .from('interpretation_rules')
-    .select('*')
-    .eq('assessment_id', assessment.id)
-    .order('min_score', { ascending: true })
+      questionsWithChoices.push({
+        ...q,
+        type: q.type || 'RADIO',
+        choices: choicesData || [],
+      })
+    }
 
-  return c.json({
-    success: true,
-    assessment: {
+    const { data: rulesData } = await supabase
+      .from('interpretation_rules')
+      .select('*')
+      .eq('assessment_id', assessment.id)
+      .order('min_score', { ascending: true })
+
+    assessments.push({
       ...assessment,
       questions: questionsWithChoices,
       interpretation_rules: rulesData || [],
-    },
-  })
+    })
+  }
+
+  if (assessments.length === 0) {
+    return c.json({ success: false, error: 'ไม่พบแบบประเมิน' }, 404)
+  }
+
+  return c.json({ success: true, assessments })
 })
 
 // 🟢 GET /api/assessments — ดึงแบบประเมินทั้งหมด (Admin)

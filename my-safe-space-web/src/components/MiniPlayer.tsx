@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { usePodcastPlayer } from '../contexts/PodcastPlayerContext';
+import type { PodcastEpisode } from '../types/podcast';
 
 function formatTime(sec: number): string {
   if (!isFinite(sec) || sec < 0) sec = 0;
@@ -7,10 +9,70 @@ function formatTime(sec: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+function SpotifyPlayer({ episode, onClose }: { episode: PodcastEpisode; onClose: () => void }) {
+  const [showHint, setShowHint] = useState(true);
+  const embedHeight = /\/playlist\/|\/album\/|\/show\//.test(episode.embedUrl || '') ? 352 : 152;
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowHint(false), 8000);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="fixed bottom-0 inset-x-0 z-50">
+      <div className="max-w-5xl mx-auto px-4 pb-3">
+        {showHint && (
+          <div className="flex items-center gap-2 mb-2 px-3 py-2 rounded-xl bg-purple-50 border border-purple-100 text-purple-700 text-xs font-medium">
+            <span className="shrink-0 text-base leading-none">💚</span>
+            <span className="flex-1">กด ▶ ที่ตัวเล่นเพื่อเริ่มฟัง</span>
+            <button
+              type="button"
+              onClick={() => setShowHint(false)}
+              aria-label="ปิดคำใบ้"
+              className="shrink-0 text-purple-400 hover:text-purple-700 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
+        <div className="relative rounded-2xl overflow-hidden border border-purple-100 bg-white shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+          <iframe
+            src={episode.embedUrl}
+            title={episode.title}
+            width="100%"
+            height={embedHeight}
+            style={{ border: 0 }}
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+          />
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="ปิดเครื่องเล่น"
+            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/30 text-white backdrop-blur flex items-center justify-center hover:bg-black/50 transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function MiniPlayer() {
   const { current, isPlaying, currentTime, duration, toggle, seek, close } = usePodcastPlayer();
 
   if (!current) return null;
+
+  const isEmbed = !!current.embedUrl && !current.audioUrl;
+
+  if (isEmbed && current.embedUrl) {
+    return <SpotifyPlayer key={current.id} episode={current} onClose={close} />;
+  }
 
   const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
 

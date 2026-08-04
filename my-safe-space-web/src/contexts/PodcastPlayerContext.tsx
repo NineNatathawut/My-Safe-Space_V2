@@ -51,13 +51,16 @@ export function PodcastPlayerProvider({ children }: { children: ReactNode }) {
 
   const play = (episode: PodcastEpisode) => {
     const audio = audioRef.current;
-    if (!audio || !episode.audioUrl) return;
+    if (!audio) return;
+    if (!episode.audioUrl && !episode.embedUrl) return;
 
     if (current?.id === episode.id) {
-      if (audio.paused) {
-        audio.play().catch(() => {});
-      } else {
-        audio.pause();
+      if (episode.audioUrl) {
+        if (audio.paused) {
+          audio.play().catch(() => {});
+        } else {
+          audio.pause();
+        }
       }
       return;
     }
@@ -65,14 +68,22 @@ export function PodcastPlayerProvider({ children }: { children: ReactNode }) {
     setCurrent(episode);
     setCurrentTime(0);
     setDuration(0);
-    audio.src = episode.audioUrl;
-    audio.load();
-    audio.play().catch(() => {});
+    setIsPlaying(false);
+
+    if (episode.audioUrl) {
+      audio.src = episode.audioUrl;
+      audio.load();
+      audio.play().catch(() => {});
+    } else {
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+    }
   };
 
   const toggle = () => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !current?.audioUrl) return;
     if (audio.paused) {
       audio.play().catch(() => {});
     } else {
@@ -82,7 +93,7 @@ export function PodcastPlayerProvider({ children }: { children: ReactNode }) {
 
   const seek = (time: number) => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !current?.audioUrl) return;
     audio.currentTime = time;
     setCurrentTime(time);
   };

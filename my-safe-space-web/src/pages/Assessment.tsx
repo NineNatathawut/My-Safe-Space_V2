@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getActiveAssessment } from '../services/assessmentService';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { getActiveAssessments } from '../services/assessmentService';
 import type { Assessment as AssessmentType, InterpretationRule } from '../types/assessment';
 
 export default function Assessment() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const [assessment, setAssessment] = useState<AssessmentType | null>(null);
+  const [assessments, setAssessments] = useState<AssessmentType[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [answers, setAnswers] = useState<Record<number, number | string>>({});
@@ -16,12 +18,37 @@ export default function Assessment() {
 
   useEffect(() => {
     const loadAssessment = async () => {
-      const data = await getActiveAssessment();
-      setAssessment(data);
+      const list = await getActiveAssessments();
+      setAssessments(list);
+      const urlId = searchParams.get('id');
+      if (urlId && list.some((a) => a.id === urlId)) {
+        setSelectedId(urlId);
+      } else if (list.length === 1) {
+        setSelectedId(list[0].id);
+      }
       setLoading(false);
     };
     loadAssessment();
-  }, []);
+  }, [searchParams]);
+
+  const assessment = assessments.find((a) => a.id === selectedId) || null;
+
+  const resetQuiz = () => {
+    setAnswers({});
+    setIsSubmitted(false);
+    setResult(null);
+    setTotalScore(0);
+  };
+
+  const handleSelect = (id: string) => {
+    resetQuiz();
+    setSelectedId(id);
+  };
+
+  const handleBackToList = () => {
+    resetQuiz();
+    setSelectedId(null);
+  };
 
   const handleSelectOption = (questionIndex: number, score: number) => {
     setAnswers((prev) => ({ ...prev, [questionIndex]: score }));
@@ -34,7 +61,7 @@ export default function Assessment() {
   const calculateResult = () => {
     if (!assessment || !assessment.questions) return;
 
-    const scoreSum = Object.entries(answers).reduce((sum, [key, value]) => {
+    const scoreSum = Object.values(answers).reduce<number>((sum, value) => {
       if (typeof value === 'number') return sum + value;
       return sum;
     }, 0);
@@ -63,7 +90,8 @@ export default function Assessment() {
     );
   }
 
-  if (!assessment) {
+  // ── ยังไม่ได้เลือก และไม่มีแบบประเมิน ──
+  if (!assessment && assessments.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-xl text-gray-500">ขณะนี้ยังไม่มีแบบประเมินที่เปิดใช้งานครับ 🙇‍♂️</div>
@@ -71,11 +99,85 @@ export default function Assessment() {
     );
   }
 
-  // EXTERNAL assessment → show redirect button
+  // ── ยังไม่ได้เลือก และมีหลายแบบประเมิน → หน้าเลือก (catalog) ──
+  if (!assessment) {
+    return (
+      <div className="min-h-screen bg-slate-50 py-10 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center space-y-2 mb-8">
+            <h1 className="text-3xl font-bold text-gray-800">แบบประเมินสุขภาพใจ 📋</h1>
+            <p className="text-gray-500">เลือกแบบประเมินที่ต้องการทำ</p>
+          </div>
+
+          <div className="space-y-4">
+            {assessments.map((a) => (
+              <div
+                key={a.id}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+              >
+                <div className="text-3xl shrink-0">
+                  {a.type === 'EXTERNAL' ? '🔗' : '📝'}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="font-bold text-gray-800">{a.title}</h2>
+                    <span
+                      className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                        a.type === 'EXTERNAL'
+                          ? 'bg-amber-50 text-amber-700'
+                          : 'bg-indigo-50 text-indigo-700'
+                      }`}
+                    >
+                      {a.type === 'EXTERNAL' ? '🔗 External' : '📝 Internal'}
+                    </span>
+                  </div>
+                  {a.description && (
+                    <p className="text-sm text-gray-500 mt-1 truncate">{a.description}</p>
+                  )}
+                  {a.estimated_time_mins && (
+                    <p className="text-xs text-gray-400 mt-1">~{a.estimated_time_mins} นาที</p>
+                  )}
+                </div>
+
+                {a.type === 'EXTERNAL' ? (
+                  <a
+                    href={a.external_url}
+                    target={a.open_in_new_tab !== false ? '_blank' : '_self'}
+                    rel="noopener noreferrer"
+                    className="shrink-0 px-5 py-2.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold text-sm rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+                  >
+                    เริ่มทำแบบประเมิน
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => handleSelect(a.id)}
+                    className="shrink-0 px-5 py-2.5 bg-gray-800 hover:bg-gray-900 text-white font-bold text-sm rounded-xl transition-colors"
+                  >
+                    เริ่มทำแบบประเมิน
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── เลือกแล้ว: EXTERNAL → redirect ──
   if (assessment.type === 'EXTERNAL' && assessment.external_url) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="max-w-md mx-auto text-center space-y-6 px-4">
+      <div className="min-h-screen bg-slate-50 py-10 px-4">
+        <div className="max-w-md mx-auto text-center space-y-6">
+          {assessments.length > 1 && (
+            <button
+              onClick={handleBackToList}
+              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              ← กลับไปเลือกแบบประเมิน
+            </button>
+          )}
           <div className="text-6xl">🔗</div>
           <h1 className="text-2xl font-bold text-gray-800">{assessment.title}</h1>
           {assessment.description && (
@@ -94,11 +196,19 @@ export default function Assessment() {
     );
   }
 
-  // INTERNAL without questions → show fallback
+  // ── เลือกแล้ว: INTERNAL ไม่มีข้อคำถาม → fallback ──
   if (!assessment.questions || assessment.questions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen bg-slate-50 py-10 px-4">
         <div className="text-center space-y-4 px-4">
+          {assessments.length > 1 && (
+            <button
+              onClick={handleBackToList}
+              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              ← กลับไปเลือกแบบประเมิน
+            </button>
+          )}
           <div className="text-5xl">📝</div>
           <h2 className="text-xl font-bold text-gray-700">แบบประเมินนี้ยังไม่มีข้อคำถาม</h2>
           <p className="text-gray-500">กรุณารอการอัปเดตจากผู้ดูแลระบบ</p>
@@ -117,6 +227,15 @@ export default function Assessment() {
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
       <div className="max-w-2xl mx-auto space-y-8">
+        {assessments.length > 1 && (
+          <button
+            onClick={handleBackToList}
+            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            ← กลับไปเลือกแบบประเมิน
+          </button>
+        )}
+
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold text-gray-800">{assessment.title}</h1>
           {assessment.description && (
@@ -231,12 +350,22 @@ export default function Assessment() {
               </>
             )}
 
-            <button
-              onClick={() => navigate('/')}
-              className="mt-6 inline-block w-full py-3.5 bg-gray-800 hover:bg-gray-900 text-white font-bold rounded-xl transition-colors shadow-sm"
-            >
-              เข้าสู่พื้นที่ปลอดภัย (หน้าหลัก)
-            </button>
+            <div className="flex flex-col gap-3">
+              {assessments.length > 1 && (
+                <button
+                  onClick={handleBackToList}
+                  className="w-full py-3.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl transition-colors shadow-sm"
+                >
+                  ← ทำแบบประเมินอื่น
+                </button>
+              )}
+              <button
+                onClick={() => navigate('/')}
+                className="mt-6 inline-block w-full py-3.5 bg-gray-800 hover:bg-gray-900 text-white font-bold rounded-xl transition-colors shadow-sm"
+              >
+                เข้าสู่พื้นที่ปลอดภัย (หน้าหลัก)
+              </button>
+            </div>
           </div>
         )}
       </div>

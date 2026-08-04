@@ -2,12 +2,24 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createFullAssessment } from '../services/assessmentService';
 
-const STEPS = [
-  { num: 1, label: 'Information' },
-  { num: 2, label: 'Type' },
-  { num: 3, label: 'Questions' },
-  { num: 4, label: 'Rules' },
-  { num: 5, label: 'Review' },
+interface StepDef {
+  display: number;
+  step: number;
+  label: string;
+}
+
+const INTERNAL_STEPS: StepDef[] = [
+  { display: 1, step: 1, label: 'Information' },
+  { display: 2, step: 2, label: 'Type' },
+  { display: 3, step: 3, label: 'Questions' },
+  { display: 4, step: 4, label: 'Rules' },
+  { display: 5, step: 5, label: 'Review' },
+];
+
+const EXTERNAL_STEPS: StepDef[] = [
+  { display: 1, step: 1, label: 'Information' },
+  { display: 2, step: 2, label: 'Type & Link' },
+  { display: 3, step: 5, label: 'Review' },
 ];
 
 const COLOR_CODES = [
@@ -242,40 +254,63 @@ export default function AdminCreateAssessment() {
 
   const canGoNext = (): boolean => {
     if (step === 1) return title.trim().length > 0;
+    if (step === 2 && assessmentType === 'EXTERNAL') return externalUrl.trim().length > 0;
     return true;
   };
+
+  const goNext = () => {
+    if (assessmentType === 'EXTERNAL') {
+      if (step === 1) setStep(2);
+      else if (step === 2) setStep(5);
+      else setStep((s) => Math.min(s + 1, 5));
+      return;
+    }
+    setStep((s) => Math.min(s + 1, 5));
+  };
+
+  const goBack = () => {
+    if (assessmentType === 'EXTERNAL') {
+      if (step === 2) setStep(1);
+      else if (step === 5) setStep(2);
+      else setStep((s) => Math.max(s - 1, 1));
+      return;
+    }
+    setStep((s) => Math.max(s - 1, 1));
+  };
+
+  const visibleSteps = assessmentType === 'EXTERNAL' ? EXTERNAL_STEPS : INTERNAL_STEPS;
 
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
       <div className="max-w-3xl mx-auto">
         {/* Progress Steps */}
         <div className="flex items-center justify-center mb-10">
-          {STEPS.map((s, i) => (
-            <div key={s.num} className="flex items-center">
+          {visibleSteps.map((s, i) => (
+            <div key={s.step} className="flex items-center">
               <div className="flex flex-col items-center">
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
-                    step === s.num
+                    step === s.step
                       ? 'bg-pink-500 text-white shadow-md'
-                      : step > s.num
+                      : step > s.step
                         ? 'bg-emerald-400 text-white'
                         : 'bg-gray-200 text-gray-500'
                   }`}
                 >
-                  {step > s.num ? '✓' : s.num}
+                  {step > s.step ? '✓' : s.display}
                 </div>
                 <span
                   className={`text-xs mt-1.5 ${
-                    step === s.num ? 'text-pink-600 font-medium' : 'text-gray-400'
+                    step === s.step ? 'text-pink-600 font-medium' : 'text-gray-400'
                   }`}
                 >
                   {s.label}
                 </span>
               </div>
-              {i < STEPS.length - 1 && (
+              {i < visibleSteps.length - 1 && (
                 <div
                   className={`w-12 md:w-20 h-0.5 mx-2 ${
-                    step > s.num ? 'bg-emerald-400' : 'bg-gray-200'
+                    step > s.step ? 'bg-emerald-400' : 'bg-gray-200'
                   }`}
                 />
               )}
@@ -420,7 +455,7 @@ export default function AdminCreateAssessment() {
           )}
 
           {/* Step 3: Questions */}
-          {step === 3 && (
+          {assessmentType === 'INTERNAL' && step === 3 && (
             <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-800">ข้อคำถาม</h2>
@@ -575,7 +610,7 @@ export default function AdminCreateAssessment() {
           )}
 
           {/* Step 4: Interpretation Rules */}
-          {step === 4 && (
+          {assessmentType === 'INTERNAL' && step === 4 && (
             <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-800">เกณฑ์การแปลผล</h2>
@@ -782,7 +817,7 @@ export default function AdminCreateAssessment() {
           <div>
             {step > 1 && (
               <button
-                onClick={() => setStep((s) => s - 1)}
+                onClick={goBack}
                 className="px-6 py-2.5 text-gray-600 hover:text-gray-800 font-medium transition-colors"
               >
                 ← Back
@@ -793,7 +828,7 @@ export default function AdminCreateAssessment() {
           <div className="flex items-center gap-3">
             {step < 5 ? (
               <button
-                onClick={() => setStep((s) => s + 1)}
+                onClick={goNext}
                 disabled={!canGoNext()}
                 className="px-6 py-2.5 bg-gray-800 hover:bg-gray-900 disabled:bg-gray-300 text-white font-medium rounded-xl transition-colors"
               >

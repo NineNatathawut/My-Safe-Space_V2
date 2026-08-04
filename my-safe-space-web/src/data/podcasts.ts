@@ -1,4 +1,5 @@
 import type { PodcastEpisode } from '../types/podcast';
+import { parsePodcastLink } from '../utils/podcastLink';
 
 export const PODCAST_STORAGE_KEY = 'resources_podcasts';
 
@@ -68,7 +69,18 @@ export function loadPodcasts(): PodcastEpisode[] {
     const saved = localStorage.getItem(PODCAST_STORAGE_KEY);
     if (!saved) return SEED_PODCASTS;
     const parsed = JSON.parse(saved);
-    return Array.isArray(parsed) ? parsed : SEED_PODCASTS;
+    if (!Array.isArray(parsed)) return SEED_PODCASTS;
+
+    const migrated = parsed.map((episode: PodcastEpisode) => {
+      if (episode.audioUrl || episode.embedUrl || !episode.externalUrl) return episode;
+      const parsedLink = parsePodcastLink(episode.externalUrl);
+      if (parsedLink.kind === 'spotify' && parsedLink.embedUrl) {
+        return { ...episode, embedUrl: parsedLink.embedUrl };
+      }
+      return episode;
+    });
+
+    return migrated;
   } catch {
     return SEED_PODCASTS;
   }

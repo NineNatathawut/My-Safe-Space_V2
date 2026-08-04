@@ -33,15 +33,21 @@ export const createFullAssessment = async (data: {
   }
 };
 
-// 2. ดึงแบบประเมินที่ PUBLISHED + INTERNAL (สำหรับหน้าทำแบบประเมิน)
-export const getActiveAssessment = async (): Promise<Assessment | null> => {
+// 2. ดึงแบบประเมินที่ PUBLISHED ทั้งหมด (สำหรับหน้าทำแบบประเมิน)
+export const getActiveAssessments = async (): Promise<Assessment[]> => {
   try {
     const res = await api.get('/api/assessments/active');
-    if (res.data.success) return res.data.assessment;
-    return null;
+    if (res.data.success) return res.data.assessments || [];
+    return [];
   } catch {
-    return null;
+    return [];
   }
+};
+
+// 2.1 ดึงแบบประเมินที่ PUBLISHED ล่าสุดเพียง 1 ตัว (สำหรับ widget หน้าโปรไฟล์)
+export const getActiveAssessment = async (): Promise<Assessment | null> => {
+  const list = await getActiveAssessments();
+  return list[0] || null;
 };
 
 // 3. ดึงแบบประเมินตาม ID (พร้อม questions + choices + rules)

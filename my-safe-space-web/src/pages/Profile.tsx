@@ -5,7 +5,7 @@ import { AdminAssessmentManager } from '../components/AdminAssessmentManager';
 import NotificationBell from '../components/NotificationBell';
 import api from '../api/axios';
 import { getDeterministicAvatar } from '../utils/getDeterministicAvatar';
-import { getActiveAssessment } from '../services/assessmentService';
+import { getActiveAssessments } from '../services/assessmentService';
 import type { Assessment as AssessmentType } from '../types/assessment';
 
 interface Post {
@@ -56,7 +56,8 @@ export default function Profile() {
   const [loadingInbox, setLoadingInbox] = useState(false);
 
   // Quick Action Widget state
-  const [activeAssessment, setActiveAssessment] = useState<AssessmentType | null>(null);
+  const [activeAssessments, setActiveAssessments] = useState<AssessmentType[]>([]);
+  const featuredAssessment = activeAssessments[0] || null;
 
   // Avatar tab state
   const [currentAvatar, setCurrentAvatar] = useState<string | null>(null);
@@ -156,7 +157,7 @@ export default function Profile() {
   }, [activeTab]);
 
   useEffect(() => {
-    getActiveAssessment().then(setActiveAssessment).catch(() => setActiveAssessment(null));
+    getActiveAssessments().then(setActiveAssessments).catch(() => setActiveAssessments([]));
   }, []);
 
   const handleSelectAvatar = (emoji: string) => {
@@ -307,7 +308,7 @@ export default function Profile() {
         </section>
 
         {/* Quick Action Widget */}
-        {activeAssessment && (
+        {featuredAssessment && activeTab !== 'assessment' && (
           <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-5 border border-pink-100 shadow-sm">
             <div className="flex items-center gap-4">
               <span className="text-3xl shrink-0">💡</span>
@@ -462,35 +463,59 @@ export default function Profile() {
                     <p className="text-sm text-gray-500 mt-1">ติดตามสุขภาพใจของคุณด้วยแบบประเมินต่างๆ</p>
                   </div>
 
-                  <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-6 border border-pink-100 text-center space-y-4">
-                    <div className="text-5xl">🫂</div>
-                    <h3 className="text-lg font-bold text-gray-800">แบบประเมินสุขภาพใจ</h3>
-                    <p className="text-sm text-gray-500 max-w-md mx-auto">
-                      แบบประเมิน PHQ-9, 2Q, 8Q และอื่นๆ ที่จะช่วยให้คุณเข้าใจสภาพจิตใจของตัวเองมากขึ้น
-                    </p>
-                    <Link
-                      to="/assessment"
-                      className="inline-block px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
-                    >
-                      📝 เริ่มทำแบบประเมิน
-                    </Link>
-                  </div>
-
-                  {activeAssessment && (
-                    <div className="bg-white rounded-2xl p-5 border border-gray-100">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">📋</span>
-                        <div>
-                          <p className="font-medium text-gray-800">แบบประเมินที่เปิดอยู่ตอนนี้:</p>
-                          <p className="text-sm text-gray-500">{activeAssessment.title}</p>
-                        </div>
-                        <Link
-                          to="/assessment"
-                          className="ml-auto px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm rounded-xl transition-colors"
+                  {activeAssessments.length === 0 ? (
+                    <div className="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                      <div className="text-4xl mb-3">📋</div>
+                      <h3 className="text-lg font-bold text-gray-700">ยังไม่มีแบบประเมินที่เปิดใช้งาน</h3>
+                      <p className="text-gray-500 text-sm mt-1">รอแอดมินเพิ่มแบบประเมิน แล้วกลับมาตรวจสอบอีกครั้งนะ</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {activeAssessments.map((a) => (
+                        <div
+                          key={a.id}
+                          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col"
                         >
-                          ไปทำเลย
-                        </Link>
-                      </div>
+                          <div className="text-4xl mb-3">
+                            {a.type === 'EXTERNAL' ? '🔗' : '📝'}
+                          </div>
+                          <h3 className="font-bold text-gray-800">{a.title}</h3>
+                          {a.description && (
+                            <p className="text-sm text-gray-500 mt-1 line-clamp-2">{a.description}</p>
+                          )}
+                          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50">
+                            <span
+                              className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                                a.type === 'EXTERNAL'
+                                  ? 'bg-amber-50 text-amber-700'
+                                  : 'bg-indigo-50 text-indigo-700'
+                              }`}
+                            >
+                              {a.type === 'EXTERNAL' ? '🔗 External' : '📝 Internal'}
+                            </span>
+                            {a.estimated_time_mins && (
+                              <span className="text-xs text-gray-400">~{a.estimated_time_mins} นาที</span>
+                            )}
+                          </div>
+                          {a.type === 'EXTERNAL' ? (
+                            <a
+                              href={a.external_url}
+                              target={a.open_in_new_tab !== false ? '_blank' : '_self'}
+                              rel="noopener noreferrer"
+                              className="mt-3 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold text-sm rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+                            >
+                              ไปทำแบบประเมิน
+                            </a>
+                          ) : (
+                            <Link
+                              to={`/assessment?id=${a.id}`}
+                              className="mt-3 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold text-sm rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+                            >
+                              เริ่มทำแบบประเมิน
+                            </Link>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   )}
                 </>

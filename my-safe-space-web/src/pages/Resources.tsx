@@ -5,6 +5,7 @@ import { HOSPITALS_DATABASE, type Hospital } from '../data/hospitals';
 import PodcastCard from '../components/PodcastCard';
 import { loadPodcasts, savePodcasts } from '../data/podcasts';
 import type { PodcastEpisode } from '../types/podcast';
+import { parsePodcastLink, describeLink } from '../utils/podcastLink';
 
 // 📚 ข้อมูลหมวดหมู่บทความทั้งหมด
 const ARTICLE_CATEGORIES = [
@@ -115,10 +116,7 @@ export default function Resources() {
         title: '',
         speaker: '',
         category: 'การหายใจ',
-        durationSec: 300,
-        audioUrl: '',
-        externalUrl: '',
-        externalLabel: '',
+        link: '',
     });
 
     const podcastSectionRef = useRef<HTMLElement | null>(null);
@@ -133,6 +131,28 @@ export default function Resources() {
         if (podcastCategory === 'ทั้งหมด') return podcasts;
         return podcasts.filter((p) => p.category === podcastCategory);
     }, [podcasts, podcastCategory]);
+
+    // 👀 พรีวิวการ์ดพอดแคสต์จากฟอร์ม
+    const previewEpisode = useMemo<PodcastEpisode>(() => {
+        const link = newPodcast.link.trim();
+        const parsed = link ? parsePodcastLink(link) : null;
+        const ep: PodcastEpisode = {
+            id: 'preview',
+            title: newPodcast.title.trim() || 'ชื่อตอนพอดแคสต์',
+            speaker: newPodcast.speaker.trim() || 'ผู้พูดไร้นาม',
+            category: newPodcast.category,
+        };
+        if (parsed?.kind === 'spotify') {
+            ep.embedUrl = parsed.embedUrl;
+            ep.externalUrl = link;
+            ep.externalLabel = 'Spotify';
+        } else if (parsed?.kind === 'audio') {
+            ep.audioUrl = link;
+        } else if (parsed) {
+            ep.externalUrl = link;
+        }
+        return ep;
+    }, [newPodcast.title, newPodcast.speaker, newPodcast.category, newPodcast.link]);
 
     // 📍 ถ้ามี ?tab=podcast ให้เลื่อนไปที่ Section พอดแคสต์อัตโนมัติ
     useEffect(() => {
@@ -257,25 +277,32 @@ export default function Resources() {
 
     const handleAddPodcast = () => {
         if (!newPodcast.title.trim()) return alert('กรุณากรอกชื่อตอนพอดแคสต์');
+        const link = newPodcast.link.trim();
+        if (!link) return alert('กรุณากรอกลิงก์ Spotify หรือไฟล์เสียง mp3');
+
+        const parsed = parsePodcastLink(link);
         const newEpisode: PodcastEpisode = {
             id: `podcast-${Date.now()}`,
             title: newPodcast.title.trim(),
             speaker: newPodcast.speaker.trim() || 'ผู้พูดไร้นาม',
             category: newPodcast.category,
-            durationSec: Number(newPodcast.durationSec) || 300,
-            audioUrl: newPodcast.audioUrl.trim() || undefined,
-            externalUrl: newPodcast.externalUrl.trim() || undefined,
-            externalLabel: newPodcast.externalLabel.trim() || undefined,
         };
+        if (parsed.kind === 'spotify') {
+            newEpisode.embedUrl = parsed.embedUrl;
+            newEpisode.externalUrl = link;
+            newEpisode.externalLabel = 'Spotify';
+        } else if (parsed.kind === 'audio') {
+            newEpisode.audioUrl = link;
+        } else {
+            newEpisode.externalUrl = link;
+        }
+
         setPodcasts([...podcasts, newEpisode]);
         setNewPodcast({
             title: '',
             speaker: '',
             category: 'การหายใจ',
-            durationSec: 300,
-            audioUrl: '',
-            externalUrl: '',
-            externalLabel: '',
+            link: '',
         });
     };
 
@@ -835,97 +862,78 @@ export default function Resources() {
                     </div>
 
                     {isEditMode && (
-                        <div className="p-5 bg-amber-50 border-2 border-dashed border-amber-300 rounded-2xl space-y-3">
-                            <span className="font-bold text-sm text-amber-900 block">➕ เพิ่มตอนพอดแคสต์ใหม่</span>
+                        <div className="p-5 bg-amber-50 border-2 border-dashed border-amber-300 rounded-2xl">
+                            <span className="font-bold text-sm text-amber-900 block mb-4">➕ เพิ่มตอนพอดแคสต์ใหม่</span>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div>
-                                    <label className="text-xs font-bold text-amber-900 block">ชื่อตอน</label>
-                                    <input
-                                        type="text"
-                                        placeholder="เช่น เสียงนุ่มก่อนนอน"
-                                        value={newPodcast.title}
-                                        onChange={(e) => setNewPodcast({ ...newPodcast, title: e.target.value })}
-                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-amber-900 block">ผู้พูด</label>
-                                    <input
-                                        type="text"
-                                        placeholder="เช่น พี่กระต่ายใจฟู"
-                                        value={newPodcast.speaker}
-                                        onChange={(e) => setNewPodcast({ ...newPodcast, speaker: e.target.value })}
-                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div>
-                                    <label className="text-xs font-bold text-amber-900 block">หมวดหมู่</label>
-                                    <select
-                                        value={newPodcast.category}
-                                        onChange={(e) => setNewPodcast({ ...newPodcast, category: e.target.value })}
-                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="text-xs font-bold text-amber-900 block">ชื่อตอน</label>
+                                        <input
+                                            type="text"
+                                            placeholder="เช่น เสียงนุ่มก่อนนอน"
+                                            value={newPodcast.title}
+                                            onChange={(e) => setNewPodcast({ ...newPodcast, title: e.target.value })}
+                                            className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-bold text-amber-900 block">ผู้พูด</label>
+                                        <input
+                                            type="text"
+                                            placeholder="เช่น พี่กระต่ายใจฟู"
+                                            value={newPodcast.speaker}
+                                            onChange={(e) => setNewPodcast({ ...newPodcast, speaker: e.target.value })}
+                                            className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-bold text-amber-900 block">หมวดหมู่</label>
+                                        <select
+                                            value={newPodcast.category}
+                                            onChange={(e) => setNewPodcast({ ...newPodcast, category: e.target.value })}
+                                            className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
+                                        >
+                                            {['การหายใจ', 'Mindfulness', 'จัดการความเครียด', 'การนอนหลับ', 'กำลังใจ'].map((cat) => (
+                                                <option key={cat} value={cat}>{cat}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-bold text-amber-900 block">🔗 ลิงก์ (Spotify หรือไฟล์เสียง mp3)</label>
+                                        <input
+                                            type="url"
+                                            placeholder="https://open.spotify.com/... หรือ https://example.com/audio.mp3"
+                                            value={newPodcast.link}
+                                            onChange={(e) => setNewPodcast({ ...newPodcast, link: e.target.value })}
+                                            className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
+                                        />
+                                        {newPodcast.link.trim() &&
+                                            (() => {
+                                                const parsed = parsePodcastLink(newPodcast.link);
+                                                const isOk = parsed.kind !== 'external';
+                                                return (
+                                                    <p className={`text-[11px] mt-1 font-medium ${isOk ? 'text-green-700' : 'text-amber-700'}`}>
+                                                        {describeLink(newPodcast.link)}
+                                                    </p>
+                                                );
+                                            })()}
+                                    </div>
+                                    <button
+                                        onClick={handleAddPodcast}
+                                        className="bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-amber-700 transition-colors"
                                     >
-                                        {['การหายใจ', 'Mindfulness', 'จัดการความเครียด', 'การนอนหลับ', 'กำลังใจ'].map((cat) => (
-                                            <option key={cat} value={cat}>{cat}</option>
-                                        ))}
-                                    </select>
+                                        + เพิ่มตอนนี้
+                                    </button>
                                 </div>
+
                                 <div>
-                                    <label className="text-xs font-bold text-amber-900 block">ระยะเวลา (วินาที)</label>
-                                    <input
-                                        type="number"
-                                        min="30"
-                                        value={newPodcast.durationSec}
-                                        onChange={(e) => setNewPodcast({ ...newPodcast, durationSec: Number(e.target.value) })}
-                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
-                                    />
+                                    <span className="text-xs font-bold text-amber-900 block mb-2">👀 พรีวิวการ์ด</span>
+                                    <div className="max-w-sm">
+                                        <PodcastCard episode={previewEpisode} />
+                                    </div>
                                 </div>
                             </div>
-
-                            <div>
-                                <label className="text-xs font-bold text-amber-900 block">🎵 ลิงก์ไฟล์เสียงตรง (mp3 URL) — เว้นว่างถ้าใช้ลิงก์ภายนอก</label>
-                                <input
-                                    type="url"
-                                    placeholder="https://example.com/audio.mp3"
-                                    value={newPodcast.audioUrl}
-                                    onChange={(e) => setNewPodcast({ ...newPodcast, audioUrl: e.target.value })}
-                                    className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div>
-                                    <label className="text-xs font-bold text-amber-900 block">🔗 ลิงก์ภายนอก (Spotify/YouTube)</label>
-                                    <input
-                                        type="url"
-                                        placeholder="https://open.spotify.com/..."
-                                        value={newPodcast.externalUrl}
-                                        onChange={(e) => setNewPodcast({ ...newPodcast, externalUrl: e.target.value })}
-                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-amber-900 block">ชื่อลิงก์ภายนอก</label>
-                                    <input
-                                        type="text"
-                                        placeholder="เช่น Spotify, YouTube"
-                                        value={newPodcast.externalLabel}
-                                        onChange={(e) => setNewPodcast({ ...newPodcast, externalLabel: e.target.value })}
-                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
-                                    />
-                                </div>
-                            </div>
-
-                            <button
-                                onClick={handleAddPodcast}
-                                className="bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-amber-700 transition-colors"
-                            >
-                                + เพิ่มตอนนี้
-                            </button>
                         </div>
                     )}
 

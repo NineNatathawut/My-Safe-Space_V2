@@ -3,9 +3,10 @@ export interface PodcastEpisode {
   title: string;
   speaker: string;
   category: string;
-  durationSec: number;
+  durationSec?: number;
   coverImage?: string;
   audioUrl?: string;
+  embedUrl?: string;
   externalUrl?: string;
   externalLabel?: string;
 }
