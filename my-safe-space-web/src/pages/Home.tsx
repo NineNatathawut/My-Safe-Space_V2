@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../contexts/AuthContext';
 import PodcastWidget from '../components/PodcastWidget';
-import heroImage from '../assets/hero.png';
+import ImageSlider from '../components/ImageSlider';
+import { PostComposer } from '../components/PostComposer';
 
 // 📝 Interface สำหรับโครงสร้างข้อมูลโพสต์
 interface Post {
@@ -78,6 +79,7 @@ export default function Home() {
   });
 
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+  const [showComposer, setShowComposer] = useState(false);
 
   useEffect(() => {
     fetchPosts();
@@ -230,37 +232,8 @@ const handleDeletePost = async (postId: string) => {
   return (
     <div className="space-y-16 py-8 max-w-6xl mx-auto relative">
 
-      {/* 🌟 1. Hero Banner สไตล์ UP (รูปจริง + overlay ม่วง ให้ข้อความอ่านชัด) */}
-      <section className="relative overflow-hidden rounded-3xl shadow-xl shadow-purple-500/10">
-        <img
-          src={heroImage}
-          alt="บ้านพักใจ"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="relative bg-gradient-to-br from-purple-900/90 via-purple-700/75 to-fuchsia-700/60 px-6 py-14 md:py-20 text-center text-white">
-          <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-          <div className="absolute -bottom-16 -right-10 w-52 h-52 bg-fuchsia-400/20 rounded-full blur-2xl"></div>
-          <div className="relative">
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur text-white px-4 py-2 rounded-full text-sm font-medium mb-6">
-              🔒 พื้นที่ปลอดภัย ไม่ระบุตัวตน
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 drop-shadow-md">
-              ที่นี่คือ <span className="bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-200 to-white">บ้านพักใจ</span> ของคุณ
-            </h1>
-            <p className="text-purple-100 text-lg md:text-xl max-w-2xl mx-auto mb-10 drop-shadow">
-              ระบายความรู้สึก แบ่งปันความเจ็บปวด หรือแค่อยากพิมพ์บอกใครสักคน - เราพร้อมรับฟังทุกคำ โดยไม่ตัดสิน ไม่มีการระบุตัวตน
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link to="/venting" className="px-8 py-3 bg-white text-purple-700 font-semibold rounded-full hover:bg-purple-50 transition-colors shadow-lg shadow-purple-900/20">
-                เริ่มระบายเลย
-              </Link>
-              <Link to="/resources" className="px-8 py-3 bg-white/15 text-white font-medium rounded-full border border-white/40 hover:bg-white/25 transition-colors backdrop-blur">
-                ค้นหาทรัพยากร
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* 🌟 1. Image Slider สไตล์ UP (เลื่อนอัตโนมัติทุก 4 วินาที) */}
+      <ImageSlider />
 
       {/* 🚨 2. แถบเบอร์ฉุกเฉินด่วน */}
       <section className="bg-red-50 py-6 px-4 rounded-2xl mx-0 border border-red-100">
@@ -546,6 +519,19 @@ const handleDeletePost = async (postId: string) => {
           </div>
         </div>
       )}
+
+      {/* 💜 FAB ปุ่มสร้างโพสต์ */}
+      {!showComposer && (
+        <button
+          onClick={() => setShowComposer(true)}
+          className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-purple-600 hover:bg-purple-500 text-white rounded-full shadow-lg shadow-purple-900/40 flex items-center justify-center text-2xl transition-colors active:scale-90"
+        >
+          +
+        </button>
+      )}
+
+      {/* PostComposer Adaptive Overlay */}
+      <PostComposer isOpen={showComposer} onClose={() => setShowComposer(false)} />
 
     </div>
   );
