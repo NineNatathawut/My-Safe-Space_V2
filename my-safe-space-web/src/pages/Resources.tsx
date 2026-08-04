@@ -37,7 +37,7 @@ const INITIAL_ARTICLES = [
         readTime: '4 นาที',
         url: 'https://dmh.go.th',
         imageUrl: '',
-        color: 'bg-indigo-100 text-indigo-700',
+        color: 'bg-purple-100 text-purple-700',
     },
     {
         id: 3,
@@ -355,8 +355,8 @@ export default function Resources() {
             <div className="max-w-4xl mx-auto px-4 pt-10 space-y-12">
                 {/* Header */}
                 <section className="text-center space-y-4">
-                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900">แหล่งข้อมูลและทรัพยากรสุขภาพจิต 📚</h1>
-                    <p className="text-gray-600 max-w-2xl mx-auto">
+                    <h1 className="text-3xl md:text-4xl font-bold text-slate-900">แหล่งข้อมูลและทรัพยากรสุขภาพจิต 📚</h1>
+                    <p className="text-slate-600 max-w-2xl mx-auto">
                         รวบรวมเครื่องมือ บทความ และหน่วยงานที่พร้อมช่วยเหลือคุณในวันที่ใจเหนื่อยล้า คุณไม่ได้อยู่ตัวคนเดียวนะ
                     </p>
                 </section>
@@ -370,15 +370,15 @@ export default function Resources() {
                         <a href="tel:1323" className="bg-white p-4 rounded-2xl flex items-center gap-4 hover:shadow-md transition-shadow border border-red-50">
                             <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center font-bold text-lg">1323</div>
                             <div>
-                                <div className="font-bold text-gray-800">สายด่วนสุขภาพจิต</div>
-                                <div className="text-sm text-gray-500">โทรฟรี 24 ชั่วโมง</div>
+                                <div className="font-bold text-slate-800">สายด่วนสุขภาพจิต</div>
+                                <div className="text-sm text-slate-500">โทรฟรี 24 ชั่วโมง</div>
                             </div>
                         </a>
                         <a href="tel:021136789" className="bg-white p-4 rounded-2xl flex items-center gap-4 hover:shadow-md transition-shadow border border-red-50">
                             <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold text-2xl">📞</div>
                             <div>
-                                <div className="font-bold text-gray-800">สมาคมสะมาริตันส์</div>
-                                <div className="text-sm text-gray-500">บริการรับฟังด้วยใจ ไม่ตัดสิน (12:00-22:00)</div>
+                                <div className="font-bold text-slate-800">สมาคมสะมาริตันส์</div>
+                                <div className="text-sm text-slate-500">บริการรับฟังด้วยใจ ไม่ตัดสิน (12:00-22:00)</div>
                             </div>
                         </a>
                     </div>
@@ -400,7 +400,7 @@ export default function Resources() {
                                     onClick={() => setSelectedCategory(category)}
                                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shadow-sm ${selectedCategory === category
                                         ? 'bg-purple-600 text-white shadow-purple-200'
-                                        : 'bg-white text-gray-600 hover:bg-purple-50 border border-gray-200'
+                                        : 'bg-white text-slate-600 hover:bg-purple-50 border border-slate-200'
                                         }`}
                                 >
                                     {category}
@@ -483,8 +483,8 @@ export default function Resources() {
 
                     {/* 🎴 รายการบทความ (Cards Grid) */}
                     {filteredArticles.length === 0 ? (
-                        <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
-                            <p className="text-gray-400">ไม่พบบทความในหมวดหมู่ "{selectedCategory}"</p>
+                        <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200">
+                            <p className="text-slate-400">ไม่พบบทความในหมวดหมู่ "{selectedCategory}"</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -503,11 +503,11 @@ export default function Resources() {
                                             />
                                         </div>
                                     ) : (
-                                        <div className="h-44 bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100 p-6 flex flex-col justify-between relative overflow-hidden group-hover:brightness-95 transition-all">
-                                            <span className="text-xs font-semibold px-2.5 py-1 bg-white/60 backdrop-blur-md rounded-full w-fit text-sky-900 border border-sky-200">
+                                        <div className="h-44 bg-gradient-to-br from-purple-100 via-purple-100 to-purple-200 p-6 flex flex-col justify-between relative overflow-hidden group-hover:brightness-95 transition-all">
+                                            <span className="text-xs font-semibold px-2.5 py-1 bg-white/60 backdrop-blur-md rounded-full w-fit text-purple-900 border border-purple-200">
                                                 📖 บทความ
                                             </span>
-                                            <h3 className="font-bold text-lg leading-snug line-clamp-3 text-sky-950">
+                                            <h3 className="font-bold text-lg leading-snug line-clamp-3 text-purple-950">
                                                 {article.title}
                                             </h3>
                                         </div>
@@ -550,7 +550,7 @@ export default function Resources() {
                                                                 );
                                                                 setArticles(updated);
                                                             }}
-                                                            className="font-bold text-gray-800 w-full border border-amber-300 bg-white rounded text-sm outline-none p-1 mt-0.5"
+                                                            className="font-bold text-slate-800 w-full border border-amber-300 bg-white rounded text-sm outline-none p-1 mt-0.5"
                                                         />
                                                     </div>
 
@@ -565,7 +565,7 @@ export default function Resources() {
                                                                 setArticles(updated);
                                                             }}
                                                             placeholder="คำอธิบาย..."
-                                                            className="text-xs text-gray-600 w-full border border-amber-300 bg-white rounded p-1 outline-none mt-0.5"
+                                                            className="text-xs text-slate-600 w-full border border-amber-300 bg-white rounded p-1 outline-none mt-0.5"
                                                         />
                                                     </div>
 
@@ -581,16 +581,16 @@ export default function Resources() {
                                                                 setArticles(updated);
                                                             }}
                                                             placeholder="https://..."
-                                                            className="text-xs text-blue-600 w-full border border-amber-300 bg-white rounded p-1 outline-none mt-0.5"
+                                                            className="text-xs text-purple-600 w-full border border-amber-300 bg-white rounded p-1 outline-none mt-0.5"
                                                         />
                                                     </div>
                                                 </div>
                                             ) : (
                                                 <>
-                                                    <h3 className="font-bold text-gray-800 text-base leading-snug line-clamp-2">
+                                                    <h3 className="font-bold text-slate-800 text-base leading-snug line-clamp-2">
                                                         {article.title}
                                                     </h3>
-                                                    <p className="text-xs text-gray-500 leading-relaxed line-clamp-3">
+                                                    <p className="text-xs text-slate-500 leading-relaxed line-clamp-3">
                                                         {article.description || 'กดอ่านเพิ่มเติมเพื่อดูเนื้อหาบทความฉบับเต็ม'}
                                                     </p>
                                                 </>
@@ -598,8 +598,8 @@ export default function Resources() {
                                         </div>
 
                                         {/* ปุ่มลิงก์อ่านเพิ่มเติม */}
-                                        <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
-                                            <span className="text-xs text-gray-400">⏱️ อ่าน {article.readTime || '3 นาที'}</span>
+                                        <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                            <span className="text-xs text-slate-400">⏱️ อ่าน {article.readTime || '3 นาที'}</span>
                                             {article.url ? (
                                                 <a
                                                     href={article.url}
@@ -611,7 +611,7 @@ export default function Resources() {
                                                     <span>→</span>
                                                 </a>
                                             ) : (
-                                                <span className="text-xs text-gray-300">ไม่มีลิงก์</span>
+                                                <span className="text-xs text-slate-300">ไม่มีลิงก์</span>
                                             )}
                                         </div>
                                     </div>
@@ -798,7 +798,7 @@ export default function Resources() {
                 {/* 📺 5. คลิปวิดีโอแนะนำ */}
                 <section className="space-y-4">
                     <div className="flex justify-between items-center border-b pb-3">
-                        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
                             <span>📺</span> คลิปวิดีโอแนะนําฮีลใจ
                         </h2>
                     </div>
@@ -810,7 +810,7 @@ export default function Resources() {
                                 value={newVideoUrl}
                                 onChange={(e) => setNewVideoUrl(e.target.value)}
                                 placeholder="วางลิงก์ YouTube ที่นี่..."
-                                className="flex-1 px-4 py-2 rounded-xl border border-gray-300 text-sm outline-none focus:border-amber-500 bg-white"
+                                className="flex-1 px-4 py-2 rounded-xl border border-slate-300 text-sm outline-none focus:border-amber-500 bg-white"
                             />
                             <button onClick={handleAddVideo} className="bg-amber-600 text-white px-5 py-2 rounded-xl font-bold text-sm hover:bg-amber-700">
                                 + เพิ่มวิดีโอ
@@ -820,7 +820,7 @@ export default function Resources() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {videos.map((video: any) => (
-                            <div key={video.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative group">
+                            <div key={video.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden relative group">
                                 <div className="aspect-video">
                                     <iframe className="w-full h-full" src={`https://www.youtube.com/embed/${video.embedId}`} title={video.title} allowFullScreen />
                                 </div>
@@ -833,10 +833,10 @@ export default function Resources() {
                                                 const updated = videos.map((v: any) => (v.id === video.id ? { ...v, title: e.target.value } : v));
                                                 setVideos(updated);
                                             }}
-                                            className="w-full font-bold text-gray-800 border-b border-amber-400 outline-none bg-amber-50 px-1"
+                                            className="w-full font-bold text-slate-800 border-b border-amber-400 outline-none bg-amber-50 px-1"
                                         />
                                     ) : (
-                                        <h3 className="font-bold text-gray-800">{video.title}</h3>
+                                        <h3 className="font-bold text-slate-800">{video.title}</h3>
                                     )}
                                 </div>
 
@@ -856,7 +856,7 @@ export default function Resources() {
                 {/* 🎧 พอดแคสต์ฮีลใจ */}
                 <section ref={podcastSectionRef} className="space-y-6">
                     <div className="flex justify-between items-center border-b pb-3">
-                        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
                             <span>🎧</span> พอดแคสต์ฮีลใจ
                         </h2>
                     </div>
@@ -944,7 +944,7 @@ export default function Resources() {
                                 onClick={() => setPodcastCategory(cat)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shadow-sm ${podcastCategory === cat
                                     ? 'bg-purple-600 text-white shadow-purple-200'
-                                    : 'bg-white text-gray-600 hover:bg-purple-50 border border-gray-200'
+                                    : 'bg-white text-slate-600 hover:bg-purple-50 border border-slate-200'
                                     }`}
                             >
                                 {cat}
@@ -953,8 +953,8 @@ export default function Resources() {
                     </div>
 
                     {filteredPodcasts.length === 0 ? (
-                        <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
-                            <p className="text-gray-400">ไม่พบพอดแคสต์ในหมวดหมู่ "{podcastCategory}"</p>
+                        <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200">
+                            <p className="text-slate-400">ไม่พบพอดแคสต์ในหมวดหมู่ "{podcastCategory}"</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -978,8 +978,8 @@ export default function Resources() {
                 </section>
 
                 {/* 💡 6. เคล็ดลับดูแลสุขภาพจิตประจำวัน */}
-                <section className="bg-white rounded-3xl p-6 md:p-8 border border-gray-200 shadow-sm space-y-6">
-                    <h2 className="text-xl font-bold text-gray-800 text-center">💡 เคล็ดลับดูแลใจประจำวัน</h2>
+                <section className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-6">
+                    <h2 className="text-xl font-bold text-slate-800 text-center">💡 เคล็ดลับดูแลใจประจำวัน</h2>
 
                     {isEditMode && (
                         <div className="p-4 bg-amber-50 border-2 border-dashed border-amber-300 rounded-2xl space-y-3">
@@ -1025,7 +1025,7 @@ export default function Resources() {
                                                 const updated = tips.map((t: any) => (t.id === tip.id ? { ...t, title: e.target.value } : t));
                                                 setTips(updated);
                                             }}
-                                            className="font-bold text-gray-800 text-center w-full border-b border-amber-400 bg-amber-50 outline-none"
+                                            className="font-bold text-slate-800 text-center w-full border-b border-amber-400 bg-amber-50 outline-none"
                                         />
                                         <textarea
                                             value={tip.desc}
@@ -1033,13 +1033,13 @@ export default function Resources() {
                                                 const updated = tips.map((t: any) => (t.id === tip.id ? { ...t, desc: e.target.value } : t));
                                                 setTips(updated);
                                             }}
-                                            className="text-sm text-gray-500 text-center w-full border border-amber-300 rounded p-1 bg-amber-50 outline-none"
+                                            className="text-sm text-slate-500 text-center w-full border border-amber-300 rounded p-1 bg-amber-50 outline-none"
                                         />
                                     </>
                                 ) : (
                                     <>
-                                        <h3 className="font-bold text-gray-800">{tip.title}</h3>
-                                        <p className="text-sm text-gray-500">{tip.desc}</p>
+                                        <h3 className="font-bold text-slate-800">{tip.title}</h3>
+                                        <p className="text-sm text-slate-500">{tip.desc}</p>
                                     </>
                                 )}
 
@@ -1057,9 +1057,9 @@ export default function Resources() {
                 </section>
 
                 {/* 🏥 7. ค้นหาโรงพยาบาล */}
-                <section className="space-y-6 pt-6 border-t border-gray-200">
+                <section className="space-y-6 pt-6 border-t border-slate-200">
                     <div className="text-center space-y-2">
-                        <h2 className="text-2xl md:text-3xl font-bold text-pink-400">โรงพยาบาลรัฐใกล้ตัวที่มีผู้เชี่ยวชาญด้านสุขภาพจิต</h2>
+                        <h2 className="text-2xl md:text-3xl font-bold text-fuchsia-400">โรงพยาบาลรัฐใกล้ตัวที่มีผู้เชี่ยวชาญด้านสุขภาพจิต</h2>
                     </div>
 
                     <div className="relative max-w-md mx-auto">
@@ -1073,9 +1073,9 @@ export default function Resources() {
                                     setShowSuggestions(true);
                                 }}
                                 onFocus={() => setShowSuggestions(true)}
-                                className="w-full px-6 py-3.5 pr-12 border-2 border-pink-300 focus:border-pink-400 rounded-full outline-none text-gray-700 placeholder-gray-400 text-base shadow-sm transition-all bg-white"
+                                className="w-full px-6 py-3.5 pr-12 border-2 border-fuchsia-300 focus:border-fuchsia-400 rounded-full outline-none text-slate-700 placeholder-slate-400 text-base shadow-sm transition-all bg-white"
                             />
-                            <button type="button" className="absolute right-4 text-pink-400 hover:text-pink-500 transition-colors p-1">
+                            <button type="button" className="absolute right-4 text-fuchsia-400 hover:text-fuchsia-500 transition-colors p-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 transform rotate-45">
                                     <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.917H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.917a.75.75 0 0 0 .926.941a60.519 60.519 0 0 0 18.445-8.986a.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
                                 </svg>
@@ -1083,13 +1083,13 @@ export default function Resources() {
                         </div>
 
                         {showSuggestions && suggestions.length > 0 && (
-                            <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-pink-100 rounded-2xl shadow-lg z-30 overflow-hidden">
+                            <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-fuchsia-100 rounded-2xl shadow-lg z-30 overflow-hidden">
                                 {suggestions.map((province) => (
                                     <button
                                         key={province}
                                         type="button"
                                         onClick={() => handleSelectProvince(province)}
-                                        className="w-full text-left px-6 py-3 hover:bg-pink-50 text-gray-700 font-medium transition-colors border-b border-gray-50 last:border-none flex items-center gap-2"
+                                        className="w-full text-left px-6 py-3 hover:bg-fuchsia-50 text-slate-700 font-medium transition-colors border-b border-slate-50 last:border-none flex items-center gap-2"
                                     >
                                         <span>📍</span>
                                         <span>{province}</span>
@@ -1101,18 +1101,18 @@ export default function Resources() {
 
                     {searchTerm.trim() !== '' && (
                         <div className="space-y-6 pt-4 animate-fadeIn">
-                            <h3 className="text-xl font-bold text-gray-700 border-b border-gray-100 pb-2">{searchTerm}</h3>
+                            <h3 className="text-xl font-bold text-slate-700 border-b border-slate-100 pb-2">{searchTerm}</h3>
 
                             {filteredHospitals.length === 0 ? (
-                                <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-gray-200">
-                                    <p className="text-gray-500">ไม่พบข้อมูลโรงพยาบาลใน "{searchTerm}"</p>
-                                    <p className="text-xs text-gray-400 mt-1">ลองค้นหาด้วยชื่อจังหวัดใกล้เคียง หรือโทรสายด่วน 1323</p>
+                                <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-slate-200">
+                                    <p className="text-slate-500">ไม่พบข้อมูลโรงพยาบาลใน "{searchTerm}"</p>
+                                    <p className="text-xs text-slate-400 mt-1">ลองค้นหาด้วยชื่อจังหวัดใกล้เคียง หรือโทรสายด่วน 1323</p>
                                 </div>
                             ) : (
                                 filteredHospitals.map((hospital: Hospital) => (
                                     <div
                                         key={hospital.id}
-                                        className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row gap-5 items-start"
+                                        className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row gap-5 items-start"
                                     >
                                         <div className="w-16 h-16 shrink-0 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center p-2 mx-auto sm:mx-0">
                                             <svg className="w-10 h-10 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
@@ -1120,16 +1120,16 @@ export default function Resources() {
                                             </svg>
                                         </div>
 
-                                        <div className="space-y-2 text-sm text-gray-600 w-full">
+                                        <div className="space-y-2 text-sm text-slate-600 w-full">
                                             <div>
-                                                <h4 className="font-bold text-lg text-gray-800">{hospital.name}</h4>
-                                                <p className="text-xs text-gray-400">{hospital.type || 'โรงพยาบาลรัฐ'}</p>
+                                                <h4 className="font-bold text-lg text-slate-800">{hospital.name}</h4>
+                                                <p className="text-xs text-slate-400">{hospital.type || 'โรงพยาบาลรัฐ'}</p>
                                             </div>
 
                                             {hospital.phone && (
                                                 <div className="flex items-center gap-2 pt-1">
                                                     <span className="text-red-400">📞</span>
-                                                    <a href={`tel:${hospital.phone.replace(/-/g, '')}`} className="font-bold text-gray-800 hover:underline">
+                                                    <a href={`tel:${hospital.phone.replace(/-/g, '')}`} className="font-bold text-slate-800 hover:underline">
                                                         {hospital.phone}
                                                     </a>
                                                 </div>
@@ -1145,7 +1145,7 @@ export default function Resources() {
                                                                 href={hospital.mapUrl}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                className="ml-2 font-bold text-gray-700 hover:text-purple-600 border-b border-gray-400 hover:border-purple-600 transition-colors"
+                                                                className="ml-2 font-bold text-slate-700 hover:text-purple-600 border-b border-slate-400 hover:border-purple-600 transition-colors"
                                                             >
                                                                 ดูแผนที่
                                                             </a>
@@ -1157,7 +1157,7 @@ export default function Resources() {
                                             {hospital.facebook && (
                                                 <div className="flex items-center gap-2 pt-1">
                                                     <span className="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xs shrink-0">f</span>
-                                                    <span className="font-bold text-gray-800">{hospital.facebook}</span>
+                                                    <span className="font-bold text-slate-800">{hospital.facebook}</span>
                                                 </div>
                                             )}
                                         </div>

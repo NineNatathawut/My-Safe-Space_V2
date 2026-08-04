@@ -4,13 +4,13 @@ import { usePodcastPlayer } from '../contexts/PodcastPlayerContext';
 const CATEGORY_STYLE: Record<string, { emoji: string; gradient: string }> = {
   'การหายใจ': { emoji: '🫁', gradient: 'from-sky-100 via-blue-50 to-indigo-100' },
   'Mindfulness': { emoji: '🧘', gradient: 'from-teal-100 via-emerald-50 to-sky-100' },
-  'การนอนหลับ': { emoji: '🌙', gradient: 'from-indigo-100 via-purple-50 to-fuchsia-100' },
+  'การนอนหลับ': { emoji: '🌙', gradient: 'from-purple-100 via-purple-50 to-fuchsia-100' },
   'จัดการความเครียด': { emoji: '🍃', gradient: 'from-emerald-100 via-green-50 to-teal-100' },
-  'กำลังใจ': { emoji: '💌', gradient: 'from-pink-100 via-rose-50 to-purple-100' },
+  'กำลังใจ': { emoji: '💌', gradient: 'from-fuchsia-100 via-pink-50 to-purple-100' },
 };
 
 function styleForCategory(category: string) {
-  return CATEGORY_STYLE[category] || { emoji: '🎧', gradient: 'from-purple-100 via-indigo-50 to-blue-100' };
+  return CATEGORY_STYLE[category] || { emoji: '🎧', gradient: 'from-purple-100 via-fuchsia-50 to-purple-200' };
 }
 
 function formatDuration(durationSec?: number): string {
@@ -69,12 +69,12 @@ export default function PodcastCard({
           </span>
         )}
 
-        <h3 className="font-bold text-gray-800 text-sm leading-snug line-clamp-2 mb-1">
+        <h3 className="font-bold text-slate-800 text-sm leading-snug line-clamp-2 mb-1">
           {episode.title}
         </h3>
-        <p className="text-xs text-gray-500 mb-3">{episode.speaker}</p>
+        <p className="text-xs text-slate-500 mb-3">{episode.speaker}</p>
 
-        <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-50">
+        <div className="mt-auto flex items-center justify-between pt-3 border-t border-slate-100">
           <button
             type="button"
             onClick={handlePlayClick}
@@ -104,7 +104,7 @@ export default function PodcastCard({
               href={episode.externalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[11px] font-bold text-gray-500 hover:text-purple-600 flex items-center gap-1 transition-colors"
+              className="text-[11px] font-bold text-slate-500 hover:text-purple-600 flex items-center gap-1 transition-colors"
             >
               <span>{episode.externalLabel || 'ฟังต่อ'}</span>
               <span>↗</span>

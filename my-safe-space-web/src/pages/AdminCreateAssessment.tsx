@@ -291,17 +291,17 @@ export default function AdminCreateAssessment() {
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
                     step === s.step
-                      ? 'bg-pink-500 text-white shadow-md'
+                      ? 'bg-fuchsia-500 text-white shadow-md'
                       : step > s.step
                         ? 'bg-emerald-400 text-white'
-                        : 'bg-gray-200 text-gray-500'
+                        : 'bg-slate-200 text-slate-500'
                   }`}
                 >
                   {step > s.step ? '✓' : s.display}
                 </div>
                 <span
                   className={`text-xs mt-1.5 ${
-                    step === s.step ? 'text-pink-600 font-medium' : 'text-gray-400'
+                    step === s.step ? 'text-fuchsia-600 font-medium' : 'text-slate-400'
                   }`}
                 >
                   {s.label}
@@ -310,7 +310,7 @@ export default function AdminCreateAssessment() {
               {i < visibleSteps.length - 1 && (
                 <div
                   className={`w-12 md:w-20 h-0.5 mx-2 ${
-                    step > s.step ? 'bg-emerald-400' : 'bg-gray-200'
+                    step > s.step ? 'bg-emerald-400' : 'bg-slate-200'
                   }`}
                 />
               )}
@@ -319,76 +319,76 @@ export default function AdminCreateAssessment() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 md:p-8">
           {/* Step 1: Basic Information */}
           {step === 1 && (
             <div className="space-y-5">
-              <h2 className="text-xl font-bold text-gray-800">ข้อมูลทั่วไป</h2>
+              <h2 className="text-xl font-bold text-slate-800">ข้อมูลทั่วไป</h2>
 
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">ชื่อแบบประเมิน *</label>
+                <label className="block text-sm font-medium text-slate-600 mb-1">ชื่อแบบประเมิน *</label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="เช่น แบบประเมินความเครียด ST-5"
-                  className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 transition-colors"
+                  className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-fuchsia-400 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">คำอธิบาย</label>
+                <label className="block text-sm font-medium text-slate-600 mb-1">คำอธิบาย</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="คำอธิบายสั้น ๆ เกี่ยวกับแบบประเมินนี้"
                   rows={3}
-                  className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 transition-colors resize-none"
+                  className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-fuchsia-400 transition-colors resize-none"
                 />
               </div>
 
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-600 mb-1">หมวดหมู่</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">หมวดหมู่</label>
                   <input
                     type="text"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     placeholder="Mental Health"
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 transition-colors"
+                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-fuchsia-400 transition-colors"
                   />
                 </div>
                 <div className="w-24">
-                  <label className="block text-sm font-medium text-gray-600 mb-1">เวอร์ชัน</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">เวอร์ชัน</label>
                   <input
                     type="number"
                     min={1}
                     value={version}
                     onChange={(e) => setVersion(Number(e.target.value))}
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 transition-colors"
+                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-fuchsia-400 transition-colors"
                   />
                 </div>
               </div>
 
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-600 mb-1">รูปภาพปก (URL)</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">รูปภาพปก (URL)</label>
                   <input
                     type="url"
                     value={coverImageUrl}
                     onChange={(e) => setCoverImageUrl(e.target.value)}
                     placeholder="https://example.com/cover.jpg"
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 transition-colors"
+                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-fuchsia-400 transition-colors"
                   />
                 </div>
                 <div className="w-32">
-                  <label className="block text-sm font-medium text-gray-600 mb-1">เวลา (นาที)</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">เวลา (นาที)</label>
                   <input
                     type="number"
                     min={1}
                     value={estimatedTimeMins}
                     onChange={(e) => setEstimatedTimeMins(Number(e.target.value))}
-                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 transition-colors"
+                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-fuchsia-400 transition-colors"
                   />
                 </div>
               </div>
@@ -398,46 +398,46 @@ export default function AdminCreateAssessment() {
           {/* Step 2: Assessment Type */}
           {step === 2 && (
             <div className="space-y-5">
-              <h2 className="text-xl font-bold text-gray-800">เลือกรูปแบบแบบประเมิน</h2>
+              <h2 className="text-xl font-bold text-slate-800">เลือกรูปแบบแบบประเมิน</h2>
 
               <div className="grid grid-cols-2 gap-4">
                 <button
                   onClick={() => setAssessmentType('INTERNAL')}
                   className={`p-5 rounded-2xl border-2 text-left transition-all ${
                     assessmentType === 'INTERNAL'
-                      ? 'border-pink-400 bg-pink-50 shadow-sm'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-fuchsia-400 bg-fuchsia-50 shadow-sm'
+                      : 'border-slate-200 hover:border-slate-300'
                   }`}
                 >
                   <div className="text-3xl mb-2">📝</div>
-                  <h3 className="font-bold text-gray-800 mb-1">Internal Assessment</h3>
-                  <p className="text-sm text-gray-500">สร้างคำถามในระบบเอง</p>
+                  <h3 className="font-bold text-slate-800 mb-1">Internal Assessment</h3>
+                  <p className="text-sm text-slate-500">สร้างคำถามในระบบเอง</p>
                 </button>
 
                 <button
                   onClick={() => setAssessmentType('EXTERNAL')}
                   className={`p-5 rounded-2xl border-2 text-left transition-all ${
                     assessmentType === 'EXTERNAL'
-                      ? 'border-pink-400 bg-pink-50 shadow-sm'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-fuchsia-400 bg-fuchsia-50 shadow-sm'
+                      : 'border-slate-200 hover:border-slate-300'
                   }`}
                 >
                   <div className="text-3xl mb-2">🔗</div>
-                  <h3 className="font-bold text-gray-800 mb-1">External Assessment</h3>
-                  <p className="text-sm text-gray-500">Redirect ไป Google Form หรือเว็บอื่น</p>
+                  <h3 className="font-bold text-slate-800 mb-1">External Assessment</h3>
+                  <p className="text-sm text-slate-500">Redirect ไป Google Form หรือเว็บอื่น</p>
                 </button>
               </div>
 
               {assessmentType === 'EXTERNAL' && (
-                <div className="bg-gray-50 rounded-2xl p-5 space-y-4">
+                <div className="bg-slate-50 rounded-2xl p-5 space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">External URL *</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">External URL *</label>
                     <input
                       type="url"
                       value={externalUrl}
                       onChange={(e) => setExternalUrl(e.target.value)}
                       placeholder="https://forms.google.com/..."
-                      className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 transition-colors"
+                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-fuchsia-400 transition-colors"
                     />
                   </div>
                   <label className="flex items-center gap-3 cursor-pointer">
@@ -445,9 +445,9 @@ export default function AdminCreateAssessment() {
                       type="checkbox"
                       checked={openInNewTab}
                       onChange={(e) => setOpenInNewTab(e.target.checked)}
-                      className="w-4 h-4 text-pink-500 border-gray-300 rounded focus:ring-pink-500"
+                      className="w-4 h-4 text-fuchsia-500 border-slate-300 rounded focus:ring-fuchsia-500"
                     />
-                    <span className="text-sm text-gray-600">Open in New Tab</span>
+                    <span className="text-sm text-slate-600">Open in New Tab</span>
                   </label>
                 </div>
               )}
@@ -458,17 +458,17 @@ export default function AdminCreateAssessment() {
           {assessmentType === 'INTERNAL' && step === 3 && (
             <div className="space-y-5">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-800">ข้อคำถาม</h2>
+                <h2 className="text-xl font-bold text-slate-800">ข้อคำถาม</h2>
                 <button
                   onClick={addQuestion}
-                  className="px-4 py-2 bg-pink-50 hover:bg-pink-100 text-pink-700 font-medium text-sm rounded-xl transition-colors"
+                  className="px-4 py-2 bg-fuchsia-50 hover:bg-fuchsia-100 text-fuchsia-700 font-medium text-sm rounded-xl transition-colors"
                 >
                   + เพิ่มคำถาม
                 </button>
               </div>
 
               {questions.length === 0 && (
-                <div className="text-center py-12 text-gray-400">
+                <div className="text-center py-12 text-slate-400">
                   <div className="text-4xl mb-2">📋</div>
                   <p>ยังไม่มีข้อคำถาม กด "+ เพิ่มคำถาม" เพื่อเริ่ม</p>
                 </div>
@@ -477,31 +477,31 @@ export default function AdminCreateAssessment() {
               {questions.map((q, qi) => (
                 <div
                   key={qi}
-                  className="border border-gray-200 rounded-2xl p-5 space-y-4 bg-white"
+                  className="border border-slate-200 rounded-2xl p-5 space-y-4 bg-white"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded">
+                      <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded">
                         Q{qi + 1}
                       </span>
                       <button
                         onClick={() => moveQuestion(qi, -1)}
                         disabled={qi === 0}
-                        className="text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                        className="text-slate-400 hover:text-slate-600 disabled:opacity-30"
                       >
                         ▲
                       </button>
                       <button
                         onClick={() => moveQuestion(qi, 1)}
                         disabled={qi === questions.length - 1}
-                        className="text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                        className="text-slate-400 hover:text-slate-600 disabled:opacity-30"
                       >
                         ▼
                       </button>
                     </div>
                     <button
                       onClick={() => removeQuestion(qi)}
-                      className="text-gray-400 hover:text-red-500 transition-colors text-sm"
+                      className="text-slate-400 hover:text-red-500 transition-colors text-sm"
                     >
                       ลบ
                     </button>
@@ -513,28 +513,28 @@ export default function AdminCreateAssessment() {
                       value={q.question_text}
                       onChange={(e) => updateQuestion(qi, 'question_text', e.target.value)}
                       placeholder="ข้อความคำถาม"
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 transition-colors"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-fuchsia-400 transition-colors"
                     />
                   </div>
 
                   <div className="flex gap-3">
                     <div className="flex-1">
-                      <label className="block text-xs font-medium text-gray-500 mb-1">ประเภท</label>
+                      <label className="block text-xs font-medium text-slate-500 mb-1">ประเภท</label>
                       <select
                         value={q.type}
                         onChange={(e) => updateQuestion(qi, 'type', e.target.value)}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-pink-400 transition-colors"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-fuchsia-400 transition-colors"
                       >
                         <option value="RADIO">Radio (เลือกเดียว)</option>
                         <option value="TEXT">Text (ข้อความ)</option>
                       </select>
                     </div>
                     <div className="w-28">
-                      <label className="block text-xs font-medium text-gray-500 mb-1">Required</label>
+                      <label className="block text-xs font-medium text-slate-500 mb-1">Required</label>
                       <select
                         value={q.is_required ? 'yes' : 'no'}
                         onChange={(e) => updateQuestion(qi, 'is_required', e.target.value === 'yes')}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-pink-400 transition-colors"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-fuchsia-400 transition-colors"
                       >
                         <option value="yes">Yes</option>
                         <option value="no">No</option>
@@ -544,32 +544,32 @@ export default function AdminCreateAssessment() {
 
                   <div className="flex gap-3">
                     <div className="flex-1">
-                      <label className="block text-xs font-medium text-gray-500 mb-1">Help Text</label>
+                      <label className="block text-xs font-medium text-slate-500 mb-1">Help Text</label>
                       <input
                         type="text"
                         value={q.help_text}
                         onChange={(e) => updateQuestion(qi, 'help_text', e.target.value)}
                         placeholder="ข้อความช่วยเหลือ"
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-pink-400 transition-colors"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-fuchsia-400 transition-colors"
                       />
                     </div>
                     {q.type === 'TEXT' && (
                       <div className="flex-1">
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Placeholder</label>
+                        <label className="block text-xs font-medium text-slate-500 mb-1">Placeholder</label>
                         <input
                           type="text"
                           value={q.placeholder}
                           onChange={(e) => updateQuestion(qi, 'placeholder', e.target.value)}
                           placeholder="เช่น พิมพ์คำตอบของคุณ..."
-                          className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-pink-400 transition-colors"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-fuchsia-400 transition-colors"
                         />
                       </div>
                     )}
                   </div>
 
                   {q.type === 'RADIO' && (
-                    <div className="space-y-2 pl-4 border-l-2 border-pink-100">
-                      <label className="block text-xs font-medium text-gray-500">ตัวเลือก</label>
+                    <div className="space-y-2 pl-4 border-l-2 border-fuchsia-100">
+                      <label className="block text-xs font-medium text-slate-500">ตัวเลือก</label>
                       {q.choices.map((c, ci) => (
                         <div key={ci} className="flex items-center gap-2">
                           <input
@@ -577,19 +577,19 @@ export default function AdminCreateAssessment() {
                             value={c.choice_text}
                             onChange={(e) => updateChoice(qi, ci, 'choice_text', e.target.value)}
                             placeholder={`ตัวเลือก ${ci + 1}`}
-                            className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-pink-400 transition-colors"
+                            className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-fuchsia-400 transition-colors"
                           />
                           <input
                             type="number"
                             value={c.score}
                             onChange={(e) => updateChoice(qi, ci, 'score', Number(e.target.value))}
                             placeholder="คะแนน"
-                            className="w-20 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-pink-400 transition-colors text-center"
+                            className="w-20 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-fuchsia-400 transition-colors text-center"
                           />
                           {q.choices.length > 2 && (
                             <button
                               onClick={() => removeChoice(qi, ci)}
-                              className="text-gray-400 hover:text-red-500 text-sm"
+                              className="text-slate-400 hover:text-red-500 text-sm"
                             >
                               ✕
                             </button>
@@ -598,7 +598,7 @@ export default function AdminCreateAssessment() {
                       ))}
                       <button
                         onClick={() => addChoice(qi)}
-                        className="text-sm text-pink-500 hover:text-pink-700 font-medium"
+                        className="text-sm text-fuchsia-500 hover:text-fuchsia-700 font-medium"
                       >
                         + Add Choice
                       </button>
@@ -613,17 +613,17 @@ export default function AdminCreateAssessment() {
           {assessmentType === 'INTERNAL' && step === 4 && (
             <div className="space-y-5">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-800">เกณฑ์การแปลผล</h2>
+                <h2 className="text-xl font-bold text-slate-800">เกณฑ์การแปลผล</h2>
                 <button
                   onClick={addRule}
-                  className="px-4 py-2 bg-pink-50 hover:bg-pink-100 text-pink-700 font-medium text-sm rounded-xl transition-colors"
+                  className="px-4 py-2 bg-fuchsia-50 hover:bg-fuchsia-100 text-fuchsia-700 font-medium text-sm rounded-xl transition-colors"
                 >
                   + Add Rule
                 </button>
               </div>
 
               {rules.length === 0 && (
-                <div className="text-center py-12 text-gray-400">
+                <div className="text-center py-12 text-slate-400">
                   <div className="text-4xl mb-2">📊</div>
                   <p>ยังไม่มีเกณฑ์การแปลผล กด "+ Add Rule" เพื่อเริ่ม</p>
                 </div>
@@ -633,23 +633,23 @@ export default function AdminCreateAssessment() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-2 px-2 text-gray-500 font-medium">Min</th>
-                        <th className="text-left py-2 px-2 text-gray-500 font-medium">Max</th>
-                        <th className="text-left py-2 px-2 text-gray-500 font-medium">Title</th>
-                        <th className="text-left py-2 px-2 text-gray-500 font-medium">Color</th>
+                      <tr className="border-b border-slate-200">
+                        <th className="text-left py-2 px-2 text-slate-500 font-medium">Min</th>
+                        <th className="text-left py-2 px-2 text-slate-500 font-medium">Max</th>
+                        <th className="text-left py-2 px-2 text-slate-500 font-medium">Title</th>
+                        <th className="text-left py-2 px-2 text-slate-500 font-medium">Color</th>
                         <th className="w-10" />
                       </tr>
                     </thead>
                     <tbody>
                       {rules.map((r, ri) => (
-                        <tr key={ri} className="border-b border-gray-50">
+                        <tr key={ri} className="border-b border-slate-50">
                           <td className="py-2 px-2">
                             <input
                               type="number"
                               value={r.min_score}
                               onChange={(e) => updateRule(ri, 'min_score', Number(e.target.value))}
-                              className="w-16 px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-center focus:outline-none focus:border-pink-400 transition-colors"
+                              className="w-16 px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-center focus:outline-none focus:border-fuchsia-400 transition-colors"
                             />
                           </td>
                           <td className="py-2 px-2">
@@ -657,7 +657,7 @@ export default function AdminCreateAssessment() {
                               type="number"
                               value={r.max_score}
                               onChange={(e) => updateRule(ri, 'max_score', Number(e.target.value))}
-                              className="w-16 px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-center focus:outline-none focus:border-pink-400 transition-colors"
+                              className="w-16 px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-center focus:outline-none focus:border-fuchsia-400 transition-colors"
                             />
                           </td>
                           <td className="py-2 px-2">
@@ -666,14 +666,14 @@ export default function AdminCreateAssessment() {
                               value={r.title}
                               onChange={(e) => updateRule(ri, 'title', e.target.value)}
                               placeholder="ปกติ"
-                              className="w-full px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-pink-400 transition-colors"
+                              className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-fuchsia-400 transition-colors"
                             />
                           </td>
                           <td className="py-2 px-2">
                             <select
                               value={r.color_code}
                               onChange={(e) => updateRule(ri, 'color_code', e.target.value)}
-                              className="px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-pink-400 transition-colors"
+                              className="px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-fuchsia-400 transition-colors"
                             >
                               {COLOR_CODES.map((c) => (
                                 <option key={c.value} value={c.value}>
@@ -685,7 +685,7 @@ export default function AdminCreateAssessment() {
                           <td className="py-2 px-2">
                             <button
                               onClick={() => removeRule(ri)}
-                              className="text-gray-400 hover:text-red-500 text-sm"
+                              className="text-slate-400 hover:text-red-500 text-sm"
                             >
                               ✕
                             </button>
@@ -702,23 +702,23 @@ export default function AdminCreateAssessment() {
                   {rules.map((r, ri) => (
                     <div key={ri} className="flex gap-3">
                       <div className="flex-1">
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Description</label>
+                        <label className="block text-xs font-medium text-slate-500 mb-1">Description</label>
                         <input
                           type="text"
                           value={r.description}
                           onChange={(e) => updateRule(ri, 'description', e.target.value)}
                           placeholder="คำอธิบายผลการประเมิน"
-                          className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-pink-400 transition-colors"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-fuchsia-400 transition-colors"
                         />
                       </div>
                       <div className="flex-1">
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Recommendation</label>
+                        <label className="block text-xs font-medium text-slate-500 mb-1">Recommendation</label>
                         <input
                           type="text"
                           value={r.recommendation}
                           onChange={(e) => updateRule(ri, 'recommendation', e.target.value)}
                           placeholder="คำแนะนำ"
-                          className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-pink-400 transition-colors"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-fuchsia-400 transition-colors"
                         />
                       </div>
                     </div>
@@ -731,32 +731,32 @@ export default function AdminCreateAssessment() {
           {/* Step 5: Review */}
           {step === 5 && (
             <div className="space-y-6">
-              <h2 className="text-xl font-bold text-gray-800">Review & Publish</h2>
+              <h2 className="text-xl font-bold text-slate-800">Review & Publish</h2>
 
-              <div className="bg-gray-50 rounded-2xl p-6 space-y-4">
+              <div className="bg-slate-50 rounded-2xl p-6 space-y-4">
                 <div className="space-y-3">
-                  <h3 className="font-bold text-gray-700 text-lg">{title || '(ไม่มีชื่อ)'}</h3>
-                  {description && <p className="text-sm text-gray-500">{description}</p>}
+                  <h3 className="font-bold text-slate-700 text-lg">{title || '(ไม่มีชื่อ)'}</h3>
+                  {description && <p className="text-sm text-slate-500">{description}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white rounded-xl p-3 border border-gray-100">
-                    <div className="text-xs text-gray-400">ประเภท</div>
-                    <div className="font-medium text-gray-700">
+                  <div className="bg-white rounded-xl p-3 border border-slate-100">
+                    <div className="text-xs text-slate-400">ประเภท</div>
+                    <div className="font-medium text-slate-700">
                       {assessmentType === 'INTERNAL' ? '📝 Internal' : '🔗 External'}
                     </div>
                   </div>
-                  <div className="bg-white rounded-xl p-3 border border-gray-100">
-                    <div className="text-xs text-gray-400">หมวดหมู่</div>
-                    <div className="font-medium text-gray-700">{category}</div>
+                  <div className="bg-white rounded-xl p-3 border border-slate-100">
+                    <div className="text-xs text-slate-400">หมวดหมู่</div>
+                    <div className="font-medium text-slate-700">{category}</div>
                   </div>
-                  <div className="bg-white rounded-xl p-3 border border-gray-100">
-                    <div className="text-xs text-gray-400">เวอร์ชัน</div>
-                    <div className="font-medium text-gray-700">v{version}</div>
+                  <div className="bg-white rounded-xl p-3 border border-slate-100">
+                    <div className="text-xs text-slate-400">เวอร์ชัน</div>
+                    <div className="font-medium text-slate-700">v{version}</div>
                   </div>
-                  <div className="bg-white rounded-xl p-3 border border-gray-100">
-                    <div className="text-xs text-gray-400">เวลา</div>
-                    <div className="font-medium text-gray-700">~{estimatedTimeMins} นาที</div>
+                  <div className="bg-white rounded-xl p-3 border border-slate-100">
+                    <div className="text-xs text-slate-400">เวลา</div>
+                    <div className="font-medium text-slate-700">~{estimatedTimeMins} นาที</div>
                   </div>
                 </div>
 
@@ -765,11 +765,11 @@ export default function AdminCreateAssessment() {
                     <div className="flex gap-4 text-sm">
                       <div className="flex items-center gap-1.5">
                         <span className="text-emerald-500">✓</span>
-                        <span className="text-gray-600">{questions.length} Questions</span>
+                        <span className="text-slate-600">{questions.length} Questions</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <span className="text-emerald-500">✓</span>
-                        <span className="text-gray-600">
+                        <span className="text-slate-600">
                           {questions.filter((q) => q.type === 'RADIO').length > 0
                             ? 'มี Choices'
                             : '0 Choices'}
@@ -777,20 +777,20 @@ export default function AdminCreateAssessment() {
                       </div>
                       <div className="flex items-center gap-1.5">
                         <span className="text-emerald-500">✓</span>
-                        <span className="text-gray-600">{rules.length} Rules</span>
+                        <span className="text-slate-600">{rules.length} Rules</span>
                       </div>
                     </div>
 
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-slate-500">
                       สถานะ: <span className="font-medium text-amber-600">Draft</span>
                     </div>
                   </>
                 )}
 
                 {assessmentType === 'EXTERNAL' && externalUrl && (
-                  <div className="bg-white rounded-xl p-3 border border-gray-100">
-                    <div className="text-xs text-gray-400">External URL</div>
-                    <div className="font-medium text-blue-600 text-sm truncate">{externalUrl}</div>
+                  <div className="bg-white rounded-xl p-3 border border-slate-100">
+                    <div className="text-xs text-slate-400">External URL</div>
+                    <div className="font-medium text-purple-600 text-sm truncate">{externalUrl}</div>
                   </div>
                 )}
               </div>
@@ -818,7 +818,7 @@ export default function AdminCreateAssessment() {
             {step > 1 && (
               <button
                 onClick={goBack}
-                className="px-6 py-2.5 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+                className="px-6 py-2.5 text-slate-600 hover:text-slate-800 font-medium transition-colors"
               >
                 ← Back
               </button>
@@ -830,7 +830,7 @@ export default function AdminCreateAssessment() {
               <button
                 onClick={goNext}
                 disabled={!canGoNext()}
-                className="px-6 py-2.5 bg-gray-800 hover:bg-gray-900 disabled:bg-gray-300 text-white font-medium rounded-xl transition-colors"
+                className="px-6 py-2.5 bg-purple-700 hover:bg-purple-800 disabled:bg-slate-300 text-white font-medium rounded-xl transition-colors"
               >
                 Next →
               </button>
@@ -839,14 +839,14 @@ export default function AdminCreateAssessment() {
                 <button
                   onClick={() => handleSave('DRAFT')}
                   disabled={saving}
-                  className="px-5 py-2.5 border border-gray-300 text-gray-600 hover:text-gray-800 font-medium rounded-xl transition-colors disabled:opacity-50"
+                  className="px-5 py-2.5 border border-slate-300 text-slate-600 hover:text-slate-800 font-medium rounded-xl transition-colors disabled:opacity-50"
                 >
                   Save Draft
                 </button>
                 <button
                   onClick={() => handleSave('PUBLISHED')}
                   disabled={saving}
-                  className="px-6 py-2.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold rounded-xl shadow-sm hover:shadow-md transition-all disabled:opacity-50"
+                  className="px-6 py-2.5 bg-gradient-to-r from-fuchsia-500 to-purple-500 text-white font-bold rounded-xl shadow-sm hover:shadow-md transition-all disabled:opacity-50"
                 >
                   {saving ? 'กำลังบันทึก...' : 'Publish'}
                 </button>

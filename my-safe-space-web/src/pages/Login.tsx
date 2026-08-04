@@ -56,7 +56,7 @@ export default function Login() {
     <div className="min-h-[80vh] flex items-center justify-center relative">
       
       {/* 🔴 ฟอร์มเข้าสู่ระบบปกติ */}
-      <div className={`w-full max-w-md p-8 bg-white rounded-2xl shadow-sm border border-gray-100 transition-opacity duration-300 ${isWelcomeVisible ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
+      <div className={`w-full max-w-md p-8 bg-white rounded-2xl shadow-sm border border-slate-100 transition-opacity duration-300 ${isWelcomeVisible ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
         <h2 className="text-2xl font-bold text-center mb-6">เข้าสู่ระบบ</h2>
         
         {error && (
@@ -96,16 +96,16 @@ export default function Login() {
         </form>
 
         <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-sm text-gray-400">หรือ</span>
-          <div className="flex-1 h-px bg-gray-200" />
+          <div className="flex-1 h-px bg-slate-200" />
+          <span className="text-sm text-slate-400">หรือ</span>
+          <div className="flex-1 h-px bg-slate-200" />
         </div>
 
         <button
           type="button"
           onClick={handleGoogleLogin}
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 font-medium py-3 rounded-xl hover:bg-gray-50 disabled:opacity-60 transition-colors"
+          className="w-full flex items-center justify-center gap-3 bg-white border border-slate-300 text-slate-700 font-medium py-3 rounded-xl hover:bg-slate-50 disabled:opacity-60 transition-colors"
         >
           <svg className="w-5 h-5" viewBox="0 0 48 48" aria-hidden="true">
             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
@@ -116,7 +116,7 @@ export default function Login() {
           เข้าสู่ระบบด้วย Google
         </button>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-slate-500 mt-6">
           ยังไม่มีบัญชี?{' '}
           <Link to="/register" className="text-purple-600 hover:underline font-medium">
             สมัครสมาชิก
@@ -129,8 +129,8 @@ export default function Login() {
         <div className="absolute inset-0 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-3xl shadow-xl border border-purple-100 text-center animate-bounce-in max-w-sm w-full mx-4">
             <div className="text-5xl mb-4">✨</div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">ยินดีต้อนรับกลับมา!</h3>
-            <p className="text-gray-500 text-sm mb-6">วันนี้บ้านพักใจขอเรียกคุณว่า...</p>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">ยินดีต้อนรับกลับมา!</h3>
+            <p className="text-slate-500 text-sm mb-6">วันนี้บ้านพักใจขอเรียกคุณว่า...</p>
             
             <div className="bg-purple-50 rounded-2xl p-4 mb-6 border border-purple-100">
               <span className="text-2xl font-bold text-purple-600">

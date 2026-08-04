@@ -120,7 +120,7 @@ export default function Venting() {
           <h2 className="text-2xl font-bold text-purple-700 flex items-center gap-2">
             ห้องระบาย 💜
           </h2>
-          <p className="text-gray-600 mt-1">
+          <p className="text-slate-600 mt-1">
             พื้นที่ปลอดภัยสำหรับคุณ — พิมพ์สิ่งที่อยู่ในใจ ไม่ต้องกลัวการตัดสิน ไม่มีใครรู้ว่าคุณเป็นใคร
           </p>
           <div className="inline-block bg-purple-50 text-purple-700 text-sm px-3 py-1 rounded-full mt-2">
@@ -141,12 +141,12 @@ export default function Venting() {
 
         {/* 🌟 3. แยกเงื่อนไขการแสดงผลระหว่าง Guest กับ User */}
         {isGuest ? (
-          <div className="bg-white rounded-2xl p-8 text-center border border-gray-100 shadow-sm mt-4">
+          <div className="bg-white rounded-2xl p-8 text-center border border-slate-100 shadow-sm mt-4">
             <div className="text-6xl mb-4">🧸</div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">
+            <h3 className="text-xl font-bold text-slate-800 mb-2">
               แวะมาพักใจหรืออยากระบายความรู้สึกไหมคะ?
             </h3>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+            <p className="text-slate-600 mb-8 max-w-md mx-auto">
               หากมีเรื่องหนักใจอยากทิ้งไว้ที่นี่ มารับนามแฝงน่ารักๆ แล้วเข้าสู่ระบบเพื่อเขียนระบายได้เลยนะ พื้นที่นี้ปลอดภัยสำหรับคุณเสมอค่ะ ☁️✨
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -159,7 +159,7 @@ export default function Venting() {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
             <div className="mb-6">
               <h3 className="font-medium mb-3">วันนี้คุณรู้สึกอย่างไร?</h3>
               <div className="flex flex-wrap gap-3">
@@ -172,11 +172,11 @@ export default function Venting() {
                     className={`flex flex-col items-center p-3 rounded-xl border transition-all ${
                       selectedEmotion === emo.icon 
                         ? 'border-purple-500 bg-purple-50' 
-                        : 'border-gray-100 hover:bg-gray-50'
+                        : 'border-slate-100 hover:bg-slate-50'
                     } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <span className="text-2xl">{emo.icon}</span>
-                    <span className="text-xs mt-1 text-gray-600">{emo.label}</span>
+                    <span className="text-xs mt-1 text-slate-600">{emo.label}</span>
                   </button>
                 ))}
               </div>
@@ -185,14 +185,14 @@ export default function Venting() {
             <div className="mb-4">
               <h3 className="font-medium mb-3">บอกเล่าสิ่งที่อยู่ในใจ...</h3>
               <textarea
-                className="w-full border border-gray-200 rounded-xl p-4 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-purple-300 resize-none bg-gray-50 disabled:opacity-50 disabled:bg-gray-100"
+                className="w-full border border-slate-200 rounded-xl p-4 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-purple-300 resize-none bg-slate-50 disabled:opacity-50 disabled:bg-slate-100"
                 placeholder="วันนี้เกิดอะไรขึ้น? คุณรู้สึกอย่างไร? ระบายได้เลย บ้านพักใจรับฟังคุณเสมอ..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 maxLength={1000}
                 disabled={isLoading}
               ></textarea>
-              <div className="text-right text-sm text-gray-400 mt-1">
+              <div className="text-right text-sm text-slate-400 mt-1">
                 {content.length}/1000 ตัวอักษร
               </div>
             </div>
@@ -202,7 +202,7 @@ export default function Venting() {
                 type="button" 
                 onClick={handleClear}
                 disabled={isLoading}
-                className="px-6 py-2 border border-gray-300 text-gray-600 rounded-full hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 border border-slate-300 text-slate-600 rounded-full hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 ล้าง
               </button>
@@ -215,7 +215,7 @@ export default function Venting() {
               </button>
             </div>
 
-            <p className="text-xs text-gray-400 flex gap-1 items-start">
+            <p className="text-xs text-slate-400 flex gap-1 items-start">
               <span>🔒</span> ความเป็นส่วนตัวของคุณสำคัญมาก — ข้อความนี้ไม่มีการบันทึกชื่อ อีเมล หรือข้อมูลส่วนตัวใดๆ ทั้งสิ้น ข้อมูลบนหน้านี้ไม่ใช่การวินิจฉัยทางการแพทย์
             </p>
           </form>
@@ -224,32 +224,32 @@ export default function Venting() {
 
       {/* 🔴 ฝั่งขวา: Sidebar เครื่องมือช่วยเหลือ (คงไว้เหมือนเดิมให้ทุกคนเห็นได้) */}
       <div className="lg:w-80 space-y-6">
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
           <h3 className="font-medium mb-4 flex items-center gap-2">
             📞 สายด่วน — พร้อมช่วยเสมอ
           </h3>
           <div className="space-y-2">
-            <a href="tel:1323" className="w-full text-left p-3 bg-gray-50 rounded-lg text-sm hover:bg-gray-100 flex justify-between items-center transition-colors">
+            <a href="tel:1323" className="w-full text-left p-3 bg-slate-50 rounded-lg text-sm hover:bg-slate-100 flex justify-between items-center transition-colors">
               <span>1323 สายด่วนสุขภาพจิต</span> <span>→</span>
             </a>
-            <a href="tel:021136789" className="w-full text-left p-3 bg-gray-50 rounded-lg text-sm hover:bg-gray-100 flex justify-between items-center transition-colors">
+            <a href="tel:021136789" className="w-full text-left p-3 bg-slate-50 rounded-lg text-sm hover:bg-slate-100 flex justify-between items-center transition-colors">
               <span>02-113-6789 สะมาริตันส์</span> <span>→</span>
             </a>
-            <a href="tel:1669" className="w-full text-left p-3 bg-gray-50 rounded-lg text-sm hover:bg-gray-100 flex justify-between items-center transition-colors">
+            <a href="tel:1669" className="w-full text-left p-3 bg-slate-50 rounded-lg text-sm hover:bg-slate-100 flex justify-between items-center transition-colors">
               <span>1669 ฉุกเฉินฟรี</span> <span>→</span>
             </a>
-            <a href="tel:1300" className="w-full text-left p-3 bg-gray-50 rounded-lg text-sm hover:bg-gray-100 flex justify-between items-center transition-colors">
+            <a href="tel:1300" className="w-full text-left p-3 bg-slate-50 rounded-lg text-sm hover:bg-slate-100 flex justify-between items-center transition-colors">
               <span>1300 ช่วยเหลือสังคม</span> <span>→</span>
             </a>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
           <h3 className="font-medium mb-2 flex items-center gap-2">
             🤍 หายใจ 4-4-4
           </h3>
-          <p className="text-sm text-gray-600 mb-4">ลองหายใจลึกๆ เพื่อลดความเครียดได้ทันที</p>
-          <ul className="text-sm text-gray-600 space-y-2">
+          <p className="text-sm text-slate-600 mb-4">ลองหายใจลึกๆ เพื่อลดความเครียดได้ทันที</p>
+          <ul className="text-sm text-slate-600 space-y-2">
             <li>1. หายใจเข้า นับ 1-2-3-4</li>
             <li>2. กลั้นหายใจ นับ 1-2-3-4</li>
             <li>3. หายใจออก นับ 1-2-3-4</li>

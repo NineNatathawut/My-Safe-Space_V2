@@ -254,7 +254,7 @@ export default function Profile() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-xl text-gray-500 animate-pulse">กำลังโหลดโปรไฟล์...</div>
+        <div className="text-xl text-slate-500 animate-pulse">กำลังโหลดโปรไฟล์...</div>
       </div>
     );
   }
@@ -264,8 +264,8 @@ export default function Profile() {
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center space-y-4">
           <div className="text-5xl">🔒</div>
-          <h2 className="text-xl font-bold text-gray-700">กรุณาเข้าสู่ระบบก่อน</h2>
-          <Link to="/login" className="inline-block px-6 py-3 bg-pink-500 text-white rounded-xl font-medium hover:bg-pink-600 transition-colors">
+          <h2 className="text-xl font-bold text-slate-700">กรุณาเข้าสู่ระบบก่อน</h2>
+          <Link to="/login" className="inline-block px-6 py-3 bg-fuchsia-500 text-white rounded-xl font-medium hover:bg-fuchsia-600 transition-colors">
             ไปหน้าเข้าสู่ระบบ
           </Link>
         </div>
@@ -278,24 +278,24 @@ export default function Profile() {
       <div className="max-w-3xl mx-auto px-4 space-y-8">
 
         {/* ส่วนหัวโปรไฟล์ */}
-        <section className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-pink-50 rounded-bl-full -z-10"></div>
+        <section className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-fuchsia-50 rounded-bl-full -z-10"></div>
 
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-5">
               <div
                 onClick={() => handleTabChange('avatar')}
-                className="w-20 h-20 bg-gradient-to-tr from-pink-200 to-purple-200 rounded-full flex items-center justify-center text-4xl shadow-inner cursor-pointer hover:ring-2 hover:ring-pink-400 transition-all"
+                className="w-20 h-20 bg-gradient-to-tr from-fuchsia-200 to-purple-200 rounded-full flex items-center justify-center text-4xl shadow-inner cursor-pointer hover:ring-2 hover:ring-fuchsia-400 transition-all"
               >
                 {displayAvatar}
               </div>
 
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
+                <h1 className="text-2xl md:text-3xl font-bold text-slate-800 flex items-center gap-2">
                   {nickname}
                 </h1>
                 <div className="flex items-center flex-wrap gap-2 mt-2">
-                  <div className="inline-block px-3 py-1 bg-pink-100 text-pink-700 font-medium text-sm rounded-full">
+                  <div className="inline-block px-3 py-1 bg-fuchsia-100 text-fuchsia-700 font-medium text-sm rounded-full">
                     {isAdmin ? 'ผู้ดูแลระบบ 🛡️' : user?.role === 'expert' ? 'ผู้เชี่ยวชาญ 🩺' : 'ผู้รับฟัง ❤️'}
                   </div>
                   
@@ -309,16 +309,16 @@ export default function Profile() {
 
         {/* Quick Action Widget */}
         {featuredAssessment && activeTab !== 'assessment' && (
-          <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-5 border border-pink-100 shadow-sm">
+          <div className="bg-gradient-to-r from-fuchsia-50 to-purple-50 rounded-2xl p-5 border border-fuchsia-100 shadow-sm">
             <div className="flex items-center gap-4">
               <span className="text-3xl shrink-0">💡</span>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-gray-800">เช็กอินสุขภาพใจประจำสัปดาห์</p>
-                <p className="text-sm text-gray-500">คุณยังไม่ได้ทำแบบประเมินสัปดาห์นี้ มาเช็กสภาพใจกันหน่อยไหม?</p>
+                <p className="font-bold text-slate-800">เช็กอินสุขภาพใจประจำสัปดาห์</p>
+                <p className="text-sm text-slate-500">คุณยังไม่ได้ทำแบบประเมินสัปดาห์นี้ มาเช็กสภาพใจกันหน่อยไหม?</p>
               </div>
               <Link
                 to="/assessment"
-                className="px-5 py-2.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-xl font-bold text-sm shadow-sm hover:shadow-md transition-all shrink-0"
+                className="px-5 py-2.5 bg-gradient-to-r from-fuchsia-500 to-purple-500 text-white rounded-xl font-bold text-sm shadow-sm hover:shadow-md transition-all shrink-0"
               >
                 📊 เริ่มทำแบบประเมิน
               </Link>
@@ -327,17 +327,17 @@ export default function Profile() {
         )}
 
         {/* Tabs */}
-        <div className="flex overflow-x-auto hide-scrollbar gap-2 p-1 bg-gray-200/50 rounded-2xl">
+        <div className="flex overflow-x-auto hide-scrollbar gap-2 p-1 bg-slate-200/50 rounded-2xl">
           <button
             onClick={() => handleTabChange('history')}
-            className={`flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all whitespace-nowrap ${activeTab === 'history' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all whitespace-nowrap ${activeTab === 'history' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             📖 เรื่องราวของฉัน
           </button>
 
           <button
             onClick={() => handleTabChange('assessment')}
-            className={`flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all whitespace-nowrap ${activeTab === 'assessment' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all whitespace-nowrap ${activeTab === 'assessment' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             📊 แบบประเมิน & สุขภาพใจ
           </button>
@@ -346,52 +346,52 @@ export default function Profile() {
 
           <button
             onClick={() => handleTabChange('expert')}
-            className={`flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all whitespace-nowrap ${activeTab === 'expert' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all whitespace-nowrap ${activeTab === 'expert' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             🩺 สถานะผู้เชี่ยวชาญ
           </button>
         </div>
 
         {/* Content area */}
-        <section className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 min-h-[400px]">
+        <section className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 min-h-[400px]">
 
           {/* History tab — combines posts + inbox */}
           {activeTab === 'history' && (
             <div className="space-y-8">
               {/* My posts */}
               <div>
-                <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
                   📝 เรื่องราวที่ฉันเคยระบาย
                 </h2>
                 {loading ? (
                   <div className="flex items-center justify-center py-12">
-                    <div className="text-lg text-gray-400 animate-pulse">กำลังโหลดประวัติ...</div>
+                    <div className="text-lg text-slate-400 animate-pulse">กำลังโหลดประวัติ...</div>
                   </div>
                 ) : fetchError ? (
                   <div className="text-center py-6">
                     <div className="text-4xl mb-3">⚠️</div>
-                    <p className="text-gray-500">{fetchError}</p>
+                    <p className="text-slate-500">{fetchError}</p>
                   </div>
                 ) : posts.length === 0 ? (
-                  <div className="text-center py-8 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                  <div className="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                     <div className="text-4xl mb-3">📝</div>
-                    <h3 className="text-lg font-bold text-gray-700">ตู้เซฟของคุณยังว่างเปล่า</h3>
-                    <p className="text-gray-500 text-sm mt-1">พื้นที่นี้จัดเก็บเฉพาะโพสต์ที่คุณเคยระบายไว้ สบายใจได้ ไม่มีใครเห็นแน่นอน</p>
+                    <h3 className="text-lg font-bold text-slate-700">ตู้เซฟของคุณยังว่างเปล่า</h3>
+                    <p className="text-slate-500 text-sm mt-1">พื้นที่นี้จัดเก็บเฉพาะโพสต์ที่คุณเคยระบายไว้ สบายใจได้ ไม่มีใครเห็นแน่นอน</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {posts.map((post) => (
-                      <div key={post.id} className="bg-gray-50 p-5 rounded-2xl border border-gray-100 hover:shadow-sm transition-shadow">
+                      <div key={post.id} className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:shadow-sm transition-shadow">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2.5">
                             <span className="text-2xl">{post.emotion}</span>
-                            <span className="font-medium text-gray-800">{post.alias_name}</span>
+                            <span className="font-medium text-slate-800">{post.alias_name}</span>
                           </div>
-                          <span className="text-xs text-gray-400">{formatDate(post.created_at)}</span>
+                          <span className="text-xs text-slate-400">{formatDate(post.created_at)}</span>
                         </div>
-                        <p className="text-gray-700 whitespace-pre-wrap mb-3">{post.content}</p>
-                        <div className="flex items-center gap-4 pt-3 border-t border-gray-200 text-sm">
-                          <span className="text-pink-500">🫂 กอด ({post.hug_count})</span>
+                        <p className="text-slate-700 whitespace-pre-wrap mb-3">{post.content}</p>
+                        <div className="flex items-center gap-4 pt-3 border-t border-slate-200 text-sm">
+                          <span className="text-fuchsia-500">🫂 กอด ({post.hug_count})</span>
                           <Link to={`/post/${post.id}`} className="text-purple-600 hover:text-purple-700 transition-colors">
                             💬 คอมเมนต์ ({post.comment_count})
                           </Link>
@@ -404,18 +404,18 @@ export default function Profile() {
 
               {/* Inbox messages */}
               <div>
-                <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
                   💌 กำลังใจที่ได้รับ
                 </h2>
                 {loadingInbox ? (
                   <div className="flex items-center justify-center py-12">
-                    <div className="text-gray-400 animate-pulse">กำลังโหลด...</div>
+                    <div className="text-slate-400 animate-pulse">กำลังโหลด...</div>
                   </div>
                 ) : inboxMessages.length === 0 ? (
-                  <div className="text-center py-8 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                  <div className="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                     <div className="text-4xl mb-3">💌</div>
-                    <h3 className="text-lg font-bold text-gray-700">กล่องจดหมายยังว่างเปล่า</h3>
-                    <p className="text-gray-500 text-sm mt-1">ข้อความอบอุ่นจะถูกส่งมาเก็บไว้ที่นี่</p>
+                    <h3 className="text-lg font-bold text-slate-700">กล่องจดหมายยังว่างเปล่า</h3>
+                    <p className="text-slate-500 text-sm mt-1">ข้อความอบอุ่นจะถูกส่งมาเก็บไว้ที่นี่</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -425,14 +425,14 @@ export default function Profile() {
                         onClick={() => !msg.is_read && handleInboxRead(msg.id)}
                         className={`p-5 rounded-2xl border transition-colors cursor-pointer ${
                           msg.is_read
-                            ? 'bg-white border-gray-100'
-                            : 'bg-indigo-50/50 border-indigo-200'
+                            ? 'bg-white border-slate-100'
+                            : 'bg-purple-50/50 border-purple-200'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1 min-w-0">
-                            <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                            <p className="text-xs text-gray-400 mt-2">
+                            <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                            <p className="text-xs text-slate-400 mt-2">
                               {new Date(msg.created_at).toLocaleDateString('th-TH', {
                                 year: 'numeric', month: 'long', day: 'numeric',
                                 hour: '2-digit', minute: '2-digit',
@@ -440,7 +440,7 @@ export default function Profile() {
                             </p>
                           </div>
                           {!msg.is_read && (
-                            <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full mt-2 shrink-0" />
+                            <span className="w-2.5 h-2.5 bg-purple-500 rounded-full mt-2 shrink-0" />
                           )}
                         </div>
                       </div>
@@ -459,42 +459,42 @@ export default function Profile() {
               ) : (
                 <>
                   <div className="text-center">
-                    <h2 className="text-2xl font-bold text-gray-800">📊 แบบประเมิน & สุขภาพใจ</h2>
-                    <p className="text-sm text-gray-500 mt-1">ติดตามสุขภาพใจของคุณด้วยแบบประเมินต่างๆ</p>
+                    <h2 className="text-2xl font-bold text-slate-800">📊 แบบประเมิน & สุขภาพใจ</h2>
+                    <p className="text-sm text-slate-500 mt-1">ติดตามสุขภาพใจของคุณด้วยแบบประเมินต่างๆ</p>
                   </div>
 
                   {activeAssessments.length === 0 ? (
-                    <div className="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                    <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                       <div className="text-4xl mb-3">📋</div>
-                      <h3 className="text-lg font-bold text-gray-700">ยังไม่มีแบบประเมินที่เปิดใช้งาน</h3>
-                      <p className="text-gray-500 text-sm mt-1">รอแอดมินเพิ่มแบบประเมิน แล้วกลับมาตรวจสอบอีกครั้งนะ</p>
+                      <h3 className="text-lg font-bold text-slate-700">ยังไม่มีแบบประเมินที่เปิดใช้งาน</h3>
+                      <p className="text-slate-500 text-sm mt-1">รอแอดมินเพิ่มแบบประเมิน แล้วกลับมาตรวจสอบอีกครั้งนะ</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {activeAssessments.map((a) => (
                         <div
                           key={a.id}
-                          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col"
+                          className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col"
                         >
                           <div className="text-4xl mb-3">
                             {a.type === 'EXTERNAL' ? '🔗' : '📝'}
                           </div>
-                          <h3 className="font-bold text-gray-800">{a.title}</h3>
+                          <h3 className="font-bold text-slate-800">{a.title}</h3>
                           {a.description && (
-                            <p className="text-sm text-gray-500 mt-1 line-clamp-2">{a.description}</p>
+                            <p className="text-sm text-slate-500 mt-1 line-clamp-2">{a.description}</p>
                           )}
-                          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50">
+                          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-50">
                             <span
                               className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
                                 a.type === 'EXTERNAL'
                                   ? 'bg-amber-50 text-amber-700'
-                                  : 'bg-indigo-50 text-indigo-700'
+                                  : 'bg-purple-50 text-purple-700'
                               }`}
                             >
                               {a.type === 'EXTERNAL' ? '🔗 External' : '📝 Internal'}
                             </span>
                             {a.estimated_time_mins && (
-                              <span className="text-xs text-gray-400">~{a.estimated_time_mins} นาที</span>
+                              <span className="text-xs text-slate-400">~{a.estimated_time_mins} นาที</span>
                             )}
                           </div>
                           {a.type === 'EXTERNAL' ? (
@@ -502,14 +502,14 @@ export default function Profile() {
                               href={a.external_url}
                               target={a.open_in_new_tab !== false ? '_blank' : '_self'}
                               rel="noopener noreferrer"
-                              className="mt-3 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold text-sm rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+                              className="mt-3 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-fuchsia-500 to-purple-500 text-white font-bold text-sm rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
                             >
                               ไปทำแบบประเมิน
                             </a>
                           ) : (
                             <Link
                               to={`/assessment?id=${a.id}`}
-                              className="mt-3 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold text-sm rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+                              className="mt-3 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-fuchsia-500 to-purple-500 text-white font-bold text-sm rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
                             >
                               เริ่มทำแบบประเมิน
                             </Link>
@@ -527,18 +527,18 @@ export default function Profile() {
           {activeTab === 'avatar' && (
             <div className="space-y-6 animate-fadeIn">
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-800">🎨 แต่งตัว Avatar</h2>
-                <p className="text-sm text-gray-500 mt-1">เลือกอิโมจิที่ใช่สำหรับโปรไฟล์ของคุณ</p>
+                <h2 className="text-2xl font-bold text-slate-800">🎨 แต่งตัว Avatar</h2>
+                <p className="text-sm text-slate-500 mt-1">เลือกอิโมจิที่ใช่สำหรับโปรไฟล์ของคุณ</p>
               </div>
 
               <div className="flex justify-center relative">
-                <div className="w-24 h-24 bg-gradient-to-tr from-pink-200 to-purple-200 rounded-full flex items-center justify-center text-5xl shadow-inner">
+                <div className="w-24 h-24 bg-gradient-to-tr from-fuchsia-200 to-purple-200 rounded-full flex items-center justify-center text-5xl shadow-inner">
                   {displayAvatar}
                 </div>
                 {selectedAvatar && selectedAvatar !== currentAvatar && (
                   <button
                     onClick={() => handleTabChange('history')}
-                    className="absolute -top-1 -right-1 w-7 h-7 bg-gray-800/70 hover:bg-gray-800 text-white rounded-full flex items-center justify-center text-sm transition-colors"
+                    className="absolute -top-1 -right-1 w-7 h-7 bg-purple-800/70 hover:bg-purple-700 text-white rounded-full flex items-center justify-center text-sm transition-colors"
                   >
                     ✕
                   </button>
@@ -569,8 +569,8 @@ export default function Profile() {
                     disabled={savingAvatar}
                     className={`w-10 h-10 flex items-center justify-center text-xl rounded-xl transition-all ${
                       (selectedAvatar ?? currentAvatar) === emoji
-                        ? 'bg-pink-100 ring-2 ring-pink-400 scale-110'
-                        : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
+                        ? 'bg-fuchsia-100 ring-2 ring-fuchsia-400 scale-110'
+                        : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
                     } disabled:opacity-50`}
                   >
                     {emoji}
@@ -584,14 +584,14 @@ export default function Profile() {
                   <button
                     onClick={handleCancelAvatar}
                     disabled={savingAvatar}
-                    className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors text-sm"
+                    className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors text-sm"
                   >
                     ยกเลิก
                   </button>
                   <button
                     onClick={handleConfirmAvatar}
                     disabled={savingAvatar}
-                    className="px-6 py-2.5 bg-gradient-to-r from-pink-500 to-purple-500 hover:brightness-110 text-white font-bold rounded-xl transition-all text-sm shadow-sm disabled:opacity-50"
+                    className="px-6 py-2.5 bg-gradient-to-r from-fuchsia-500 to-purple-500 hover:brightness-110 text-white font-bold rounded-xl transition-all text-sm shadow-sm disabled:opacity-50"
                   >
                     {savingAvatar ? 'กำลังบันทึก...' : '✅ ยืนยัน'}
                   </button>
@@ -600,24 +600,24 @@ export default function Profile() {
 
               {/* Expert upload section */}
               {user?.role === 'expert' && (
-                <div className="border-t border-gray-200 pt-6 mt-6">
-                  <h3 className="text-lg font-bold text-gray-700 text-center mb-4">📸 หรืออัปโหลดรูปโปรไฟล์</h3>
-                  <p className="text-xs text-gray-500 text-center mb-4">อัปโหลดรูปภาพขนาดไม่เกิน 5MB (JPG, PNG, WebP) รอแอดมินตรวจสอบ</p>
+                <div className="border-t border-slate-200 pt-6 mt-6">
+                  <h3 className="text-lg font-bold text-slate-700 text-center mb-4">📸 หรืออัปโหลดรูปโปรไฟล์</h3>
+                  <p className="text-xs text-slate-500 text-center mb-4">อัปโหลดรูปภาพขนาดไม่เกิน 5MB (JPG, PNG, WebP) รอแอดมินตรวจสอบ</p>
 
                   <div className="max-w-sm mx-auto space-y-3">
                     <div
                       onClick={() => uploadFileRef.current?.click()}
-                      className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition-colors cursor-pointer"
+                      className="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center hover:bg-slate-50 transition-colors cursor-pointer"
                     >
                       {uploadFile ? (
                         <>
                           <div className="text-2xl mb-1">✅</div>
-                          <p className="text-sm text-gray-700 font-medium">{uploadFile.name}</p>
+                          <p className="text-sm text-slate-700 font-medium">{uploadFile.name}</p>
                         </>
                       ) : (
                         <>
                           <div className="text-2xl mb-1">📎</div>
-                          <p className="text-sm text-gray-600">คลิกเลือกไฟล์รูปภาพ</p>
+                          <p className="text-sm text-slate-600">คลิกเลือกไฟล์รูปภาพ</p>
                         </>
                       )}
                       <input
@@ -633,7 +633,7 @@ export default function Profile() {
                       <button
                         onClick={handleUploadAvatar}
                         disabled={uploading}
-                        className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 text-white font-bold rounded-xl transition-colors text-sm"
+                        className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 text-white font-bold rounded-xl transition-colors text-sm"
                       >
                         {uploading ? 'กำลังอัปโหลด...' : 'ส่งให้แอดมินตรวจสอบ'}
                       </button>
@@ -656,23 +656,23 @@ export default function Profile() {
               {user?.role === 'expert' ? (
                 <div className="text-center py-10">
                   <div className="text-5xl mb-4">🩺</div>
-                  <h2 className="text-2xl font-bold text-gray-800">สถานะผู้เชี่ยวชาญ</h2>
-                  <p className="text-gray-500 mt-2">คุณเป็นผู้เชี่ยวชาญที่ได้รับการรับรองแล้ว</p>
+                  <h2 className="text-2xl font-bold text-slate-800">สถานะผู้เชี่ยวชาญ</h2>
+                  <p className="text-slate-500 mt-2">คุณเป็นผู้เชี่ยวชาญที่ได้รับการรับรองแล้ว</p>
                   <div className="inline-block px-4 py-2 bg-teal-100 text-teal-800 rounded-full font-medium mt-4">
                     ✅ ผู้เชี่ยวชาญรับรอง
                   </div>
-                  <p className="text-sm text-gray-400 mt-6">
+                  <p className="text-sm text-slate-400 mt-6">
                     ฟีเจอร์แก้ไขข้อมูลผู้เชี่ยวชาญจะมาเร็วๆ นี้
                   </p>
                 </div>
               ) : isAdmin ? (
                 <div className="text-center py-10">
                   <div className="text-5xl mb-4">🛡️</div>
-                  <h2 className="text-2xl font-bold text-gray-800">คุณคือผู้ดูแลระบบ</h2>
-                  <p className="text-gray-500 mt-2">บัญชีผู้ดูแลระบบไม่จำเป็นต้องสมัครเป็นผู้เชี่ยวชาญ</p>
+                  <h2 className="text-2xl font-bold text-slate-800">คุณคือผู้ดูแลระบบ</h2>
+                  <p className="text-slate-500 mt-2">บัญชีผู้ดูแลระบบไม่จำเป็นต้องสมัครเป็นผู้เชี่ยวชาญ</p>
                   <Link
                     to="/admin-dashboard"
-                    className="inline-block mt-4 px-6 py-3 bg-gray-800 text-white rounded-xl font-medium hover:bg-gray-900 transition-colors"
+                    className="inline-block mt-4 px-6 py-3 bg-purple-700 text-white rounded-xl font-medium hover:bg-purple-800 transition-colors"
                   >
                     🔧 ไปที่หน้าแอดมิน
                   </Link>
@@ -680,21 +680,21 @@ export default function Profile() {
               ) : (
                 <>
                   <div className="text-center mb-8">
-                    <h2 className="text-2xl font-bold text-gray-800">ยกระดับบัญชีเป็น "ผู้เชี่ยวชาญ"</h2>
-                    <p className="text-sm text-gray-500 mt-2">
-                      กรุณากรอกข้อมูลและแนบเอกสารเพื่อรับตราสัญลักษณ์ <span className="font-bold text-gray-700">ผู้เชี่ยวชาญ 🩺</span><br />
+                    <h2 className="text-2xl font-bold text-slate-800">ยกระดับบัญชีเป็น "ผู้เชี่ยวชาญ"</h2>
+                    <p className="text-sm text-slate-500 mt-2">
+                      กรุณากรอกข้อมูลและแนบเอกสารเพื่อรับตราสัญลักษณ์ <span className="font-bold text-slate-700">ผู้เชี่ยวชาญ 🩺</span><br />
                       (ข้อมูลทั้งหมดจะถูกเก็บเป็นความลับและประมวลผลโดยแอดมินเท่านั้น)
                     </p>
                   </div>
 
                   <form onSubmit={handleVerifySubmit} className="max-w-xl mx-auto space-y-5">
                     <div className="space-y-1.5">
-                      <label className="block text-sm font-medium text-gray-700">ประเภทวิชาชีพ <span className="text-red-500">*</span></label>
+                      <label className="block text-sm font-medium text-slate-700">ประเภทวิชาชีพ <span className="text-red-500">*</span></label>
                       <select
                         required
                         value={profession}
                         onChange={(e) => setProfession(e.target.value)}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 focus:bg-white transition-colors"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-fuchsia-400 focus:bg-white transition-colors"
                       >
                         <option value="" disabled>เลือกประเภทวิชาชีพของคุณ</option>
                         <option value="psychiatrist">จิตแพทย์</option>
@@ -705,19 +705,19 @@ export default function Profile() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-sm font-medium text-gray-700">เลขที่ใบประกอบวิชาชีพ / ใบอนุญาต <span className="text-red-500">*</span></label>
+                      <label className="block text-sm font-medium text-slate-700">เลขที่ใบประกอบวิชาชีพ / ใบอนุญาต <span className="text-red-500">*</span></label>
                       <input
                         type="text"
                         required
                         value={licenseNumber}
                         onChange={(e) => setLicenseNumber(e.target.value)}
                         placeholder="เช่น ว.12345 หรือ ศส.9876"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 focus:bg-white transition-colors"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-fuchsia-400 focus:bg-white transition-colors"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-sm font-medium text-gray-700">🏷️ สาขาที่เชี่ยวชาญ (เลือกได้หลายข้อ)</label>
+                      <label className="block text-sm font-medium text-slate-700">🏷️ สาขาที่เชี่ยวชาญ (เลือกได้หลายข้อ)</label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {SPECIALTY_OPTIONS.map((opt) => (
                           <label
@@ -725,7 +725,7 @@ export default function Profile() {
                             className={`flex items-center gap-2 px-3 py-2 rounded-xl border cursor-pointer transition-colors ${
                               selectedSpecialties.includes(opt.key)
                                 ? 'bg-teal-50 border-teal-300 text-teal-800'
-                                : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                                : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                             }`}
                           >
                             <input
@@ -741,44 +741,44 @@ export default function Profile() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-sm font-medium text-gray-700">🏛️ สังกัด (ถ้ามี)</label>
+                      <label className="block text-sm font-medium text-slate-700">🏛️ สังกัด (ถ้ามี)</label>
                       <input
                         type="text"
                         value={affiliation}
                         onChange={(e) => setAffiliation(e.target.value)}
                         placeholder="เช่น สมาคมจิตวิทยาแห่งประเทศไทย"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 focus:bg-white transition-colors"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-fuchsia-400 focus:bg-white transition-colors"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-sm font-medium text-gray-700">🕐 ช่วงเวลาที่พร้อมรับฟัง (ถ้ามี)</label>
+                      <label className="block text-sm font-medium text-slate-700">🕐 ช่วงเวลาที่พร้อมรับฟัง (ถ้ามี)</label>
                       <input
                         type="text"
                         value={availability}
                         onChange={(e) => setAvailability(e.target.value)}
                         placeholder="เช่น 10:00-18:00 น."
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 focus:bg-white transition-colors"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-fuchsia-400 focus:bg-white transition-colors"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-sm font-medium text-gray-700">รูปถ่ายใบประกอบวิชาชีพ <span className="text-red-500">*</span></label>
+                      <label className="block text-sm font-medium text-slate-700">รูปถ่ายใบประกอบวิชาชีพ <span className="text-red-500">*</span></label>
                       <div
                         onClick={() => fileInputRef.current?.click()}
-                        className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-slate-50 transition-colors cursor-pointer"
                       >
                         {licenseFile ? (
                           <>
                             <div className="text-3xl mb-2">✅</div>
-                            <p className="text-sm text-gray-700 font-medium">{licenseFile.name}</p>
-                            <p className="text-xs text-gray-400 mt-1">{(licenseFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                            <p className="text-sm text-slate-700 font-medium">{licenseFile.name}</p>
+                            <p className="text-xs text-slate-400 mt-1">{(licenseFile.size / 1024 / 1024).toFixed(2)} MB</p>
                           </>
                         ) : (
                           <>
                             <div className="text-3xl mb-2">📎</div>
-                            <p className="text-sm text-gray-600 font-medium">คลิกเพื่ออัปโหลด หรือลากไฟล์มาวาง</p>
-                            <p className="text-xs text-gray-400 mt-1">รองรับ JPG, PNG, PDF ขนาดไม่เกิน 5MB</p>
+                            <p className="text-sm text-slate-600 font-medium">คลิกเพื่ออัปโหลด หรือลากไฟล์มาวาง</p>
+                            <p className="text-xs text-slate-400 mt-1">รองรับ JPG, PNG, PDF ขนาดไม่เกิน 5MB</p>
                           </>
                         )}
                         <input
@@ -797,9 +797,9 @@ export default function Profile() {
                         required
                         checked={consent}
                         onChange={(e) => setConsent(e.target.checked)}
-                        className="mt-1 w-4 h-4 text-pink-500 border-gray-300 rounded focus:ring-pink-500"
+                        className="mt-1 w-4 h-4 text-fuchsia-500 border-slate-300 rounded focus:ring-fuchsia-500"
                       />
-                      <span className="text-xs text-gray-500 leading-relaxed">
+                      <span className="text-xs text-slate-500 leading-relaxed">
                         ข้าพเจ้ายินยอมให้เว็บไซต์บ้านพักใจเก็บรวบรวมและประมวลผลข้อมูลส่วนบุคคลและเอกสารที่แนบมานี้ เพื่อวัตถุประสงค์ในการตรวจสอบและยืนยันตัวตนเท่านั้น (ข้อมูลไฟล์จะถูกลบออกจากระบบหลังการอนุมัติเสร็จสิ้น)
                       </span>
                     </label>
@@ -818,7 +818,7 @@ export default function Profile() {
                     <button
                       type="submit"
                       disabled={!consent || isSubmitting}
-                      className="w-full py-3.5 bg-gray-800 hover:bg-gray-900 disabled:bg-gray-300 text-white font-bold rounded-xl transition-colors shadow-sm mt-4 flex items-center justify-center gap-2"
+                      className="w-full py-3.5 bg-purple-700 hover:bg-purple-800 disabled:bg-slate-300 text-white font-bold rounded-xl transition-colors shadow-sm mt-4 flex items-center justify-center gap-2"
                     >
                       {isSubmitting ? (
                         <>

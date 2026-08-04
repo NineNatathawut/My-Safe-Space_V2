@@ -110,8 +110,8 @@ export default function MiniPlayer() {
 
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2 mb-1">
-            <p className="font-semibold text-gray-800 text-sm truncate">{current.title}</p>
-            <p className="text-[11px] text-gray-400 shrink-0 tabular-nums">
+            <p className="font-semibold text-slate-800 text-sm truncate">{current.title}</p>
+            <p className="text-[11px] text-slate-400 shrink-0 tabular-nums">
               {formatTime(currentTime)} / {formatTime(duration)}
             </p>
           </div>
@@ -123,12 +123,12 @@ export default function MiniPlayer() {
             aria-valuemin={0}
             aria-valuemax={100}
             onClick={handleSeekClick}
-            className="h-1.5 bg-gray-200 rounded-full cursor-pointer overflow-hidden"
+            className="h-1.5 bg-slate-200 rounded-full cursor-pointer overflow-hidden"
           >
             <div className="h-full bg-purple-600 rounded-full" style={{ width: `${progress}%` }} />
           </div>
 
-          <p className="text-[11px] text-gray-400 mt-0.5 truncate">{current.speaker}</p>
+          <p className="text-[11px] text-slate-400 mt-0.5 truncate">{current.speaker}</p>
         </div>
 
         {current.externalUrl && (
@@ -136,7 +136,7 @@ export default function MiniPlayer() {
             href={current.externalUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 text-xs font-bold text-gray-500 hover:text-purple-600 transition-colors"
+            className="shrink-0 text-xs font-bold text-slate-500 hover:text-purple-600 transition-colors"
             title={current.externalLabel || 'ฟังต่อ'}
           >
             {current.externalLabel || 'ฟังต่อ'} ↗
@@ -147,7 +147,7 @@ export default function MiniPlayer() {
           type="button"
           onClick={close}
           aria-label="ปิดเครื่องเล่น"
-          className="shrink-0 text-gray-400 hover:text-gray-700 transition-colors p-1"
+          className="shrink-0 text-slate-400 hover:text-slate-700 transition-colors p-1"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
             <path d="M18 6 6 18M6 6l12 12" />

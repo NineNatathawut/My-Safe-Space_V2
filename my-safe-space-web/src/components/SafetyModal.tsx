@@ -19,10 +19,10 @@ export const SafetyModal: React.FC<SafetyModalProps> = ({ isOpen, onClose, onPro
         </div>
         
         <div className="space-y-2">
-          <h3 className="text-xl font-bold text-gray-900">
+          <h3 className="text-xl font-bold text-slate-900">
             เราขออยู่ข้างๆ คุณนะ...
           </h3>
-          <p className="text-gray-600 text-sm leading-relaxed px-2">
+          <p className="text-slate-600 text-sm leading-relaxed px-2">
             สัมผัสได้ว่าตอนนี้คุณอาจจะกำลังแบกรับเรื่องที่หนักหนามากๆ ไว้ หากรู้สึกไม่ไหว ลองพูดคุยกับผู้เชี่ยวชาญที่พร้อมรับฟังคุณตลอด 24 ชม. ได้เลยนะครับ
           </p>
         </div>
@@ -44,13 +44,13 @@ export const SafetyModal: React.FC<SafetyModalProps> = ({ isOpen, onClose, onPro
 
           <a 
             href="tel:021136789" 
-            className="flex items-center justify-between p-3.5 bg-pink-50 hover:bg-pink-100 rounded-2xl text-pink-900 transition-colors border border-pink-100"
+            className="flex items-center justify-between p-3.5 bg-fuchsia-50 hover:bg-fuchsia-100 rounded-2xl text-fuchsia-900 transition-colors border border-fuchsia-100"
           >
             <div>
               <div className="font-bold text-sm">💬 สมาคมสะมาริตันส์</div>
-              <div className="text-xs text-pink-600">รับฟังด้วยความเข้าใจ ไม่ตัดสิน</div>
+              <div className="text-xs text-fuchsia-600">รับฟังด้วยความเข้าใจ ไม่ตัดสิน</div>
             </div>
-            <span className="bg-pink-500 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">
+            <span className="bg-fuchsia-500 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">
               02-113-6789
             </span>
           </a>
@@ -79,7 +79,7 @@ export const SafetyModal: React.FC<SafetyModalProps> = ({ isOpen, onClose, onPro
           </button>
           <button
             onClick={onClose}
-            className="w-full py-2.5 text-gray-500 hover:text-gray-700 font-medium text-xs transition-colors"
+            className="w-full py-2.5 text-slate-500 hover:text-slate-700 font-medium text-xs transition-colors"
           >
             ย้อนกลับไปแก้ไขข้อความ
           </button>

@@ -22,7 +22,7 @@ const UserProfile = lazy(() => import('./pages/UserProfile'));
 
 function SuspenseWrapper({ children }: { children: ReactNode }) {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50"><div className="animate-pulse text-gray-400">กำลังโหลด...</div></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50"><div className="animate-pulse text-slate-400">กำลังโหลด...</div></div>}>
       {children}
     </Suspense>
   );

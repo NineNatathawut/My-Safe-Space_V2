@@ -10,8 +10,8 @@ export default function PodcastWidget() {
     <section className="px-4">
       <div className="flex items-end justify-between gap-3 mb-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">🎧 พอดแคสต์ฮีลใจ</h2>
-          <p className="text-sm text-gray-500 mt-1">เสียงอบอุ่นสั้นๆ เล่นทิ้งไว้ได้ ฟังไปพร้อมทำอย่างอื่น</p>
+          <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">🎧 พอดแคสต์ฮีลใจ</h2>
+          <p className="text-sm text-slate-500 mt-1">เสียงอบอุ่นสั้นๆ เล่นทิ้งไว้ได้ ฟังไปพร้อมทำอย่างอื่น</p>
         </div>
         <Link
           to="/resources?tab=podcast"
@@ -22,8 +22,8 @@ export default function PodcastWidget() {
       </div>
 
       {podcasts.length === 0 ? (
-        <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-gray-200">
-          <p className="text-gray-400">ยังไม่มีพอดแคสต์ให้ฟังในตอนนี้</p>
+        <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-slate-200">
+          <p className="text-slate-400">ยังไม่มีพอดแคสต์ให้ฟังในตอนนี้</p>
         </div>
       ) : (
         <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">

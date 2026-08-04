@@ -200,8 +200,8 @@ export default function PostDetail() {
       <div className="max-w-3xl mx-auto py-12 px-4 text-center">
         <div className="animate-pulse flex flex-col items-center gap-4">
           <div className="w-12 h-12 bg-purple-100 rounded-full"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-          <div className="h-20 bg-gray-100 rounded w-full"></div>
+          <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+          <div className="h-20 bg-slate-100 rounded w-full"></div>
         </div>
       </div>
     );
@@ -211,7 +211,7 @@ export default function PostDetail() {
     return (
       <div className="max-w-2xl mx-auto py-16 px-4 text-center">
         <div className="text-4xl mb-4">🍃</div>
-        <p className="text-gray-600 mb-6">{error || 'ไม่พบโพสต์ที่คุณต้องการ'}</p>
+        <p className="text-slate-600 mb-6">{error || 'ไม่พบโพสต์ที่คุณต้องการ'}</p>
         <button 
           onClick={() => navigate('/')}
           className="px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors"
@@ -229,7 +229,7 @@ export default function PostDetail() {
       <div className="mb-2">
         <button 
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 border border-gray-200 rounded-full text-sm text-gray-600 shadow-sm hover:bg-purple-50 hover:border-purple-200 hover:text-purple-700 transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 border border-slate-200 rounded-full text-sm text-slate-600 shadow-sm hover:bg-purple-50 hover:border-purple-200 hover:text-purple-700 transition-all"
         >
           <span>←</span> ย้อนกลับ
         </button>
@@ -242,53 +242,53 @@ export default function PostDetail() {
             {post.emotion}
           </div>
           <div>
-            <Link to={`/user/${post.user_id}`} className="font-semibold text-gray-900 text-lg hover:text-indigo-600 transition-colors">{post.alias_name}</Link>
+            <Link to={`/user/${post.user_id}`} className="font-semibold text-slate-900 text-lg hover:text-purple-600 transition-colors">{post.alias_name}</Link>
             {post.poster_role === 'expert' && <span className="inline-flex items-center gap-0.5 text-xs px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full font-medium">🩺 ผู้เชี่ยวชาญ</span>}
-            <p className="text-xs text-gray-400">{formatDate(post.created_at)}</p>
+            <p className="text-xs text-slate-400">{formatDate(post.created_at)}</p>
           </div>
         </div>
 
-        <p className="text-gray-800 text-lg leading-relaxed whitespace-pre-wrap mb-8">
+        <p className="text-slate-800 text-lg leading-relaxed whitespace-pre-wrap mb-8">
           {post.content}
         </p>
 
-        <div className="pt-4 border-t border-gray-100 flex items-center gap-6">
+        <div className="pt-4 border-t border-slate-100 flex items-center gap-6">
           <button 
             onClick={handleHug}
             className={`flex items-center gap-1.5 transition-colors active:scale-95 transform ${
               hasHugged 
-                ? 'text-pink-500 hover:text-pink-600'
-                : 'text-gray-500 hover:text-pink-500'
+                ? 'text-fuchsia-500 hover:text-fuchsia-600'
+                : 'text-slate-500 hover:text-fuchsia-500'
             }`}
           >
             <span className={`${hasHugged ? 'scale-110 transition-transform' : ''}`}>
               {hasHugged ? '💖' : '🫂'}
             </span>
-            กอด {post.hug_count > 0 && <span className={`font-medium ${hasHugged ? 'text-pink-600' : 'text-pink-500'}`}>({post.hug_count})</span>}
+            กอด {post.hug_count > 0 && <span className={`font-medium ${hasHugged ? 'text-fuchsia-600' : 'text-fuchsia-500'}`}>({post.hug_count})</span>}
           </button>
           {isAuthenticated && post.user_id !== user?.id && (
             <button
               onClick={() => setCardModal(true)}
-              className="flex items-center gap-1.5 text-gray-500 hover:text-purple-600 transition-colors"
+              className="flex items-center gap-1.5 text-slate-500 hover:text-purple-600 transition-colors"
             >
               <span>💌</span> ส่งกำลังใจ
             </button>
           )}
-          <div className="flex items-center gap-2 text-gray-400 font-medium text-sm">
+          <div className="flex items-center gap-2 text-slate-400 font-medium text-sm">
             <span>💬</span> {comments.length} ความคิดเห็น
           </div>
         </div>
       </article>
 
       {/* 💬 ข้อความกำลังใจ + ช่องพิมพ์ (รวมใน Card เดียว) */}
-      <section className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-5">
-        <h3 className="font-bold text-gray-800 text-lg flex items-center gap-2">
+      <section className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-5">
+        <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
           <span>💬</span> ข้อความกำลังใจ ({comments.length})
         </h3>
 
         {comments.length === 0 ? (
           <div className="text-center py-6 bg-purple-50/50 rounded-2xl border border-dashed border-purple-100">
-            <p className="text-gray-500 text-sm">ยังไม่มีใครส่งกำลังใจ เป็นคนแรกที่มอบความอบอุ่นให้เพื่อนสิ 🤍</p>
+            <p className="text-slate-500 text-sm">ยังไม่มีใครส่งกำลังใจ เป็นคนแรกที่มอบความอบอุ่นให้เพื่อนสิ 🤍</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -301,18 +301,18 @@ export default function PostDetail() {
                     <div className="flex items-center gap-2">
                       
                         {isOwner ? (
-                          <Link to={`/user/${post.user_id}`} className="font-medium text-sm text-amber-800 hover:text-indigo-600 transition-colors">{post.alias_name}</Link>
+                          <Link to={`/user/${post.user_id}`} className="font-medium text-sm text-amber-800 hover:text-purple-600 transition-colors">{post.alias_name}</Link>
                         ) : comment.user_id ? (
-                          <Link to={`/user/${comment.user_id}`} className="font-medium text-sm text-purple-700 hover:text-indigo-600 transition-colors">{comment.alias_name || 'เพื่อนร่วมทาง'}</Link>
+                          <Link to={`/user/${comment.user_id}`} className="font-medium text-sm text-purple-700 hover:text-purple-600 transition-colors">{comment.alias_name || 'เพื่อนร่วมทาง'}</Link>
                         ) : (
                           <span className="font-medium text-sm text-purple-700">{comment.alias_name || 'เพื่อนร่วมทาง'}</span>
                         )}
                       {isOwner && <span className="text-[10px] px-2 py-0.5 bg-amber-200/60 text-amber-800 rounded-full font-medium">🏠 เจ้าของเรื่อง</span>}
                       {comment.role === 'expert' && <span className="inline-flex items-center gap-0.5 text-[10px] px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full font-medium">🩺 ผู้เชี่ยวชาญ</span>}
                     </div>
-                    <span className="text-xs text-gray-400">{formatDate(comment.created_at)}</span>
+                    <span className="text-xs text-slate-400">{formatDate(comment.created_at)}</span>
                   </div>
-                  <p className="text-gray-700 text-sm whitespace-pre-wrap">{comment.content}</p>
+                  <p className="text-slate-700 text-sm whitespace-pre-wrap">{comment.content}</p>
                 </div>
               );
             })}
@@ -322,17 +322,17 @@ export default function PostDetail() {
         {/* ✍️ ช่องพิมพ์ส่งกำลังใจ (อยู่ด้านล่างสุด) */}
         <div ref={commentsEndRef} />
         {isAuthenticated ? (
-          <form onSubmit={handleSubmitComment} className="pt-4 border-t border-gray-100">
+          <form onSubmit={handleSubmitComment} className="pt-4 border-t border-slate-100">
             <textarea
               rows={3}
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="พิมพ์คำปลอบโยน หรือข้อความให้กำลังใจที่นี่... (ไม่ต้องระบุตัวตน)"
-              className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none resize-none text-gray-700"
+              className="w-full p-4 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none resize-none text-slate-700"
               maxLength={500}
             />
             <div className="flex justify-between items-center mt-3">
-              <span className="text-xs text-gray-400">{newComment.length}/500</span>
+              <span className="text-xs text-slate-400">{newComment.length}/500</span>
               <button
                 type="submit"
                 disabled={isSubmitting || !newComment.trim()}
@@ -343,7 +343,7 @@ export default function PostDetail() {
             </div>
           </form>
         ) : (
-          <div className="pt-4 border-t border-gray-100 text-center py-4">
+          <div className="pt-4 border-t border-slate-100 text-center py-4">
             <Link to="/login" className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors text-sm font-medium">
               🔒 เข้าสู่ระบบเพื่อส่งกำลังใจ
             </Link>
@@ -355,11 +355,11 @@ export default function PostDetail() {
       {cardModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-xl space-y-4">
-            <h3 className="text-lg font-bold text-gray-800">💌 ส่งการ์ดฮีลใจ</h3>
-            <p className="text-sm text-gray-500">เลือกการ์ดเพื่อส่งกำลังใจให้เจ้าของโพสต์</p>
+            <h3 className="text-lg font-bold text-slate-800">💌 ส่งการ์ดฮีลใจ</h3>
+            <p className="text-sm text-slate-500">เลือกการ์ดเพื่อส่งกำลังใจให้เจ้าของโพสต์</p>
 
             {presetCards.length === 0 ? (
-              <p className="text-center text-gray-400 py-4">ไม่พบการ์ด</p>
+              <p className="text-center text-slate-400 py-4">ไม่พบการ์ด</p>
             ) : (
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {presetCards.map((card) => (
@@ -367,10 +367,10 @@ export default function PostDetail() {
                     key={card.id}
                     disabled={sendingCard}
                     onClick={() => handleSendCard(card.id)}
-                    className="w-full text-left p-4 bg-gray-50 hover:bg-indigo-50 rounded-xl transition-colors border border-gray-100 hover:border-indigo-200 disabled:opacity-50"
+                    className="w-full text-left p-4 bg-slate-50 hover:bg-purple-50 rounded-xl transition-colors border border-slate-100 hover:border-purple-200 disabled:opacity-50"
                   >
                     <span className="text-xl mr-2">{card.icon}</span>
-                    <span className="text-sm text-gray-700">{card.thai_text}</span>
+                    <span className="text-sm text-slate-700">{card.thai_text}</span>
                   </button>
                 ))}
               </div>
@@ -379,7 +379,7 @@ export default function PostDetail() {
             <div className="flex justify-end">
               <button
                 onClick={() => setCardModal(false)}
-                className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-bold transition-colors"
+                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-bold transition-colors"
               >
                 ยกเลิก
               </button>

@@ -55,7 +55,7 @@ export default function Register() {
   return (
     <div className="flex flex-col items-center justify-center h-full p-4">
       <div className="w-full max-w-sm bg-white rounded-xl shadow-sm border p-6">
-        <h2 className="text-2xl font-bold text-center text-indigo-600 mb-6">
+        <h2 className="text-2xl font-bold text-center text-purple-600 mb-6">
           สมัครสมาชิก
         </h2>
 
@@ -67,13 +67,13 @@ export default function Register() {
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 mb-1">
               อีเมล
             </label>
             <input
               type="email"
               required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
@@ -81,13 +81,13 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 mb-1">
               รหัสผ่าน
             </label>
             <input
               type="password"
               required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
@@ -95,13 +95,13 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 mb-1">
               ยืนยันรหัสผ่าน
             </label>
             <input
               type="password"
               required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
@@ -111,23 +111,23 @@ export default function Register() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-indigo-600 text-white font-medium py-2 rounded-lg hover:bg-indigo-700 transition disabled:bg-indigo-300"
+            className="w-full bg-purple-600 text-white font-medium py-2 rounded-lg hover:bg-purple-700 transition disabled:bg-purple-300"
           >
             {isLoading ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก'}
           </button>
         </form>
 
         <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-sm text-gray-400">หรือ</span>
-          <div className="flex-1 h-px bg-gray-200" />
+          <div className="flex-1 h-px bg-slate-200" />
+          <span className="text-sm text-slate-400">หรือ</span>
+          <div className="flex-1 h-px bg-slate-200" />
         </div>
 
         <button
           type="button"
           onClick={handleGoogleRegister}
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 font-medium py-2 rounded-lg hover:bg-gray-50 disabled:opacity-60 transition-colors"
+          className="w-full flex items-center justify-center gap-3 bg-white border border-slate-300 text-slate-700 font-medium py-2 rounded-lg hover:bg-slate-50 disabled:opacity-60 transition-colors"
         >
           <svg className="w-5 h-5" viewBox="0 0 48 48" aria-hidden="true">
             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
@@ -138,9 +138,9 @@ export default function Register() {
           สมัครสมาชิกด้วย Google
         </button>
 
-        <p className="mt-4 text-center text-sm text-gray-600">
+        <p className="mt-4 text-center text-sm text-slate-600">
           มีบัญชีอยู่แล้ว?{' '}
-          <Link to="/login" className="text-indigo-600 hover:underline">
+          <Link to="/login" className="text-purple-600 hover:underline">
             เข้าสู่ระบบ
           </Link>
         </p>

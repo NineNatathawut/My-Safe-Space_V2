@@ -36,9 +36,9 @@ export default function UserDropdown() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(prev => !prev)}
-        className="flex items-center gap-2 text-gray-600 hover:text-indigo-600 transition px-2 py-1 rounded-lg hover:bg-gray-100"
+        className="flex items-center gap-2 text-slate-600 hover:text-purple-700 transition px-2 py-1 rounded-lg hover:bg-slate-100"
       >
-        <span className="w-7 h-7 bg-gradient-to-tr from-pink-200 to-purple-200 rounded-full flex items-center justify-center text-xs shadow-sm">
+        <span className="w-7 h-7 bg-gradient-to-tr from-fuchsia-200 to-purple-200 rounded-full flex items-center justify-center text-xs shadow-sm">
           {avatarEmoji}
         </span>
         <span className="hidden sm:inline truncate max-w-[120px]">
@@ -55,16 +55,16 @@ export default function UserDropdown() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-lg border border-gray-100 py-2 z-[100] animate-fadeIn">
-          <div className="px-4 py-3 border-b border-gray-100">
-            <p className="text-sm font-medium text-gray-800 truncate">{nickname}</p>
-            <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+        <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-lg border border-slate-100 py-2 z-[100] animate-fadeIn">
+          <div className="px-4 py-3 border-b border-slate-100">
+            <p className="text-sm font-medium text-slate-800 truncate">{nickname}</p>
+            <p className="text-xs text-slate-400 truncate">{user?.email}</p>
           </div>
 
           <Link
             to="/profile"
             onClick={handleLinkClick}
-            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
+            className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition"
           >
             <span className="text-lg">👤</span>
             โปรไฟล์ของฉัน
@@ -73,13 +73,13 @@ export default function UserDropdown() {
           <Link
             to="/assessment"
             onClick={handleLinkClick}
-            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
+            className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition"
           >
             <span className="text-lg">📊</span>
             ทำแบบประเมินสุขภาพใจ
           </Link>
 
-          <div className="border-t border-gray-100 mt-1 pt-1">
+          <div className="border-t border-slate-100 mt-1 pt-1">
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition"
