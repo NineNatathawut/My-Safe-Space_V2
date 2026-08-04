@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../contexts/AuthContext';
-import { InlinePostBox } from '../components/InlinePostBox';
+import { PostComposer } from '../components/PostComposer';
 
 interface Post {
   id: string;
@@ -26,6 +26,7 @@ export default function Feed() {
     const saved = localStorage.getItem('huggedPosts');
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
+  const [showComposer, setShowComposer] = useState(false);
 
   const fetchPosts = async () => {
     try {
@@ -113,8 +114,6 @@ export default function Feed() {
         <p className="text-slate-500 text-sm mt-1">บอกเล่าความรู้สึกของคุณให้โลกได้รับรู้</p>
       </div>
 
-      <InlinePostBox onPost={fetchPosts} />
-
       {error && <div className="p-4 mb-6 bg-red-50 text-red-600 rounded-xl border border-red-200 text-center">{error}</div>}
 
       {isLoading ? (
@@ -185,6 +184,19 @@ export default function Feed() {
           })}
         </div>
       )}
+
+      {/* 💜 FAB ปุ่มสร้างโพสต์ */}
+      {!showComposer && (
+        <button
+          onClick={() => setShowComposer(true)}
+          className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-purple-600 hover:bg-purple-500 text-white rounded-full shadow-lg shadow-purple-900/40 flex items-center justify-center text-2xl transition-colors active:scale-90"
+        >
+          +
+        </button>
+      )}
+
+      {/* PostComposer Adaptive Overlay */}
+      <PostComposer isOpen={showComposer} onClose={() => setShowComposer(false)} />
     </div>
   );
 }
