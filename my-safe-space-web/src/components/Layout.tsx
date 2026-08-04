@@ -38,7 +38,7 @@ export default function Layout({ children }: { children?: ReactNode }) {
 
             <nav className="hidden md:flex items-center gap-1 text-sm">
               <Link to="/" className="px-3 py-2 text-slate-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors font-medium">หน้าหลัก</Link>
-              <Link to="/" className="px-3 py-2 text-slate-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors font-medium">ลานสายลม</Link>
+              <Link to="/feed" className="px-3 py-2 text-slate-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors font-medium">ลานสายลม</Link>
               <Link to="/venting" className="px-3 py-2 text-slate-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors font-medium">ระบายใจ</Link>
               <Link to="/assessment" className="px-3 py-2 text-slate-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors font-medium">แบบประเมิน</Link>
               <Link to="/resources" className="px-3 py-2 text-slate-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors font-medium">ทรัพยากร</Link>
