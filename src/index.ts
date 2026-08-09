@@ -100,7 +100,7 @@ const authMiddleware = async (c: any, next: any) => {
   await next()
 }
 
-// 🔓 แบบยืดหยุ่น: มี Token ก็ได้ ไม่มีก็ได้ (สำหรับ คอมเมนต์ / ส่งกอด แบบไม่ต้องล็อกอิน)
+// 🔓 แบบยืดหยุ่น: มี token ก็ได้ ไม่มีก็ได้ (สำหรับ คอมเมนต์ / ส่งกอด แบบไม่ต้องล็อกอิน)
 const optionalAuthMiddleware = async (c: any, next: any) => {
   const authHeader = c.req.header('Authorization')
   if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -113,6 +113,17 @@ const optionalAuthMiddleware = async (c: any, next: any) => {
     }
   }
   await next()
+}
+
+// 🧑💼 Helper: ตรวจว่าเป็น Admin (ใช้เช็กสิทธิ์แก้ไข Resources ฯลฯ)
+const isAdminUser = (user: { email?: string; user_metadata?: any }) => {
+  return user?.email === 'admin@banpakjai.com' || user?.user_metadata?.role === 'admin'
+}
+
+// 🗑️ Helper: ลบข้อมูลทุกแถวในตาราง (ใช้ตอนแทนที่ข้อมูลเดิมทั้งหมดเมื่อ admin บันทึก)
+const EMPTY_UUID = '00000000-0000-0000-0000-000000000000'
+const clearResourcesTable = async (table: string) => {
+  await supabaseAdmin.from(table).delete().neq('id', EMPTY_UUID)
 }
 
 // ==========================================
@@ -149,7 +160,7 @@ app.get('/api/auth/me', authMiddleware, async (c) => {
   const isAdmin = user.email === 'admin@banpakjai.com' || user.user_metadata?.role === 'admin'
   const userRole = user.user_metadata?.role || 'user'
 
-  // Admin ไม่ต้องมี alias_name — เคลียร์ metadata จริง (service_role มีสิทธิ์สูงสุด)
+  // Admin ไม่ต้องมี alias_name — เคลียร์ metadata จริง (profile admin มีสิทธิ์สูงสุด)
   if (isAdmin) {
     await supabaseAdmin.auth.admin.updateUserById(user.id, {
       user_metadata: { role: 'admin', nickname: null }
@@ -165,7 +176,7 @@ app.get('/api/auth/me', authMiddleware, async (c) => {
 
   let nickname = user.user_metadata?.nickname
 
-  // ถ้าไม่มีชื่อ หรือชื่อไม่มี #XXXX → generate + save
+  // ถ้า nickname หรือไม่มี #XXXX → generate + save
   if (!nickname || !/#\d{4}$/.test(nickname)) {
     nickname = generateNickname()
     await supabaseAdmin.auth.admin.updateUserById(user.id, {
@@ -175,6 +186,33 @@ app.get('/api/auth/me', authMiddleware, async (c) => {
     })
   }
 
+  // สถานะสุขภาพใจ (onboarding / baseline / ครั้งล่าสุด)
+  let onboarding = {
+    has_completed_onboarding: false,
+    baseline_score: null as number | null,
+    baseline_at: null as string | null,
+    last_assessed_at: null as string | null,
+    last_score: null as number | null,
+    last_severity: 'normal' as string,
+  }
+
+  const { data: statusRow } = await supabaseAdmin
+    .from('user_assessment_status')
+    .select('*')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (statusRow) {
+    onboarding = {
+      has_completed_onboarding: !!(statusRow.has_completed_onboarding || statusRow.baseline_score != null),
+      baseline_score: statusRow.baseline_score ?? null,
+      baseline_at: statusRow.baseline_at ?? null,
+      last_assessed_at: statusRow.last_assessed_at ?? null,
+      last_score: statusRow.last_score ?? null,
+      last_severity: statusRow.last_severity || 'normal',
+    }
+  }
+
   return c.json({
     success: true,
     user: {
@@ -182,6 +220,7 @@ app.get('/api/auth/me', authMiddleware, async (c) => {
       email: user.email,
       nickname: nickname,
       role: userRole,
+      onboarding,
     }
   })
 })
@@ -688,6 +727,183 @@ app.get('/api/assessments/active', async (c) => {
   return c.json({ success: true, assessments })
 })
 
+// 🟢 GET /api/assessments/onboarding — หาแบบประเมินมาตรฐาน (Standard) ที่แนะนำเป็นครั้งแรก
+// 💡 ชอบตัวที่มี code และเปิดใช้งานอยู่ก่อน แล้วค่อยดึงตัว PUBLISHED ตัวแรกเป็น fallback
+app.get('/api/assessments/onboarding', authMiddleware, async (c) => {
+  const { data: standardList } = await supabase
+    .from('assessments')
+    .select('id, title, description, code, estimated_time_mins')
+    .eq('status', 'PUBLISHED')
+    .not('code', 'is', null)
+    .order('created_at', { ascending: false })
+
+  if (standardList && standardList.length > 0) {
+    const preferred = standardList.find((a: any) => String(a.code).toLowerCase() === 'st5')
+    return c.json({ success: true, assessment: preferred || standardList[0] })
+  }
+
+  const { data: anyPublished } = await supabase
+    .from('assessments')
+    .select('id, title, description, code, estimated_time_mins')
+    .eq('status', 'PUBLISHED')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (!anyPublished) {
+    return c.json({ success: false, error: 'ยังไม่มีแบบประเมินที่เปิดใช้งาน' }, 404)
+  }
+
+  return c.json({ success: true, assessment: anyPublished })
+})
+
+// 🟢 POST /api/assessments/submit — บันทึกผลการทำแบบประเมินมาตรฐาน (เฉพาะตัวที่มี code)
+app.post('/api/assessments/submit', authMiddleware, async (c) => {
+  const user = c.get('user')
+  const body = await c.req.json()
+
+  if (!body.assessment_id) {
+    return c.json({ success: false, error: 'ไม่พบ assessment_id' }, 400)
+  }
+
+  const { data: assessment } = await supabase
+    .from('assessments')
+    .select('id, code, title, status')
+    .eq('id', body.assessment_id)
+    .single()
+
+  if (!assessment) {
+    return c.json({ success: false, error: 'ไม่พบแบบประเมิน' }, 404)
+  }
+
+  // แบบสอบถามทั่วไป (ไม่มี code) → ไม่บันทึก เป็นเพียง Self-Discovery
+  if (!assessment.code) {
+    return c.json({ success: true, recorded: false })
+  }
+
+  const totalScore = Math.max(0, Math.round(Number(body.total_score) || 0))
+  const severity = body.severity || 'normal'
+  const ruleColor = body.rule_color || 'indigo'
+
+  const { error: insertError } = await supabaseAdmin
+    .from('assessment_submissions')
+    .insert({
+      user_id: user.id,
+      assessment_id: assessment.id,
+      assessment_code: assessment.code,
+      assessment_title: assessment.title,
+      total_score: totalScore,
+      max_score: Math.max(0, Math.round(Number(body.max_score) || 0)),
+      severity,
+      rule_title: body.rule_title || '',
+      rule_color: ruleColor,
+      answers: body.answers || {},
+      dimensions: body.dimensions || [],
+    })
+
+  if (insertError) {
+    console.error('❌ submit assessment error:', insertError)
+    return c.json({ success: false, error: insertError.message }, 500)
+  }
+
+  // ── ตั้งค่า/อัปเดตสถานะสุขภาพใจ ──
+  const now = new Date().toISOString()
+  const { data: existing } = await supabaseAdmin
+    .from('user_assessment_status')
+    .select('*')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  let hasCompletedOnboarding = false
+
+  if (existing) {
+    const shouldSetBaseline = !existing.has_completed_onboarding && existing.baseline_score == null
+
+    const { error: updateError } = await supabaseAdmin
+      .from('user_assessment_status')
+      .update({
+        has_completed_onboarding: true,
+        baseline_score: shouldSetBaseline ? totalScore : existing.baseline_score,
+        baseline_at: shouldSetBaseline ? now : existing.baseline_at,
+        last_assessed_at: now,
+        last_score: totalScore,
+        last_severity: severity,
+        updated_at: now,
+      })
+      .eq('user_id', user.id)
+
+    if (updateError) {
+      console.error('error update status:', updateError)
+      return c.json({ success: false, error: updateError.message }, 500)
+    }
+
+    hasCompletedOnboarding = shouldSetBaseline || existing.has_completed_onboarding
+  } else {
+    const { error: insertStatusError } = await supabaseAdmin
+      .from('user_assessment_status')
+      .insert({
+        user_id: user.id,
+        has_completed_onboarding: true,
+        baseline_score: totalScore,
+        baseline_at: now,
+        last_assessed_at: now,
+        last_score: totalScore,
+        last_severity: severity,
+        updated_at: now,
+      })
+
+    if (insertStatusError) {
+      console.error('error inserting status:', insertStatusError)
+      return c.json({ success: false, error: insertStatusError.message }, 500)
+    }
+
+    hasCompletedOnboarding = true
+  }
+
+  return c.json({
+    success: true,
+    recorded: true,
+    completion: hasCompletedOnboarding,
+  })
+})
+
+// 🟢 GET /api/assessments/my — ประวัติผลการประเมินของฉัน (เฉพาะ Standard + สถานะ)
+app.get('/api/assessments/my', authMiddleware, async (c) => {
+  const user = c.get('user')
+
+  const { data: submissions, error: subError } = await supabaseAdmin
+    .from('assessment_submissions')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(100)
+
+  if (subError) {
+    return c.json({ success: false, error: subError.message }, 500)
+  }
+
+  const { data: statusRow } = await supabaseAdmin
+    .from('user_assessment_status')
+    .select('*')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  return c.json({
+    success: true,
+    submissions: submissions || [],
+    status: statusRow
+      ? {
+          has_completed_onboarding: !!(statusRow.has_completed_onboarding || statusRow.baseline_score != null),
+          baseline_score: statusRow.baseline_score ?? null,
+          baseline_at: statusRow.baseline_at ?? null,
+          last_assessed_at: statusRow.last_assessed_at ?? null,
+          last_score: statusRow.last_score ?? null,
+          last_severity: statusRow.last_severity || 'normal',
+        }
+      : null,
+  })
+})
+
 // 🟢 GET /api/assessments — ดึงแบบประเมินทั้งหมด (Admin)
 app.get('/api/assessments', authMiddleware, async (c) => {
   const { data, error } = await supabase
@@ -773,6 +989,7 @@ app.post('/api/assessments', authMiddleware, async (c) => {
         type: body.type,
         status: body.status,
         scoring_method: body.scoring_method || 'TOTAL_SCORE',
+        code: body.code || null,
         external_url: body.external_url || null,
         open_in_new_tab: body.open_in_new_tab ?? true,
       })
@@ -793,6 +1010,7 @@ app.post('/api/assessments', authMiddleware, async (c) => {
         help_text: q.help_text || null,
         placeholder: q.placeholder || null,
         media_url: q.media_url || null,
+        dimension: q.dimension || null,
       }))
 
       const { data: insertedQuestions, error: qError } = await supabaseAdmin
@@ -840,6 +1058,8 @@ app.post('/api/assessments', authMiddleware, async (c) => {
         description: r.description || null,
         recommendation: r.recommendation || null,
         color_code: r.color_code || 'indigo',
+        severity: r.severity || 'normal',
+        dimension: r.dimension || null,
       }))
 
       const { error: rError } = await supabaseAdmin
@@ -1628,6 +1848,163 @@ app.patch('/api/admin/avatars/:user_id/approve', authMiddleware, async (c) => {
   if (error) return c.json({ success: false, error: error.message }, 500)
 
   return c.json({ success: true, message: approved ? 'อนุมัติ Avatar แล้ว' : 'ปฏิเสธ Avatar แล้ว' })
+})
+
+// ==========================================
+// 🧩 12. API: Resources — เนื้อหาหน้าทรัพยากร (บทความ/วิดีโอ/ทิป/หายใจ/พอดแคสต์)
+// อ่านได้สาธารณะ (ไม่ต้องล็อกอิน) / แก้ได้เฉพาะ admin
+// ==========================================
+
+// 🟢 GET /api/resources/content — ดึงข้อมูลทั้งหมด (public)
+app.get('/api/resources/content', async (c) => {
+  const [articlesRes, videosRes, tipsRes, podcastsRes, settings] = await Promise.all([
+    supabaseAdmin.from('resource_articles').select('*').order('sort_order', { ascending: true }),
+    supabaseAdmin.from('resource_videos').select('*').order('sort_order', { ascending: true }),
+    supabaseAdmin.from('resource_tips').select('*').order('sort_order', { ascending: true }),
+    supabaseAdmin.from('resource_podcasts').select('*').order('sort_order', { ascending: true }),
+    supabaseAdmin.from('resource_settings').select('key, value'),
+  ])
+
+  if (articlesRes.error || videosRes.error || tipsRes.error || podcastsRes.error || settings.error) {
+    return c.json({ success: false, error: 'ไม่สามารถโหลดข้อมูลได้' }, 500)
+  }
+
+  const breathing = (settings.data || []).find((s: any) => s.key === 'breathing')?.value || null
+
+  return c.json({
+    success: true,
+    articles: (articlesRes.data || []).map((a: any) => ({
+      id: a.id,
+      category: a.category,
+      title: a.title,
+      description: a.description,
+      readTime: `${a.read_time_min} นาที`,
+      url: a.url,
+      imageUrl: a.image_url,
+      color: a.color,
+    })),
+    videos: (videosRes.data || []).map((v: any) => ({
+      id: v.id,
+      title: v.title,
+      embedId: v.embed_id,
+    })),
+    tips: (tipsRes.data || []).map((t: any) => ({
+      id: t.id,
+      icon: t.icon,
+      title: t.title,
+      desc: t.description,
+    })),
+    breathing,
+    podcasts: (podcastsRes.data || []).map((p: any) => ({
+      id: p.episode_key || p.id,
+      key: p.episode_key || undefined,
+      title: p.title,
+      speaker: p.speaker,
+      category: p.category,
+      durationSec: p.duration_sec,
+      coverImage: p.cover_image,
+      audioUrl: p.audio_url,
+      embedUrl: p.embed_url,
+      externalUrl: p.external_url,
+      externalLabel: p.external_label,
+    })),
+  })
+})
+
+// 🟡 PUT /api/resources — บันทึกข้อมูลทั้งหมดจากแอดมิน (replace ทั้งชุด)
+app.put('/api/resources', authMiddleware, async (c) => {
+  const user = c.get('user')
+  if (!isAdminUser(user)) {
+    return c.json({ success: false, error: 'Forbidden: เฉพาะแอดมินเท่านั้น' }, 403)
+  }
+
+  const body = await c.req.json()
+  const { articles, videos, tips, breathing, podcasts } = body
+
+  try {
+    if (Array.isArray(articles)) {
+      await clearResourcesTable('resource_articles')
+      if (articles.length > 0) {
+        const { error } = await supabaseAdmin.from('resource_articles').insert(
+          articles.map((a: any, i: number) => ({
+            title: a.title,
+            category: a.category || '',
+            description: a.description || '',
+            read_time_min: parseInt(String(a.readTime), 10) || 3,
+            url: a.url || '',
+            image_url: a.imageUrl || '',
+            color: a.color || '',
+            sort_order: i + 1,
+          }))
+        )
+        if (error) throw error
+      }
+    }
+
+    if (Array.isArray(videos)) {
+      await clearResourcesTable('resource_videos')
+      if (videos.length > 0) {
+        const { error } = await supabaseAdmin.from('resource_videos').insert(
+          videos.map((v: any, i: number) => ({
+            title: v.title,
+            embed_id: v.embedId,
+            sort_order: i + 1,
+          }))
+        )
+        if (error) throw error
+      }
+    }
+
+    if (Array.isArray(tips)) {
+      await clearResourcesTable('resource_tips')
+      if (tips.length > 0) {
+        const { error } = await supabaseAdmin.from('resource_tips').insert(
+          tips.map((t: any, i: number) => ({
+            icon: t.icon || '🌸',
+            title: t.title,
+            description: t.desc || '',
+            sort_order: i + 1,
+          }))
+        )
+        if (error) throw error
+      }
+    }
+
+    if (breathing && typeof breathing === 'object') {
+      const { error } = await supabaseAdmin.from('resource_settings').upsert(
+        { key: 'breathing', value: breathing, updated_at: new Date().toISOString() },
+        { onConflict: 'key' }
+      )
+      if (error) throw error
+    }
+
+    if (Array.isArray(podcasts)) {
+      await clearResourcesTable('resource_podcasts')
+      if (podcasts.length > 0) {
+        const { error } = await supabaseAdmin.from('resource_podcasts').insert(
+          podcasts.map((p: any, i: number) => ({
+            episode_key: p.key || `podcast-${Date.now()}-${i}`,
+            title: p.title,
+            speaker: p.speaker || 'ผู้พูดไร้นาม',
+            category: p.category || 'การหายใจ',
+            duration_sec: p.durationSec || 0,
+            cover_image: p.coverImage || '',
+            audio_url: p.audioUrl || '',
+            embed_url: p.embedUrl || '',
+            external_url: p.externalUrl || '',
+            external_label: p.externalLabel || '',
+            sort_order: i + 1,
+          }))
+        )
+        if (error) throw error
+      }
+    }
+
+    return c.json({ success: true, message: 'บันทึกข้อมูล Resources เรียบร้อยแล้ว' })
+  } catch (err: any) {
+    console.error('❌ PUT resources error:', err)
+    return c.json({ success: false, error: err.message || 'ไม่สามารถบันทึกได้' }, 500)
+  }
 })
 
 // 🧪 Route สำหรับทดสอบ SUPABASE_SERVICE_KEY
