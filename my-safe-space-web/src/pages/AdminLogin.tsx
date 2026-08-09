@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Icon } from '../components/Icon';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -31,40 +32,42 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans">
-      <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
+    <div className="min-h-screen bg-ink-deep flex items-center justify-center p-4 font-sans">
+      <div className="card p-8 w-full max-w-md rounded-3xl">
         <div className="text-center mb-8">
-          <div className="text-5xl mb-4">🛡️</div>
-          <h1 className="text-2xl font-bold text-slate-800">ระบบจัดการหลังบ้าน</h1>
-          <p className="text-slate-500 mt-1">บ้านพักใจ (Admin Portal)</p>
+          <div className="w-16 h-16 bg-owl-soft mx-auto rounded-full flex items-center justify-center text-owl-pressed mb-4">
+            <Icon name="shield" size={28} />
+          </div>
+          <h1 className="text-2xl font-black text-ink">ระบบจัดการหลังบ้าน</h1>
+          <p className="text-body-muted mt-1 font-medium">บ้านพักใจ (Admin Portal)</p>
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-500 p-3 rounded-xl text-sm text-center mb-6 border border-red-100">
+          <div className="bg-cardinal/10 text-cardinal p-3 rounded-xl text-sm text-center mb-6 border border-cardinal/30 font-medium">
             {error}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">อีเมลแอดมิน</label>
+            <label className="block text-sm font-bold text-body-strong mb-1">อีเมลแอดมิน</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all"
+              className="input"
               placeholder="admin@banpakjai.com"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">รหัสผ่าน</label>
+            <label className="block text-sm font-bold text-body-strong mb-1">รหัสผ่าน</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all"
+              className="input"
               placeholder="••••••••"
               required
             />
@@ -73,7 +76,7 @@ export default function AdminLogin() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-purple-600 text-white font-bold py-3 rounded-xl hover:bg-purple-700 transition-colors shadow-md mt-4 disabled:bg-purple-400"
+            className="w-full btn-primary mt-4"
           >
             {isLoading ? 'กำลังตรวจสอบ...' : 'เข้าสู่ระบบ'}
           </button>

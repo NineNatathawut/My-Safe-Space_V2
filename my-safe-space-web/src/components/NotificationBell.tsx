@@ -103,7 +103,7 @@ export default function NotificationBell() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="relative p-2.5 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors text-slate-600"
+        className="relative p-2.5 bg-owl-soft hover:bg-owl-mint rounded-full transition-colors text-owl-pressed"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
           <path fillRule="evenodd" d="M5.25 9a6.75 6.75 0 0 1 13.5 0v.75c0 2.123.8 4.057 2.118 5.52a.75.75 0 0 1-.297 1.206c-1.544.57-3.16.99-4.831 1.243a3.75 3.75 0 1 1-7.48 0 24.585 24.585 0 0 1-4.831-1.244.75.75 0 0 1-.298-1.205A8.217 8.217 0 0 0 5.25 9.75V9Zm4.502 8.9a2.25 2.25 0 1 0 4.496 0 25.057 25.057 0 0 0-4.496 0Z" clipRule="evenodd" />
@@ -116,11 +116,11 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 md:w-96 bg-white rounded-2xl shadow-xl border border-slate-100 z-[100] overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-            <h3 className="font-bold text-slate-800 text-sm">การแจ้งเตือน</h3>
+        <div className="absolute right-0 top-full mt-2 w-80 md:w-96 bg-white rounded-2xl shadow-xl border border-hairline z-[100] overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-hairline">
+            <h3 className="font-feather font-extrabold text-ink text-sm">การแจ้งเตือน</h3>
             {unreadCount > 0 && (
-              <button onClick={handleMarkAllRead} className="text-xs text-purple-600 hover:text-purple-700 font-medium">
+              <button onClick={handleMarkAllRead} className="text-xs text-owl hover:text-owl-pressed font-bold">
                 อ่านทั้งหมด
               </button>
             )}
@@ -128,24 +128,24 @@ export default function NotificationBell() {
 
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="text-center py-8 text-slate-400 text-sm">ไม่มีการแจ้งเตือน</div>
+              <div className="text-center py-8 text-body-soft text-sm font-medium">ไม่มีการแจ้งเตือน</div>
             ) : (
               notifications.slice(0, 10).map((n) => (
                   <div
                     key={n.id}
                     onClick={() => handleNotificationClick(n)}
-                    className={`cursor-pointer block px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0 ${!n.is_read ? 'bg-purple-50/50' : ''}`}
+                    className={`cursor-pointer block px-4 py-3 hover:bg-owl-soft/30 transition-colors border-b border-hairline last:border-0 ${!n.is_read ? 'bg-owl-soft/40' : ''}`}
                   >
                   <div className="flex items-start gap-3">
                     <span className="text-lg mt-0.5">{TYPE_ICONS[n.type] || '🔔'}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-slate-700 leading-relaxed">
+                      <p className="text-sm text-body-strong leading-relaxed">
                         {n.content_preview}
                       </p>
-                      <p className="text-xs text-slate-400 mt-1">{formatTime(n.created_at)}</p>
+                      <p className="text-xs text-body-soft mt-1">{formatTime(n.created_at)}</p>
                     </div>
                     {!n.is_read && (
-                      <span className="w-2 h-2 bg-purple-500 rounded-full mt-2 shrink-0" />
+                      <span className="w-2 h-2 bg-owl rounded-full mt-2 shrink-0" />
                     )}
                   </div>
                   </div>

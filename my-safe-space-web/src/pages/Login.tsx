@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { OwlLogo } from '../components/Icon';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ export default function Login() {
     if (!user || authLoading) return;
 
     if (user.role === 'admin') {
-      navigate('/resources');
+      navigate('/');
       return;
     }
 
@@ -56,31 +57,31 @@ export default function Login() {
     <div className="min-h-[80vh] flex items-center justify-center relative">
       
       {/* 🔴 ฟอร์มเข้าสู่ระบบปกติ */}
-      <div className={`w-full max-w-md p-8 bg-white rounded-2xl shadow-sm border border-slate-100 transition-opacity duration-300 ${isWelcomeVisible ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
-        <h2 className="text-2xl font-bold text-center mb-6">เข้าสู่ระบบ</h2>
+      <div className={`w-full max-w-md p-8 card transition-opacity duration-300 ${isWelcomeVisible ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
+        <h2 className="text-2xl font-black text-center mb-6 text-ink">เข้าสู่ระบบ</h2>
         
         {error && (
-          <div className="bg-red-50 text-red-500 p-3 rounded-lg text-sm mb-4">
+          <div className="bg-cardinal/10 text-cardinal p-3 rounded-lg text-sm mb-4 font-medium">
             {error}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">อีเมล</label>
+            <label className="block text-sm font-bold text-body-strong mb-1">อีเมล</label>
             <input
               type="email"
-              className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-purple-300 outline-none"
+              className="input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">รหัสผ่าน</label>
+            <label className="block text-sm font-bold text-body-strong mb-1">รหัสผ่าน</label>
             <input
               type="password"
-              className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-purple-300 outline-none"
+              className="input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -89,23 +90,23 @@ export default function Login() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-purple-600 text-white font-medium py-3 rounded-xl hover:bg-purple-700 disabled:bg-purple-300 transition-colors"
+            className="w-full btn-primary"
           >
             {isLoading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
           </button>
         </form>
 
         <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-slate-200" />
-          <span className="text-sm text-slate-400">หรือ</span>
-          <div className="flex-1 h-px bg-slate-200" />
+          <div className="flex-1 h-px bg-hairline" />
+          <span className="text-sm text-body-soft">หรือ</span>
+          <div className="flex-1 h-px bg-hairline" />
         </div>
 
         <button
           type="button"
           onClick={handleGoogleLogin}
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-3 bg-white border border-slate-300 text-slate-700 font-medium py-3 rounded-xl hover:bg-slate-50 disabled:opacity-60 transition-colors"
+          className="w-full flex items-center justify-center gap-3 btn-secondary disabled:opacity-60"
         >
           <svg className="w-5 h-5" viewBox="0 0 48 48" aria-hidden="true">
             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
@@ -116,30 +117,32 @@ export default function Login() {
           เข้าสู่ระบบด้วย Google
         </button>
 
-        <p className="text-center text-sm text-slate-500 mt-6">
+        <p className="text-center text-sm text-body-muted mt-6 font-medium">
           ยังไม่มีบัญชี?{' '}
-          <Link to="/register" className="text-purple-600 hover:underline font-medium">
+          <Link to="/register" className="text-owl-pressed hover:underline font-bold">
             สมัครสมาชิก
           </Link>
         </p>
       </div>
 
-      {/* 🔴 Pop-up สุ่มนามแฝง (จะโชว์เฉพาะ User ทั่วไปเมื่อ logged in) */}
+      {/* Pop-up สุ่มนามแฝง */}
       {isWelcomeVisible && (
         <div className="absolute inset-0 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-3xl shadow-xl border border-purple-100 text-center animate-bounce-in max-w-sm w-full mx-4">
-            <div className="text-5xl mb-4">✨</div>
-            <h3 className="text-xl font-bold text-slate-800 mb-2">ยินดีต้อนรับกลับมา!</h3>
-            <p className="text-slate-500 text-sm mb-6">วันนี้บ้านพักใจขอเรียกคุณว่า...</p>
+          <div className="card p-8 rounded-3xl text-center animate-bounce-in max-w-sm w-full mx-4">
+            <div className="w-16 h-16 bg-owl-soft mx-auto rounded-full flex items-center justify-center text-owl-pressed mb-4">
+              <OwlLogo className="w-9 h-9" />
+            </div>
+            <h3 className="text-xl font-black text-ink mb-2">ยินดีต้อนรับกลับมา!</h3>
+            <p className="text-body-muted text-sm mb-6 font-medium">วันนี้บ้านพักใจขอเรียกคุณว่า...</p>
             
-            <div className="bg-purple-50 rounded-2xl p-4 mb-6 border border-purple-100">
-              <span className="text-2xl font-bold text-purple-600">
+            <div className="bg-owl-soft rounded-2xl p-4 mb-6 border border-owl-mint">
+              <span className="text-2xl font-black text-owl-pressed">
                 {alias}
               </span>
             </div>
             
-            <p className="text-xs text-purple-400 animate-pulse">
-              กำลังพาไปหน้าหลัก.. 🚀
+            <p className="text-xs text-body-soft animate-pulse">
+              กำลังพาไปหน้าหลัก..
             </p>
           </div>
         </div>

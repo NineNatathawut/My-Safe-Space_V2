@@ -1,12 +1,14 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import api from '../api/axios';
 import { supabase } from '../lib/supabaseClient';
+import type { OnboardingInfo } from '../types/assessment';
 
 interface AuthUser {
   id: string;
   email: string;
   nickname?: string;
   role: 'admin' | 'user' | 'expert';
+  onboarding?: OnboardingInfo;
 }
 
 interface AuthContextType {
@@ -23,6 +25,7 @@ interface AuthContextType {
   }>;
   loginWithGoogle: () => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 function ensureAliasName(nickname?: string): void {
@@ -143,6 +146,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.signOut();
   };
 
+  const refreshUser = async () => {
+    try {
+      const res = await api.get('/api/auth/me');
+      if (res.data.success) {
+        setUser(res.data.user);
+        ensureAliasName(res.data.user?.nickname);
+      }
+    } catch (err) {
+      console.error('Failed to refresh user:', err);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -154,6 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         loginWithGoogle,
         logout,
+        refreshUser,
       }}
     >
       {children}

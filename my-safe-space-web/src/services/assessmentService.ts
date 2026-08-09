@@ -4,6 +4,8 @@ import type {
   AssessmentQuestion,
   InterpretationRule,
   ImportedAssessmentPayload,
+  MyAssessmentHistory,
+  SubmitAssessmentPayload,
 } from '../types/assessment';
 
 // 1. สร้างแบบประเมินแบบเต็ม (transaction safety)
@@ -17,6 +19,7 @@ export const createFullAssessment = async (data: {
   type: 'INTERNAL' | 'EXTERNAL' | 'API';
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
   scoring_method?: 'TOTAL_SCORE' | 'AVERAGE_SCORE' | 'WEIGHTED_SCORE';
+  code?: string;
   external_url?: string;
   open_in_new_tab?: boolean;
   questions?: Omit<AssessmentQuestion, 'assessment_id'>[];
@@ -138,6 +141,7 @@ export const parseImportFile = async (file: File): Promise<{ payload: ImportedAs
       type: parsed.type || 'INTERNAL',
       status: parsed.status || 'DRAFT',
       scoring_method: parsed.scoring_method || 'TOTAL_SCORE',
+      code: parsed.code || undefined,
       questions: parsed.questions,
       interpretation_rules: parsed.interpretation_rules,
     };
@@ -154,4 +158,49 @@ export const importAssessmentToDatabase = async (
 ): Promise<{ success: boolean; id?: string; error?: string }> => {
   const result = await createFullAssessment(payload);
   return result;
+};
+
+// 11. หาแบบประเมินมาตรฐาน (Standard) สำหรับ Onboarding ครั้งแรก
+export const fetchOnboardingAssessment = async (): Promise<Assessment | null> => {
+  try {
+    const res = await api.get('/api/assessments/onboarding');
+    if (res.data.success) return res.data.assessment || null;
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+// 12. บันทึกผลการทำแบบประเมินมาตรฐานลงประวัติ
+export const submitAssessmentResult = async (
+  payload: SubmitAssessmentPayload
+): Promise<{ success: boolean; recorded?: boolean; completion?: boolean }> => {
+  try {
+    const res = await api.post('/api/assessments/submit', payload);
+    return {
+      success: !!res.data.success,
+      recorded: res.data.recorded,
+      completion: res.data.completion,
+    };
+  } catch (err: unknown) {
+    console.error('Failed to submit assessment result:', err);
+    return { success: false };
+  }
+};
+
+// 13. ประวัติผลการประเมินของฉัน (เฉพาะ Standard)
+export const fetchMyAssessmentHistory = async (): Promise<MyAssessmentHistory> => {
+  const empty: MyAssessmentHistory = { status: null, submissions: [] };
+  try {
+    const res = await api.get('/api/assessments/my');
+    if (res.data.success) {
+      return {
+        status: res.data.status || null,
+        submissions: res.data.submissions || [],
+      };
+    }
+    return empty;
+  } catch {
+    return empty;
+  }
 };

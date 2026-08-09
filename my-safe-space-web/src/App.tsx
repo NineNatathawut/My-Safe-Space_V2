@@ -8,7 +8,6 @@ import MiniPlayer from './components/MiniPlayer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Venting from './pages/Venting';
 import Feed from './pages/Feed';
 import PostDetail from './pages/PostDetail';
 import Resources from './pages/Resources';
@@ -44,7 +43,6 @@ function AppContent() {
           <Route index element={<Home />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
-          <Route path="venting" element={<Venting />} />
           <Route path="feed" element={<Feed />} />
           <Route path="post/:id" element={<PostDetail />} />
           <Route path="resources" element={<Resources />} />

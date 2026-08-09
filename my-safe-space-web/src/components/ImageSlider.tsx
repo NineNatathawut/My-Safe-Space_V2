@@ -1,44 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import heroImage from '../assets/hero.png';
+import poster1 from '../assets/poster-slide-1.png';
+import poster2 from '../assets/poster-slide-2.png';
+import poster3 from '../assets/poster-slide-3.png';
+import poster4 from '../assets/poster-slide-4.png';
 
-const SLIDES = [
-  {
-    id: 1,
-    image: heroImage,
-    alt: 'บ้านพักใจ',
-    overlay: 'from-purple-900/90 via-purple-700/75 to-fuchsia-700/60',
-    glow: 'bg-fuchsia-400/20',
-    badge: '🔒 พื้นที่ปลอดภัย ไม่ระบุตัวตน',
-    title: 'ที่นี่คือ บ้านพักใจ ของคุณ',
-    subtitle: 'ระบายความรู้สึก แบ่งปันความเจ็บปวด หรือแค่อยากพิมพ์บอกใครสักคน - เราพร้อมรับฟังทุกคำ โดยไม่ตัดสิน ไม่มีการระบุตัวตน',
-    cta1: { label: 'เริ่มระบายเลย', to: '/venting', variant: 'white' },
-    cta2: { label: 'ค้นหาทรัพยากร', to: '/resources', variant: 'glass' },
-  },
-  {
-    id: 2,
-    image: '',
-    alt: 'พื้นที่ปลอดภัย',
-    overlay: 'from-purple-800/90 via-fuchsia-700/75 to-purple-800/60',
-    glow: 'bg-purple-400/20',
-    badge: '🛡️ ความเป็นส่วนตัว',
-    title: 'ทุกความรู้สึกได้รับการยอมรับ',
-    subtitle: 'ไม่มีการตัดสิน ไม่มีการระบุตัวตน พื้นที่นี้เป็นของคุณโดยเฉพาะ',
-    cta1: { label: 'เริ่มระบายเลย', to: '/venting', variant: 'white' },
-    cta2: { label: 'เรียนรู้เพิ่มเติม', to: '/resources', variant: 'glass' },
-  },
-  {
-    id: 3,
-    image: '',
-    alt: 'การดูแลสุขภาพจิต',
-    overlay: 'from-fuchsia-800/90 via-purple-700/75 to-fuchsia-800/60',
-    glow: 'bg-fuchsia-400/20',
-    badge: '💜 ดูแลสุขภาพจิต',
-    title: 'ก้าวแรกสู่การฟื้นฟู',
-    subtitle: 'เล็กๆ ที่ทำทุกวัน ทำให้ใจแข็งแรงขึ้น เริ่มต้นได้ไม่ยาก',
-    cta1: { label: 'เริ่มระบายเลย', to: '/venting', variant: 'white' },
-    cta2: { label: 'ดูบทความ', to: '/resources', variant: 'glass' },
-  },
+interface Slide {
+  id: number;
+  image: string;
+  alt: string;
+  aspect?: string;
+}
+
+const SLIDES: Slide[] = [
+  { id: 0, image: poster1, alt: 'โปสเตอร์ 1', aspect: '951/382' },
+  { id: 1, image: poster2, alt: 'โปสเตอร์ 2', aspect: '1942/809' },
+  { id: 2, image: poster3, alt: 'โปสเตอร์ 3', aspect: '948/383' },
+  { id: 3, image: poster4, alt: 'โปสเตอร์ 4', aspect: '953/387' },
 ];
 
 export default function ImageSlider() {
@@ -58,50 +35,21 @@ export default function ImageSlider() {
   const prev = useCallback(() => goTo((current - 1 + SLIDES.length) % SLIDES.length), [current, goTo]);
 
   useEffect(() => {
-    const timer = setInterval(next, 4000);
+    const timer = setInterval(next, 6000);
     return () => clearInterval(timer);
   }, [next]);
 
-  const slide = SLIDES[current];
-
   return (
-    <section className="relative overflow-hidden rounded-3xl shadow-xl shadow-purple-500/10">
-      <div className="relative h-[300px] md:h-[450px] lg:h-[500px]">
+    <section className="relative overflow-hidden rounded-3xl" style={{ boxShadow: '0 6px 18px -6px rgba(16,15,62,0.4)' }}>
+      <div className="relative w-full" style={{ aspectRatio: SLIDES[current].aspect || '951/382' }}>
         {SLIDES.map((s, i) => (
           <div
             key={s.id}
             className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${i === current ? 'opacity-100' : 'opacity-0'}`}
           >
-            {s.image ? (
-              <img src={s.image} alt={s.alt} className="absolute inset-0 w-full h-full object-cover" />
-            ) : (
-              <div className={`absolute inset-0 bg-gradient-to-br ${s.overlay}`} />
-            )}
-            <div className={`absolute inset-0 bg-gradient-to-t ${s.overlay}`} />
-            <div className={`absolute -top-10 -left-10 w-40 h-40 bg-white/10 rounded-full blur-2xl`} />
-            <div className={`absolute -bottom-16 -right-10 w-52 h-52 ${s.glow} rounded-full blur-2xl`} />
+            <img src={s.image} alt={s.alt} className="absolute inset-0 w-full h-full object-cover" />
           </div>
         ))}
-
-        <div className="relative h-full flex flex-col items-center justify-center px-6 text-center text-white">
-          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur text-white px-4 py-2 rounded-full text-sm font-medium mb-6">
-            {slide.badge}
-          </div>
-          <h1 className="text-3xl md:text-5xl font-bold mb-4 drop-shadow-md">
-            {slide.title}
-          </h1>
-          <p className="text-purple-100 text-sm md:text-lg max-w-2xl mx-auto mb-8 drop-shadow">
-            {slide.subtitle}
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-3">
-            <Link to={slide.cta1.to} className="px-6 py-3 bg-white text-purple-700 font-semibold rounded-full hover:bg-purple-50 transition-colors shadow-lg shadow-purple-900/20 text-sm">
-              {slide.cta1.label}
-            </Link>
-            <Link to={slide.cta2.to} className="px-6 py-3 bg-white/15 text-white font-medium rounded-full border border-white/40 hover:bg-white/25 transition-colors backdrop-blur text-sm">
-              {slide.cta2.label}
-            </Link>
-          </div>
-        </div>
       </div>
 
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">

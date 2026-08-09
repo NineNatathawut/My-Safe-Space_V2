@@ -1,3 +1,121 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #fafafd;
+    color: #3c3c3c;
+    font-family: "Quicksand", "ui-rounded", "Segoe UI", "system-ui", sans-serif;
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: "Nunito", "ui-rounded", "Segoe UI", "system-ui", sans-serif;
+  }
+
+  button {
+    font-family: inherit;
+  }
+}
+
+@layer components {
+  /* ปุ่มหลักสไตล์ Duolingo: เขียว owl + ขอบล่างกดลง (shadow-lip) */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-btn font-bold uppercase tracking-btn transition-all duration-100;
+  }
+
+  .btn-primary {
+    @apply btn bg-owl text-white shadow-lip select-none;
+    min-height: 50px;
+    padding: 13px 16px;
+    transition: box-shadow 150ms, transform 150ms, background-color 150ms;
+  }
+  .btn-primary:hover {
+    background-color: #61d60a;
+  }
+  .btn-primary:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 #58a700;
+    background-color: #58a700;
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: 0 4px 0 #3f7d00;
+  }
+
+  .btn-secondary {
+    @apply btn bg-white text-macaw;
+    min-height: 50px;
+    padding: 13px 16px;
+    border: 2px solid #e5e5e5;
+  }
+  .btn-secondary:hover {
+    background-color: #f7f7f7;
+  }
+  .btn-secondary:active {
+    border-color: #afafaf;
+  }
+  .btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-ghost {
+    @apply btn text-macaw;
+    min-height: 48px;
+    padding: 10px 14px;
+  }
+  .btn-ghost:hover {
+    background-color: #e6f7fe;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl border border-hairline shadow-card;
+  }
+
+  .input {
+    @apply w-full bg-white border-2 border-hairline rounded-lg px-4 py-3 text-body-strong outline-none transition-colors;
+  }
+  .input:focus {
+    border-color: #1cb0f6;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-3 py-1 font-bold uppercase tracking-btn;
+  }
+}
+
+@keyframes mascot-bob {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, -6px);
+  }
+}
+.animate-mascot-bob {
+  animation: mascot-bob 1.5s ease-in-out infinite;
+}
+
+@keyframes float-side {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.animate-float-side {
+  animation: float-side 4s ease-in-out infinite;
+}

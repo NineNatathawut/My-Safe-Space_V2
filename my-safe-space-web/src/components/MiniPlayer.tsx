@@ -1,13 +1,7 @@
 import { useEffect, useState } from 'react';
 import { usePodcastPlayer } from '../contexts/PodcastPlayerContext';
 import type { PodcastEpisode } from '../types/podcast';
-
-function formatTime(sec: number): string {
-  if (!isFinite(sec) || sec < 0) sec = 0;
-  const m = Math.floor(sec / 60);
-  const s = Math.floor(sec % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
+import { Icon } from './Icon';
 
 function SpotifyPlayer({ episode, onClose }: { episode: PodcastEpisode; onClose: () => void }) {
   const [showHint, setShowHint] = useState(true);
@@ -22,14 +16,14 @@ function SpotifyPlayer({ episode, onClose }: { episode: PodcastEpisode; onClose:
     <div className="fixed bottom-0 inset-x-0 z-50">
       <div className="max-w-5xl mx-auto px-4 pb-3">
         {showHint && (
-          <div className="flex items-center gap-2 mb-2 px-3 py-2 rounded-xl bg-purple-50 border border-purple-100 text-purple-700 text-xs font-medium">
-            <span className="shrink-0 text-base leading-none">💚</span>
-            <span className="flex-1">กด ▶ ที่ตัวเล่นเพื่อเริ่มฟัง</span>
+          <div className="flex items-center gap-2 mb-2 px-3 py-2 rounded-xl bg-owl-soft border border-owl-mint text-owl-pressed text-xs font-bold">
+            <Icon name="headphones" size={15} className="shrink-0" />
+            <span className="flex-1">กดเล่นที่ตัวเครื่องเล่นเพื่อเริ่มฟัง</span>
             <button
               type="button"
               onClick={() => setShowHint(false)}
               aria-label="ปิดคำใบ้"
-              className="shrink-0 text-purple-400 hover:text-purple-700 transition-colors"
+              className="shrink-0 text-owl-pressed/60 hover:text-owl-pressed transition-colors"
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
                 <path d="M18 6 6 18M6 6l12 12" />
@@ -37,7 +31,7 @@ function SpotifyPlayer({ episode, onClose }: { episode: PodcastEpisode; onClose:
             </button>
           </div>
         )}
-        <div className="relative rounded-2xl overflow-hidden border border-purple-100 bg-white shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+        <div className="relative rounded-2xl overflow-hidden border border-hairline bg-white shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
           <iframe
             src={episode.embedUrl}
             title={episode.title}
@@ -83,13 +77,13 @@ export default function MiniPlayer() {
   };
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-purple-100 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+    <div className="fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-hairline shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
       <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
         <button
           type="button"
           onClick={toggle}
           aria-label={isPlaying ? 'หยุดเล่น' : 'เล่น'}
-          className="w-10 h-10 shrink-0 rounded-full bg-purple-600 text-white flex items-center justify-center hover:bg-purple-700 transition-colors active:scale-95"
+          className="w-10 h-10 shrink-0 rounded-full bg-owl text-white flex items-center justify-center hover:bg-owl-pressed transition-colors active:scale-95"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             {isPlaying ? (
@@ -100,20 +94,18 @@ export default function MiniPlayer() {
           </svg>
         </button>
 
-        <div className="w-10 h-10 shrink-0 rounded-lg bg-purple-100 flex items-center justify-center text-lg overflow-hidden">
+        <div className="w-10 h-10 shrink-0 rounded-lg bg-owl-soft flex items-center justify-center text-lg overflow-hidden">
           {current.coverImage ? (
             <img src={current.coverImage} alt="" className="w-full h-full object-cover" />
           ) : (
-            <span>🎧</span>
+            <Icon name="headphones" className="text-owl-pressed" />
           )}
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2 mb-1">
-            <p className="font-semibold text-slate-800 text-sm truncate">{current.title}</p>
-            <p className="text-[11px] text-slate-400 shrink-0 tabular-nums">
-              {formatTime(currentTime)} / {formatTime(duration)}
-            </p>
+            <p className="font-semibold text-body-strong text-sm truncate">{current.title}</p>
+            {/* ลบตัวเลขเวลา (05:00 / 06:00) ออกจากแถบเครื่องเล่น */}
           </div>
 
           <div
@@ -123,12 +115,12 @@ export default function MiniPlayer() {
             aria-valuemin={0}
             aria-valuemax={100}
             onClick={handleSeekClick}
-            className="h-1.5 bg-slate-200 rounded-full cursor-pointer overflow-hidden"
+            className="h-1.5 bg-hairline rounded-full cursor-pointer overflow-hidden"
           >
-            <div className="h-full bg-purple-600 rounded-full" style={{ width: `${progress}%` }} />
+            <div className="h-full bg-owl rounded-full" style={{ width: `${progress}%` }} />
           </div>
 
-          <p className="text-[11px] text-slate-400 mt-0.5 truncate">{current.speaker}</p>
+          <p className="text-[11px] text-body-soft mt-0.5 truncate">{current.speaker}</p>
         </div>
 
         {current.externalUrl && (
@@ -136,10 +128,10 @@ export default function MiniPlayer() {
             href={current.externalUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 text-xs font-bold text-slate-500 hover:text-purple-600 transition-colors"
+            className="shrink-0 text-xs font-bold text-body-muted hover:text-owl transition-colors"
             title={current.externalLabel || 'ฟังต่อ'}
           >
-            {current.externalLabel || 'ฟังต่อ'} ↗
+            {current.externalLabel || 'ฟังต่อ'} <Icon name="external" size={12} className="inline" />
           </a>
         )}
 

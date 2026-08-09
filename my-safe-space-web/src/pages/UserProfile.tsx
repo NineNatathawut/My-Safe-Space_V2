@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios';
 import { getDeterministicAvatar } from '../utils/getDeterministicAvatar';
 import { useAuth } from '../contexts/AuthContext';
+import { Icon } from '../components/Icon';
 
 interface Post {
   id: string;
@@ -45,7 +46,7 @@ function AvatarDisplay({ avatar, nickname, size = 'default' }: { avatar: string 
   const displayAvatar = avatar || getDeterministicAvatar(nickname);
   const sizeClass = size === 'large' ? 'w-20 h-20 text-4xl' : 'w-14 h-14 text-2xl';
   return (
-    <div className={`${sizeClass} bg-gradient-to-tr from-fuchsia-200 to-purple-200 rounded-full flex items-center justify-center shadow-inner shrink-0`}>
+    <div className={`${sizeClass} bg-owl-soft rounded-full flex items-center justify-center border border-owl-mint shrink-0`}>
       {displayAvatar}
     </div>
   );
@@ -53,31 +54,31 @@ function AvatarDisplay({ avatar, nickname, size = 'default' }: { avatar: string 
 
 function ExpertProfileCard({ expert }: { expert: ExpertInfo }) {
   return (
-    <div className="bg-gradient-to-br from-teal-50 to-emerald-50 rounded-2xl p-5 border border-teal-100 space-y-3">
+    <div className="bg-owl-soft/30 rounded-2xl p-5 border border-owl-mint space-y-3">
       <div className="flex items-center gap-2">
-        <span className="text-lg">🩺</span>
-        <span className="font-bold text-teal-800">{expert.profession_label}</span>
-        <span className="inline-flex items-center gap-0.5 text-xs px-2 py-0.5 bg-teal-200 text-teal-800 rounded-full font-medium">✨ ผู้เชี่ยวชาญรับรอง</span>
+        <Icon name="stethoscope" size={18} className="text-owl-pressed" />
+        <span className="font-bold text-ink">{expert.profession_label}</span>
+        <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-owl text-white rounded-full font-bold">ผู้เชี่ยวชาญรับรอง</span>
       </div>
 
       {expert.affiliation && (
-        <p className="text-sm text-slate-600 flex items-center gap-1.5">
-          <span>🏛️</span> สังกัด: {expert.affiliation}
+        <p className="text-sm text-body-muted flex items-center gap-1.5 font-medium">
+          <Icon name="home" size={14} className="text-owl" /> สังกัด: {expert.affiliation}
         </p>
       )}
 
       {expert.availability && (
-        <p className="text-sm text-green-700 flex items-center gap-1.5">
-          <span>🟢</span> พร้อมรับฟัง ({expert.availability} น.)
+        <p className="text-sm text-macaw flex items-center gap-1.5 font-medium">
+          <Icon name="clock" size={14} /> พร้อมรับฟัง ({expert.availability} น.)
         </p>
       )}
 
       {expert.specialty_labels.length > 0 && (
         <div>
-          <p className="text-sm font-medium text-slate-700 mb-1.5">🏷️ สาขาที่เชี่ยวชาญ:</p>
+          <p className="text-sm font-bold text-body-strong mb-1.5"><Icon name="sparkles" size={13} className="inline text-owl mr-1" /> สาขาที่เชี่ยวชาญ:</p>
           <div className="flex flex-wrap gap-1.5">
             {expert.specialty_labels.map((label, i) => (
-              <span key={i} className="inline-block px-2.5 py-1 bg-white/70 text-slate-700 text-xs rounded-full border border-teal-200/50 shadow-sm">
+              <span key={i} className="inline-block px-2.5 py-1 bg-white text-body-strong text-xs rounded-full border border-hairline">
                 {label}
               </span>
             ))}
@@ -88,25 +89,12 @@ function ExpertProfileCard({ expert }: { expert: ExpertInfo }) {
   );
 }
 
-function SpecialtyTags({ labels }: { labels: string[] }) {
-  if (labels.length === 0) return null;
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {labels.map((label, i) => (
-        <span key={i} className="inline-block px-2.5 py-1 bg-fuchsia-50 text-fuchsia-700 text-xs rounded-full border border-fuchsia-100">
-          {label}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 function PostList({ posts }: { posts: Post[] }) {
   if (posts.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-4xl mb-3">📝</div>
-        <p className="text-slate-500">ยังไม่มีเรื่องราวที่แบ่งปัน</p>
+        <div className="w-14 h-14 bg-owl-soft mx-auto rounded-full flex items-center justify-center text-owl-pressed mb-3"><Icon name="sparkles" size={24} /></div>
+        <p className="text-body-muted font-medium">ยังไม่มีเรื่องราวที่แบ่งปัน</p>
       </div>
     );
   }
@@ -114,19 +102,19 @@ function PostList({ posts }: { posts: Post[] }) {
   return (
     <div className="space-y-4">
       {posts.map((post) => (
-        <div key={post.id} className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:shadow-sm transition-shadow">
+        <div key={post.id} className="bg-owl-soft/25 p-5 rounded-2xl border border-hairline hover:shadow-card transition-shadow">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2.5">
               <span className="text-2xl">{post.emotion}</span>
-              <span className="font-medium text-slate-800">{post.alias_name}</span>
+              <span className="font-bold text-body-strong">{post.alias_name}</span>
             </div>
-            <span className="text-xs text-slate-400">{formatDate(post.created_at)}</span>
+            <span className="text-xs text-body-soft font-medium">{formatDate(post.created_at)}</span>
           </div>
-          <p className="text-slate-700 whitespace-pre-wrap mb-3">{post.content}</p>
-          <div className="flex items-center gap-4 pt-3 border-t border-slate-200 text-sm">
-            <span className="text-fuchsia-500">🫂 กอด ({post.hug_count})</span>
-            <Link to={`/post/${post.id}`} className="text-purple-600 hover:text-purple-700 transition-colors">
-              💬 คอมเมนต์ ({post.comment_count})
+          <p className="text-body-strong whitespace-pre-wrap mb-3 font-medium">{post.content}</p>
+          <div className="flex items-center gap-4 pt-3 border-t border-hairline text-sm">
+            <span className="text-cardinal font-medium"><Icon name="heart" size={15} className="inline mr-1" /> กอด ({post.hug_count})</span>
+            <Link to={`/post/${post.id}`} className="text-owl-pressed hover:text-owl transition-colors font-medium">
+              <Icon name="message" size={15} className="inline mr-1" /> คอมเมนต์ ({post.comment_count})
             </Link>
           </div>
         </div>
@@ -204,7 +192,7 @@ export default function UserProfile() {
         to_user_id: profile.id,
         card_id: cardId,
       });
-      alert('💌 ส่งกำลังใจให้เรียบร้อยแล้ว!');
+      alert('ส่งกำลังใจให้เรียบร้อยแล้ว!');
       setCardModal(false);
     } catch (err: any) {
       alert(err.response?.data?.error || 'ไม่สามารถส่งกำลังใจได้');
@@ -219,78 +207,78 @@ export default function UserProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-lg text-slate-400 animate-pulse">กำลังโหลดโปรไฟล์...</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg text-body-soft animate-pulse font-medium">กำลังโหลดโปรไฟล์...</div>
       </div>
     );
   }
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4 max-w-md mx-auto px-4">
-          <div className="text-6xl mb-4">🔍</div>
-          <h2 className="text-xl font-bold text-slate-700">ไม่พบผู้ใช้</h2>
-          <p className="text-slate-500">ผู้ใช้นี้ไม่มีอยู่ในระบบ หรือลิงก์ไม่ถูกต้อง</p>
-          <button onClick={() => navigate(-1)} className="inline-block px-6 py-3 bg-fuchsia-500 text-white rounded-xl font-medium hover:bg-fuchsia-600 transition-colors">
-            ← กลับ
-          </button>
+          <div className="w-16 h-16 bg-owl-soft mx-auto rounded-full flex items-center justify-center text-owl-pressed mb-4">
+            <Icon name="search" size={26} />
+          </div>
+          <h2 className="text-xl font-bold text-ink">ไม่พบผู้ใช้</h2>
+          <p className="text-body-muted font-medium">ผู้ใช้นี้ไม่มีอยู่ในระบบ หรือลิงก์ไม่ถูกต้อง</p>
+          <button onClick={() => navigate(-1)} className="inline-block px-6 py-3 btn-primary">กลับ</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10">
+    <div className="min-h-screen py-10">
       <div className="max-w-3xl mx-auto px-4 space-y-6">
         {/* ปุ่มกลับ */}
-        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-700 transition-colors text-sm font-medium">
-          <span>⬅️</span> กลับ
+        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-body-muted hover:text-body-strong transition-colors text-sm font-bold">
+          <Icon name="chevron-left" size={16} /> กลับ
         </button>
 
         {/* ส่วนหัวโปรไฟล์ */}
-        <section className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-fuchsia-50 rounded-bl-full -z-10"></div>
+        <section className="card rounded-3xl p-6 md:p-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-owl-soft/60 rounded-bl-full -z-10"></div>
 
           <div className="flex items-start gap-5">
             <AvatarDisplay avatar={profile.avatar} nickname={profile.nickname} size="large" />
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-2xl md:text-3xl font-bold text-slate-800">{profile.nickname}</h1>
+                <h1 className="text-2xl md:text-3xl font-black text-ink">{profile.nickname}</h1>
                 {profile.role === 'expert' && (
-                  <span className="inline-flex items-center gap-0.5 text-xs px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full font-medium">🩺 ผู้เชี่ยวชาญ</span>
+                  <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-macaw/10 text-ink rounded-full font-bold"><Icon name="stethoscope" size={12} className="text-macaw" /> ผู้เชี่ยวชาญ</span>
                 )}
               </div>
 
-              <p className="text-sm text-slate-400 mt-1">{memberSince}</p>
+              <p className="text-sm text-body-soft mt-1 font-medium">{memberSince}</p>
 
               {profile.last_post && (
-                <p className="text-sm text-slate-500 mt-2 flex items-center gap-1.5">
-                  <span>💬</span> ล่าสุด: {profile.last_post.emotion} "{profile.last_post.content}"
+                <p className="text-sm text-body-muted mt-2 flex items-center gap-1.5 font-medium">
+                  <Icon name="message" size={14} className="text-owl" /> ล่าสุด: {profile.last_post.emotion} "{profile.last_post.content}"
                 </p>
               )}
 
               <div className="flex items-center gap-2 mt-4">
                 {isOwnProfile ? (
-                  <Link to="/profile" className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-medium text-slate-700 transition-colors">
-                    ✏️ แก้ไขโปรไฟล์
+                  <Link to="/profile" className="inline-flex items-center gap-1.5 px-4 py-2 btn-secondary text-sm">
+                    <Icon name="pencil" size={14} /> แก้ไขโปรไฟล์
                   </Link>
                 ) : (
                   <button
                     onClick={openCardModal}
                     disabled={!isAuthenticated}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-fuchsia-500 hover:bg-fuchsia-600 disabled:bg-slate-300 text-white rounded-xl text-sm font-medium transition-colors shadow-sm"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 btn-primary text-sm"
                   >
-                    🫂 ส่งกำลังใจ
+                    ส่งกำลังใจ
                   </button>
                 )}
                 {profile.role === 'expert' && !isOwnProfile && (
                   <Link
                     to={`/post/${profile.id}`}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-sm font-medium transition-colors shadow-sm"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 btn-secondary text-sm"
                   >
-                    💬 พูดคุยกับผู้เชี่ยวชาญ
+                    <Icon name="message" size={14} /> พูดคุยกับผู้เชี่ยวชาญ
                   </Link>
                 )}
               </div>
@@ -304,14 +292,14 @@ export default function UserProfile() {
         )}
 
         {/* โพสต์ทั้งหมด */}
-        <section className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100">
-          <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <span>📖</span> เรื่องราวทั้งหมด
+        <section className="card rounded-3xl p-6 md:p-8">
+          <h2 className="text-xl font-black text-ink mb-6 flex items-center gap-2">
+            <Icon name="home" size={18} className="text-owl" /> เรื่องราวทั้งหมด
           </h2>
 
           {loadingPosts ? (
             <div className="flex items-center justify-center py-12">
-              <div className="text-slate-400 animate-pulse">กำลังโหลด...</div>
+              <div className="text-body-soft animate-pulse">กำลังโหลด...</div>
             </div>
           ) : (
             <PostList posts={posts} />
@@ -321,15 +309,15 @@ export default function UserProfile() {
 
       {/* Modal ส่งการ์ดกำลังใจ */}
       {cardModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setCardModal(false)}>
-          <div className="bg-white rounded-3xl p-6 max-w-lg w-full mx-4 shadow-xl max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40" onClick={() => setCardModal(false)}>
+          <div className="card rounded-3xl p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-800">💌 ส่งกำลังใจถึง {profile?.nickname}</h3>
-              <button onClick={() => setCardModal(false)} className="text-slate-400 hover:text-slate-600 text-xl">✕</button>
+              <h3 className="text-lg font-bold text-ink"><Icon name="heart" size={17} className="inline text-cardinal mr-1" /> ส่งกำลังใจถึง {profile?.nickname}</h3>
+              <button onClick={() => setCardModal(false)} className="text-body-soft hover:text-body-strong text-xl">✕</button>
             </div>
 
             {presetCards.length === 0 ? (
-              <div className="text-center py-8 text-slate-500">ไม่พบการ์ดฮีลใจ</div>
+              <div className="text-center py-8 text-body-muted font-medium">ไม่พบการ์ดฮีลใจ</div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 {presetCards.map((card) => (
@@ -337,17 +325,17 @@ export default function UserProfile() {
                     key={card.id}
                     onClick={() => sendCard(card.id)}
                     disabled={sendingCard}
-                    className="p-4 bg-gradient-to-br from-fuchsia-50 to-purple-50 rounded-2xl border border-fuchsia-100 hover:shadow-md hover:border-fuchsia-200 transition-all text-center disabled:opacity-50"
+                    className="p-4 bg-owl-soft/40 rounded-2xl border border-owl-mint hover:shadow-card hover:border-owl transition-all text-center disabled:opacity-50"
                   >
                     <div className="text-3xl mb-2">{card.icon}</div>
-                    <p className="text-sm text-slate-700 font-medium">{card.thai_text}</p>
+                    <p className="text-sm text-body-strong font-bold">{card.thai_text}</p>
                   </button>
                 ))}
               </div>
             )}
 
             {sendingCard && (
-              <div className="text-center py-4 text-purple-600 animate-pulse">กำลังส่งกำลังใจ...</div>
+              <div className="text-center py-4 text-owl-pressed animate-pulse font-medium">กำลังส่งกำลังใจ...</div>
             )}
           </div>
         </div>

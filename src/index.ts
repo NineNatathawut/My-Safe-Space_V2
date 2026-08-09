@@ -122,6 +122,9 @@ const isAdminUser = (user: { email?: string; user_metadata?: any }) => {
 
 // 🗑️ Helper: ลบข้อมูลทุกแถวในตาราง (ใช้ตอนแทนที่ข้อมูลเดิมทั้งหมดเมื่อ admin บันทึก)
 const EMPTY_UUID = '00000000-0000-0000-0000-000000000000'
+
+// 🛡️ Regex ตรวจสอบว่า id เป็นรูปแบบ UUID จริง (กัน Postgres cast ข้อความ/text id ธรรมดาแล้ว Error)
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const clearResourcesTable = async (table: string) => {
   await supabaseAdmin.from(table).delete().neq('id', EMPTY_UUID)
 }
@@ -1870,9 +1873,11 @@ app.get('/api/resources/content', async (c) => {
   }
 
   const breathing = (settings.data || []).find((s: any) => s.key === 'breathing')?.value || null
+  const initialized = (settings.data || []).some((s: any) => s.key === 'initialized' && s.value === true)
 
   return c.json({
     success: true,
+    initialized,
     articles: (articlesRes.data || []).map((a: any) => ({
       id: a.id,
       category: a.category,
@@ -2000,10 +2005,184 @@ app.put('/api/resources', authMiddleware, async (c) => {
       }
     }
 
+    // เก็บ flag initialized = true เพื่อให้ frontend ใช้ข้อมูลจาก DB เสมอ (แทน Seed fallback)
+    {
+      const { error: settingError } = await supabaseAdmin.from('resource_settings').upsert(
+        { key: 'initialized', value: true, updated_at: new Date().toISOString() },
+        { onConflict: 'key' }
+      )
+      if (settingError) throw settingError
+    }
+
     return c.json({ success: true, message: 'บันทึกข้อมูล Resources เรียบร้อยแล้ว' })
   } catch (err: any) {
     console.error('❌ PUT resources error:', err)
     return c.json({ success: false, error: err.message || 'ไม่สามารถบันทึกได้' }, 500)
+  }
+})
+
+// 🔴 DELETE /api/resources/:type/:id — ลบทีละรายการ (เฉพาะ admin)
+// รองรับ type: articles | videos | tips | podcasts
+app.delete('/api/resources/:type/:id', authMiddleware, async (c) => {
+  const user = c.get('user')
+  if (!isAdminUser(user)) {
+    return c.json({ success: false, error: 'Forbidden: เฉพาะแอดมินเท่านั้น' }, 403)
+  }
+
+  const type = c.req.param('type')
+  const id = c.req.param('id')
+
+  const tableMap: Record<string, string> = {
+    articles: 'resource_articles',
+    videos: 'resource_videos',
+    tips: 'resource_tips',
+    podcasts: 'resource_podcasts',
+  }
+
+  const table = tableMap[type]
+  if (!table) {
+    return c.json({ success: false, error: 'ประเภทข้อมูลไม่ถูกต้อง' }, 400)
+  }
+
+  try {
+    if (type === 'podcasts') {
+      // พอดแคสต์ frontend ใช้ episode_key เป็น id → ลบจาก episode_key ก่อน (TEXT col)
+      const { error: byKeyErr } = await supabaseAdmin.from(table).delete().eq('episode_key', id)
+      if (byKeyErr) throw byKeyErr
+
+      // ลบจาก id (UUID col) เฉพาะเมื่อ id เป็น UUID จริง เพื่อกัน Error "invalid input syntax for type uuid"
+      if (UUID_RE.test(String(id))) {
+        const { error: byIdErr } = await supabaseAdmin.from(table).delete().eq('id', id)
+        if (byIdErr) throw byIdErr
+      }
+    } else {
+      // articles | videos | tips — ลบจาก id (UUID col) เฉพาะเมื่อ id เป็น UUID จริง
+      // (id ชั่วคราวแบบตัวเลขที่ยังไม่เคยบันทึกลง DB จะข้ามไปและคืน Success ได้ปลอดภัย)
+      if (UUID_RE.test(String(id))) {
+        const { error } = await supabaseAdmin.from(table).delete().eq('id', id)
+        if (error) throw error
+      }
+    }
+
+    // ตั้ง flag initialized เพื่อให้ frontend ใช้ข้อมูลจาก DB เป็นหลัก (ลบหมดแล้วไม่กลับไปใช้ Seed)
+    {
+      const { error: settingError } = await supabaseAdmin.from('resource_settings').upsert(
+        { key: 'initialized', value: true, updated_at: new Date().toISOString() },
+        { onConflict: 'key' }
+      )
+      if (settingError) throw settingError
+    }
+
+    return c.json({ success: true, message: 'ลบข้อมูลเรียบร้อยแล้ว' })
+  } catch (err: any) {
+    console.error(`❌ DELETE resource error (${type}):`, err)
+    return c.json({ success: false, error: err.message || 'ไม่สามารถลบข้อมูลได้' }, 500)
+  }
+})
+
+// ==========================================
+// 🏠 12b. API: Home — การ์ด "บทความและเทคนิคสำหรับคุณ" (admin จัดการได้)
+// อ่านได้สาธารณะ (ไม่ต้องล็อกอิน) / แก้ได้เฉพาะ admin
+// ==========================================
+
+// 🟢 GET /api/home/articles — ดึงการ์ดทั้งหมด (public)
+app.get('/api/home/articles', async (c) => {
+  const [articlesRes, settingsRes] = await Promise.all([
+    supabaseAdmin.from('home_articles').select('*').order('sort_order', { ascending: true }),
+    supabaseAdmin.from('resource_settings').select('key, value').eq('key', 'home_articles_initialized'),
+  ])
+
+  if (articlesRes.error || settingsRes.error) {
+    return c.json({ success: false, error: 'ไม่สามารถโหลดข้อมูลการ์ดได้' }, 500)
+  }
+
+  const initialized = (settingsRes.data || []).some((s: any) => s.value === true)
+
+  return c.json({
+    success: true,
+    initialized,
+    articles: (articlesRes.data || []).map((a: any) => ({
+      id: a.id,
+      category: a.category,
+      title: a.title,
+      description: a.description,
+      badgeColor: a.badge_color,
+      actionText: a.action_text,
+      link: a.link,
+    })),
+  })
+})
+
+// 🟡 PUT /api/home/articles — บันทึกการ์ดทั้งชุด (เฉพาะแอดมิน, replace ทั้งชุด)
+app.put('/api/home/articles', authMiddleware, async (c) => {
+  const user = c.get('user')
+  if (!isAdminUser(user)) {
+    return c.json({ success: false, error: 'Forbidden: เฉพาะแอดมินเท่านั้น' }, 403)
+  }
+
+  const body = await c.req.json()
+  const articles = body?.articles
+
+  if (!Array.isArray(articles)) {
+    return c.json({ success: false, error: 'ข้อมูลไม่ถูกต้อง' }, 400)
+  }
+
+  try {
+    await clearResourcesTable('home_articles')
+    if (articles.length > 0) {
+      const { error } = await supabaseAdmin.from('home_articles').insert(
+        articles.map((a: any, i: number) => ({
+          category: a.category || '',
+          title: a.title,
+          description: a.description || '',
+          badge_color: a.badgeColor || 'bg-owl-soft text-owl-pressed',
+          action_text: a.actionText || 'อ่านต่อ',
+          link: a.link || '',
+          sort_order: i + 1,
+        }))
+      )
+      if (error) throw error
+    }
+
+    const { error: settingError } = await supabaseAdmin.from('resource_settings').upsert(
+      { key: 'home_articles_initialized', value: true, updated_at: new Date().toISOString() },
+      { onConflict: 'key' }
+    )
+    if (settingError) throw settingError
+
+    return c.json({ success: true, message: 'บันทึกการ์ดเรียบร้อยแล้ว' })
+  } catch (err: any) {
+    console.error('❌ PUT home articles error:', err)
+    return c.json({ success: false, error: err.message || 'ไม่สามารถบันทึกข้อมูลได้' }, 500)
+  }
+})
+
+// 🔴 DELETE /api/home/articles/:id — ลบการ์ดทีละใบ (เฉพาะแอดมิน)
+app.delete('/api/home/articles/:id', authMiddleware, async (c) => {
+  const user = c.get('user')
+  if (!isAdminUser(user)) {
+    return c.json({ success: false, error: 'Forbidden: เฉพาะแอดมินเท่านั้น' }, 403)
+  }
+
+  const id = c.req.param('id')
+
+  try {
+    // ลบเฉพาะเมื่อ id เป็น UUID จริง (id ชั่วคราวแบบตัวเลขที่ยังไม่เคยบันทึก จะข้ามและคืน Success ได้ปลอดภัย)
+    if (UUID_RE.test(String(id))) {
+      const { error } = await supabaseAdmin.from('home_articles').delete().eq('id', id)
+      if (error) throw error
+    }
+
+    const { error: settingError } = await supabaseAdmin.from('resource_settings').upsert(
+      { key: 'home_articles_initialized', value: true, updated_at: new Date().toISOString() },
+      { onConflict: 'key' }
+    )
+    if (settingError) throw settingError
+
+    return c.json({ success: true, message: 'ลบการ์ดเรียบร้อยแล้ว' })
+  } catch (err: any) {
+    console.error('❌ DELETE home article error:', err)
+    return c.json({ success: false, error: err.message || 'ไม่สามารถลบข้อมูลได้' }, 500)
   }
 })
 

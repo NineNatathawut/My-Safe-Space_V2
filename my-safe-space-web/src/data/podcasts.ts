@@ -1,8 +1,6 @@
 import type { PodcastEpisode } from '../types/podcast';
-import { parsePodcastLink } from '../utils/podcastLink';
 
-export const PODCAST_STORAGE_KEY = 'resources_podcasts';
-
+// ข้อมูลพอดแคสต์เริ่มต้น — จะถูกแทนที่ด้วยข้อมูลจากฐานข้อมูลผ่าน /api/resources/content
 export const SEED_PODCASTS: PodcastEpisode[] = [
   {
     id: 'podcast-1',
@@ -63,29 +61,3 @@ export const SEED_PODCASTS: PodcastEpisode[] = [
     externalUrl: 'https://open.spotify.com/',
   },
 ];
-
-export function loadPodcasts(): PodcastEpisode[] {
-  try {
-    const saved = localStorage.getItem(PODCAST_STORAGE_KEY);
-    if (!saved) return SEED_PODCASTS;
-    const parsed = JSON.parse(saved);
-    if (!Array.isArray(parsed)) return SEED_PODCASTS;
-
-    const migrated = parsed.map((episode: PodcastEpisode) => {
-      if (episode.audioUrl || episode.embedUrl || !episode.externalUrl) return episode;
-      const parsedLink = parsePodcastLink(episode.externalUrl);
-      if (parsedLink.kind === 'spotify' && parsedLink.embedUrl) {
-        return { ...episode, embedUrl: parsedLink.embedUrl };
-      }
-      return episode;
-    });
-
-    return migrated;
-  } catch {
-    return SEED_PODCASTS;
-  }
-}
-
-export function savePodcasts(episodes: PodcastEpisode[]): void {
-  localStorage.setItem(PODCAST_STORAGE_KEY, JSON.stringify(episodes));
-}

@@ -53,7 +53,7 @@ export function usePostComposer() {
       const aliasName = localStorage.getItem('alias_name') || 'ผู้ใช้ไร้นาม';
 
       if (!token) {
-        setError('กรุณาเข้าสู่ระบบก่อนส่งความในใจครับ');
+        setError('กรุณาเข้าสู่ระบบก่อนแชร์เรื่องราวครับ');
         setIsLoading(false);
         return;
       }
@@ -67,7 +67,7 @@ export function usePostComposer() {
       });
 
       if (response.data.success) {
-        setSuccessMsg(response.data.message || 'ส่งความในใจเข้าสู่พื้นที่ปลอดภัยเรียบร้อยแล้ว 🤍');
+        setSuccessMsg(response.data.message || 'แชร์เรื่องราวเข้าสู่พื้นที่ปลอดภัยเรียบร้อยแล้ว 🤍');
         setContent('');
         setTimeout(() => setSuccessMsg(''), 4000);
       }
