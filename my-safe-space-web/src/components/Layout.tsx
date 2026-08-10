@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { Outlet, Link, NavLink } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { Outlet, Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { usePodcastPlayer } from '../contexts/PodcastPlayerContext';
 import NotificationBell from './NotificationBell';
@@ -18,6 +19,23 @@ const NAV_ITEMS = [
 export default function Layout({ children }: { children?: ReactNode }) {
   const { isAuthenticated, isAdmin } = useAuth();
   const { current } = usePodcastPlayer();
+  const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col font-din">
@@ -118,7 +136,15 @@ export default function Layout({ children }: { children?: ReactNode }) {
               )}
             </nav>
 
-            <div className="flex items-center gap-2">
+            <div ref={menuRef} className="flex items-center gap-2">
+              <button
+                onClick={() => setMenuOpen(prev => !prev)}
+                aria-label="เปิดเมนู"
+                aria-expanded={menuOpen}
+                className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg text-body-strong hover:bg-owl-soft hover:text-owl transition"
+              >
+                <Icon name={menuOpen ? 'x' : 'menu'} size={22} />
+              </button>
               {isAuthenticated ? (
                 <>
                   <NotificationBell />
@@ -132,6 +158,43 @@ export default function Layout({ children }: { children?: ReactNode }) {
             </div>
           </div>
         </div>
+
+        {menuOpen && (
+          <div className="md:hidden absolute left-0 right-0 top-full bg-white border-t border-hairline shadow-lg z-[100] animate-fadeIn">
+            <nav className="container mx-auto max-w-6xl px-4 py-2 flex flex-col text-sm font-semibold">
+              {NAV_ITEMS.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.to === '/'}
+                  className={({ isActive }) =>
+                    `px-3 py-3 rounded-lg transition-colors ${
+                      isActive
+                        ? 'text-owl bg-owl-soft'
+                        : 'text-body-strong hover:text-owl hover:bg-owl-soft'
+                    }`
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+              {isAdmin && (
+                <NavLink
+                  to="/admin-dashboard"
+                  className={({ isActive }) =>
+                    `flex items-center gap-1.5 px-3 py-3 rounded-lg transition-colors ${
+                      isActive
+                        ? 'text-owl bg-owl-soft'
+                        : 'text-body-strong hover:text-owl hover:bg-owl-soft'
+                    }`
+                  }
+                >
+                  <Icon name="settings" size={15} /> แอดมิน
+                </NavLink>
+              )}
+            </nav>
+          </div>
+        )}
       </header>
 
       {/* ③ พื้นที่เนื้อหาหลัก */}

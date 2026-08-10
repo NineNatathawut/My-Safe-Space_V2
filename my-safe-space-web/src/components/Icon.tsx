@@ -40,6 +40,7 @@ import {
   Award,
   HeartHandshake,
   Trash2,
+  Menu,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -84,7 +85,8 @@ export type IconName =
   | 'user-round'
   | 'award'
   | 'hands'
-  | 'trash';
+  | 'trash'
+  | 'menu';
 
 const ICONS: Record<IconName, LucideIcon> = {
   book: BookOpen,
@@ -128,6 +130,7 @@ const ICONS: Record<IconName, LucideIcon> = {
   award: Award,
   hands: HeartHandshake,
   trash: Trash2,
+  menu: Menu,
 };
 
 interface IconProps {
