@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000', // URL ของ Hono Backend
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000', // URL ของ Hono Backend
 });
 
 // แนบ Token ไปใน Header อัตโนมัติถ้ามี

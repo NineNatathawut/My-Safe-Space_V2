@@ -1281,7 +1281,7 @@ export default function Resources() {
                 <section>
                     <div className="max-w-4xl mx-auto px-4 py-12 space-y-6">
                     <div className="text-center space-y-2">
-                        <h2 className="text-2xl md:text-3xl font-black text-ink">โรงพยาบาลรัฐใกล้ตัวที่มีผู้เชี่ยวชาญด้านสุขภาพจิต</h2>
+                        <h2 className="text-2xl md:text-3xl font-black text-ink">โรงพยาบาลรัฐใกล้ตัว</h2>
                     </div>
 
                     <div className="relative max-w-md mx-auto">

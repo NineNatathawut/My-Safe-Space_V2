@@ -41,8 +41,10 @@ const app = new Hono<{ Variables: Variables }>()
 // ==========================================
 // 🛡️ Middleware: CORS (อนุญาตให้ Frontend เข้าถึง Backend ได้)
 // ==========================================
+const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',').map((s) => s.trim())
+
 app.use('*', cors({
-  origin: 'http://localhost:5173',
+  origin: corsOrigins,
   allowHeaders: ['Content-Type', 'Authorization'],
   allowMethods: ['POST', 'GET', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
 }))
@@ -2219,7 +2221,7 @@ app.get('/api/test-admin', async (c) => {
 });
 
 
-const port = 3000
+const port = Number(process.env.PORT) || 3000
 console.log(`🚀 API Server is running on http://localhost:${port}`)
 
 serve({ fetch: app.fetch, port })
