@@ -54,10 +54,10 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center relative">
+    <div className="min-h-dvh flex relative">
       
       {/* 🔴 ฟอร์มเข้าสู่ระบบปกติ */}
-      <div className={`w-full max-w-md p-8 card transition-opacity duration-300 ${isWelcomeVisible ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
+      <div className={`m-auto w-full max-w-md p-8 card transition-opacity duration-300 ${isWelcomeVisible ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
         <h2 className="text-2xl font-black text-center mb-6 text-ink">เข้าสู่ระบบ</h2>
         
         {error && (

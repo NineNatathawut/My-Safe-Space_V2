@@ -32,8 +32,8 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-ink-deep flex items-center justify-center p-4 font-sans">
-      <div className="card p-8 w-full max-w-md rounded-3xl">
+    <div className="min-h-dvh bg-ink-deep flex p-4 font-sans">
+      <div className="card p-8 w-full max-w-md rounded-3xl m-auto">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-owl-soft mx-auto rounded-full flex items-center justify-center text-owl-pressed mb-4">
             <Icon name="shield" size={28} />

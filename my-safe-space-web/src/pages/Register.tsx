@@ -53,8 +53,8 @@ export default function Register() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full p-4">
-      <div className="w-full max-w-sm card p-6">
+    <div className="flex flex-col h-full p-4">
+      <div className="w-full max-w-sm card p-6 m-auto">
         <h2 className="text-2xl font-black text-center text-ink mb-6">
           สมัครสมาชิก
         </h2>
