@@ -22,9 +22,16 @@ export default function Layout({ children }: { children?: ReactNode }) {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLElement>(null);
+  const lastToggleRef = useRef(0);
+
+  const toggleMenu = () => {
+    lastToggleRef.current = Date.now();
+    setMenuOpen(prev => !prev);
+  };
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
+      if (Date.now() - lastToggleRef.current < 300) return;
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setMenuOpen(false);
       }
@@ -138,7 +145,7 @@ export default function Layout({ children }: { children?: ReactNode }) {
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setMenuOpen(prev => !prev)}
+                onClick={toggleMenu}
                 aria-label="เปิดเมนู"
                 aria-expanded={menuOpen}
                 className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg text-body-strong hover:bg-owl-soft hover:text-owl transition"
