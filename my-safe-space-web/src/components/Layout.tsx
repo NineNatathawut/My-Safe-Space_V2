@@ -21,7 +21,7 @@ export default function Layout({ children }: { children?: ReactNode }) {
   const { current } = usePodcastPlayer();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -62,7 +62,7 @@ export default function Layout({ children }: { children?: ReactNode }) {
       </div>
 
       {/* ② Header + Nav สไตล์ Duolingo */}
-      <header className="bg-white sticky top-0 z-40" style={{ boxShadow: '0 2px 3px 0 rgba(0,0,0,0.06)' }}>
+      <header ref={menuRef} className="bg-white sticky top-0 z-40" style={{ boxShadow: '0 2px 3px 0 rgba(0,0,0,0.06)' }}>
         <div className="container mx-auto max-w-6xl px-4">
           <div className="flex justify-between items-center h-[70px] gap-4">
             <Link to="/" className="flex items-center gap-2.5 group">
@@ -136,7 +136,7 @@ export default function Layout({ children }: { children?: ReactNode }) {
               )}
             </nav>
 
-            <div ref={menuRef} className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setMenuOpen(prev => !prev)}
                 aria-label="เปิดเมนู"
