@@ -319,7 +319,7 @@ export default function Profile() {
         {/* Quick Action Widget */}
         {featuredAssessment && activeTab !== 'assessment' && (
           <div className="bg-owl-soft/40 rounded-2xl p-5 border border-owl-mint">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
               <span className="w-12 h-12 bg-owl text-white rounded-full flex items-center justify-center shrink-0 shadow-lip-sm">
                 <Icon name="chart" size={22} />
               </span>
@@ -329,7 +329,7 @@ export default function Profile() {
               </div>
               <Link
                 to="/assessment"
-                className="px-5 py-2.5 btn-primary text-sm shrink-0"
+                className="px-5 py-2.5 btn-primary text-sm shrink-0 w-full md:w-auto"
               >
                 เริ่มทำแบบประเมิน
               </Link>
