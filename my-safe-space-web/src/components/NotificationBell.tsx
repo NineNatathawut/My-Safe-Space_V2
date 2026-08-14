@@ -27,6 +27,7 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
+  const [popupPos, setPopupPos] = useState<{ left: number; top: number; width: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const markAllReadAtRef = useRef(0);
   const fetchStartedAtRef = useRef(0);
@@ -73,7 +74,18 @@ export default function NotificationBell() {
   };
 
   const handleToggle = () => {
-    setOpen(prev => !prev);
+    if (open) {
+      setOpen(false);
+      return;
+    }
+    const rect = ref.current?.getBoundingClientRect();
+    const isDesktop = window.innerWidth >= 768;
+    const width = isDesktop ? 384 : Math.min(320, window.innerWidth - 16);
+    let left = rect ? rect.right - width : 8;
+    left = Math.max(8, Math.min(left, window.innerWidth - width - 8));
+    const top = rect ? rect.bottom + 8 : 64;
+    setPopupPos({ left, top, width });
+    setOpen(true);
   };
 
   const prevOpenRef = useRef(false);
@@ -125,8 +137,11 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 md:w-96 bg-white rounded-2xl shadow-xl border border-hairline z-[100] overflow-hidden">
+      {open && popupPos && (
+        <div
+          className="fixed bg-white rounded-2xl shadow-xl border border-hairline z-[100] overflow-hidden animate-fadeIn"
+          style={{ left: popupPos.left, top: popupPos.top, width: popupPos.width }}
+        >
           <div className="flex items-center justify-between px-4 py-3 border-b border-hairline">
             <h3 className="font-feather font-extrabold text-ink text-sm">การแจ้งเตือน</h3>
             {unreadCount > 0 && (
