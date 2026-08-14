@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../contexts/AuthContext';
 import { Icon } from '../components/Icon';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 
 interface Comment {
   id: string;
@@ -45,7 +46,9 @@ export default function PostDetail() {
       return false;
     }
   });
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isAdmin } = useAuth();
+  const [postToDelete, setPostToDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const commentsEndRef = useRef<HTMLDivElement>(null);
 
   // 📬 State สำหรับส่งการ์ด
@@ -188,6 +191,33 @@ export default function PostDetail() {
     } catch { /* ignore */ }
   };
 
+  const handleDeletePost = async () => {
+    if (!post || deleting) return;
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+      const response = await api.delete(`/api/posts/${post.id || post._id}`, config);
+      if (response.status === 200 || response.data?.success) {
+        setPostToDelete(false);
+        alert('ลบโพสต์เรียบร้อยแล้ว');
+        navigate('/feed');
+      } else {
+        alert('ไม่สามารถลบโพสต์ได้ ลองใหม่อีกครั้งครับ');
+      }
+    } catch (err: any) {
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        alert('คุณไม่มีสิทธิ์ลบโพสต์นี้');
+      } else if (err?.response?.status === 404) {
+        alert('ไม่พบโพสต์นี้ในระบบ');
+      } else {
+        alert('ไม่สามารถลบโพสต์ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง');
+      }
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('th-TH', {
@@ -240,15 +270,24 @@ export default function PostDetail() {
 
       {/* 📌 โพสต์หลัก */}
       <article className="card p-8 rounded-3xl">
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-start gap-4 mb-6">
           <div className="w-12 h-12 bg-owl-soft rounded-full flex items-center justify-center text-3xl border border-owl-mint shadow-sm">
             {post.emotion}
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <Link to={`/user/${post.user_id}`} className="font-bold text-ink text-lg hover:text-owl transition-colors">{post.alias_name}</Link>
             {post.poster_role === 'expert' && <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-macaw/10 text-ink rounded-full font-bold"><Icon name="stethoscope" size={12} className="text-macaw" /> ผู้เชี่ยวชาญ</span>}
             <p className="text-xs text-body-soft font-medium">{formatDate(post.created_at)}</p>
           </div>
+          {(isAdmin || user?.id === post.user_id) && (
+            <button
+              onClick={() => setPostToDelete(true)}
+              className="text-body-soft hover:text-cardinal transition-colors w-10 h-10 flex items-center justify-center rounded-lg shrink-0"
+              title="ลบโพสต์"
+            >
+              <Icon name="trash" size={18} />
+            </button>
+          )}
         </div>
 
         <p className="text-body-strong text-lg leading-relaxed whitespace-pre-wrap mb-8">
@@ -386,6 +425,15 @@ export default function PostDetail() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal ยืนยันการลบโพสต์ */}
+      {postToDelete && (
+        <ConfirmDeleteModal
+          confirming={deleting}
+          onCancel={() => { if (!deleting) setPostToDelete(false); }}
+          onConfirm={handleDeletePost}
+        />
       )}
 
     </div>

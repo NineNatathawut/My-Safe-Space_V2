@@ -4,6 +4,7 @@ import api from '../api/axios';
 import { useAuth } from '../contexts/AuthContext';
 import { PostComposer } from '../components/PostComposer';
 import { Icon } from '../components/Icon';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 
 interface Post {
   id: string;
@@ -22,8 +23,10 @@ export default function Feed() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const [huggingIds, setHuggingIds] = useState<Set<string>>(new Set());
+  const [postToDelete, setPostToDelete] = useState<Post | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [huggedPosts, setHuggedPosts] = useState<Set<string>>(() => {
     const saved = localStorage.getItem('huggedPosts');
     return saved ? new Set(JSON.parse(saved)) : new Set();
@@ -48,14 +51,17 @@ export default function Feed() {
 
   useEffect(() => { fetchPosts(); }, []);
 
-  const handleDeletePost = async (postId: string) => {
-    if (!window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบโพสต์นี้?')) return;
+  const confirmDeletePost = async () => {
+    if (!postToDelete) return;
+    const postId = postToDelete.id || postToDelete._id;
+    setDeleting(true);
     try {
       const token = localStorage.getItem('token');
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
       const response = await api.delete(`/api/posts/${postId}`, config);
       if (response.status === 200 || response.data?.success) {
         setPosts(prev => prev.filter(post => (post.id || post._id) !== postId));
+        setPostToDelete(null);
         alert('ลบโพสต์เรียบร้อยแล้ว');
       } else {
         alert('ไม่สามารถลบโพสต์ได้ ลองใหม่อีกครั้งครับ');
@@ -68,6 +74,8 @@ export default function Feed() {
       } else {
         alert('ไม่สามารถลบโพสต์ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง');
       }
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -163,8 +171,8 @@ export default function Feed() {
                         <div className="text-xs text-body-soft font-medium">{formatDate(post.created_at)}</div>
                       </div>
                     </div>
-                    {isAdmin && (
-                      <button onClick={() => handleDeletePost(activeId)} className="text-body-soft hover:text-cardinal transition-colors w-10 h-10 flex items-center justify-center rounded-lg" title="ลบโพสต์"><Icon name="trash" size={16} /></button>
+                    {(isAdmin || user?.id === post.user_id) && (
+                      <button onClick={() => setPostToDelete(post)} className="text-body-soft hover:text-cardinal transition-colors w-10 h-10 flex items-center justify-center rounded-lg" title="ลบโพสต์"><Icon name="trash" size={16} /></button>
                     )}
                   </div>
                   <p className="text-body-strong whitespace-pre-wrap mb-4 font-medium">{post.content}</p>
@@ -200,6 +208,15 @@ export default function Feed() {
 
       {/* PostComposer Adaptive Overlay */}
       <PostComposer isOpen={showComposer} onClose={() => setShowComposer(false)} />
+
+      {/* Modal ยืนยันการลบโพสต์ */}
+      {postToDelete && (
+        <ConfirmDeleteModal
+          confirming={deleting}
+          onCancel={() => { if (!deleting) setPostToDelete(null); }}
+          onConfirm={confirmDeletePost}
+        />
+      )}
     </div>
   );
 }
