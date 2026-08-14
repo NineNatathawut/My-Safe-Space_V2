@@ -28,6 +28,8 @@ export default function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const markAllReadAtRef = useRef(0);
+  const fetchStartedAtRef = useRef(0);
 
   useEffect(() => {
     fetchNotifications();
@@ -46,8 +48,10 @@ export default function NotificationBell() {
   }, []);
 
   const fetchNotifications = async () => {
+    fetchStartedAtRef.current = Date.now();
     try {
       const res = await api.get('/api/notifications');
+      if (fetchStartedAtRef.current < markAllReadAtRef.current) return;
       if (res.data.success) {
         setNotifications(res.data.notifications);
         setUnreadCount(res.data.unread_count);
@@ -60,6 +64,7 @@ export default function NotificationBell() {
   const handleMarkAllRead = async () => {
     try {
       await api.patch('/api/notifications/read-all');
+      markAllReadAtRef.current = Date.now();
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
       setUnreadCount(0);
     } catch {
@@ -68,24 +73,18 @@ export default function NotificationBell() {
   };
 
   const handleToggle = () => {
-    if (!open) {
-      setOpen(true);
-      if (unreadCount > 0) {
-        handleMarkAllRead();
-      }
-    } else {
-      setOpen(false);
-    }
+    setOpen(prev => !prev);
   };
 
-  const handleNotificationClick = async (n: Notification) => {
-    if (!n.is_read) {
-      try {
-        await api.patch(`/api/notifications/${n.id}/read`);
-        setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, is_read: true } : x));
-        setUnreadCount(prev => Math.max(0, prev - 1));
-      } catch { /* ignore */ }
+  const prevOpenRef = useRef(false);
+  useEffect(() => {
+    if (prevOpenRef.current && !open) {
+      handleMarkAllRead();
     }
+    prevOpenRef.current = open;
+  }, [open]);
+
+  const handleNotificationClick = (n: Notification) => {
     setOpen(false);
 
     const targetPath = getNotificationLink(n);
