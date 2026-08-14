@@ -285,10 +285,10 @@ export default function Assessment() {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="font-bold text-ink">{a.title}</h2>
+                  <div className="flex items-center gap-2 flex-wrap min-w-0">
+                    <h2 className="font-bold text-ink min-w-0 [overflow-wrap:anywhere]">{a.title}</h2>
                     <span
-                      className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                      className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${
                         a.type === 'EXTERNAL'
                           ? 'bg-bee/20 text-ink'
                           : 'bg-owl-soft text-owl-pressed'
