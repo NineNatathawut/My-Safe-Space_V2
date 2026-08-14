@@ -278,46 +278,46 @@ export default function Assessment() {
             {assessments.map((a) => (
               <div
                 key={a.id}
-                className="card p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+                className="card w-full p-5 overflow-hidden"
               >
-                <div className="text-3xl shrink-0">
-                  <Icon name={a.type === 'EXTERNAL' ? 'external' : 'pencil'} size={28} className="text-macaw" />
+                <div className="w-10 h-10 bg-owl-soft text-macaw rounded-xl flex items-center justify-center mb-3 shrink-0">
+                  <Icon name={a.type === 'EXTERNAL' ? 'external' : 'pencil'} size={20} />
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap min-w-0">
-                    <h2 className="font-bold text-ink min-w-0 [overflow-wrap:anywhere]">{a.title}</h2>
-                    <span
-                      className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${
-                        a.type === 'EXTERNAL'
-                          ? 'bg-bee/20 text-ink'
-                          : 'bg-owl-soft text-owl-pressed'
-                      }`}
-                    >
-                      {a.type === 'EXTERNAL' ? 'External' : 'Internal'}
-                    </span>
-                  </div>
-                  {a.description && (
-                    <p className="text-sm text-body-muted font-medium mt-1 truncate">{a.description}</p>
-                  )}
-                  {a.estimated_time_mins && (
-                    <p className="text-xs text-body-soft mt-1">~{a.estimated_time_mins} นาที</p>
-                  )}
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <h3 className="font-bold text-ink text-base leading-snug min-w-0 [overflow-wrap:anywhere]">{a.title}</h3>
+                  <span
+                    className={`shrink-0 text-xs font-medium px-2.5 py-0.5 rounded-full ${
+                      a.type === 'EXTERNAL'
+                        ? 'bg-bee/20 text-ink'
+                        : 'bg-owl-soft text-owl-pressed'
+                    }`}
+                  >
+                    {a.type === 'EXTERNAL' ? 'External' : 'Internal'}
+                  </span>
                 </div>
+
+                {a.description && (
+                  <p className="text-xs sm:text-sm text-body-muted font-medium leading-relaxed mb-1 break-words">{a.description}</p>
+                )}
+
+                {a.estimated_time_mins && (
+                  <span className="text-xs text-body-soft block mb-4">~{a.estimated_time_mins} นาที</span>
+                )}
 
                 {a.type === 'EXTERNAL' ? (
                   <a
                     href={a.external_url}
                     target={a.open_in_new_tab !== false ? '_blank' : '_self'}
                     rel="noopener noreferrer"
-                    className="shrink-0 btn-primary text-sm"
+                    className="w-full sm:w-auto btn-primary text-sm"
                   >
                     เริ่มทำแบบประเมิน
                   </a>
                 ) : (
                   <button
                     onClick={() => handleSelect(a.id)}
-                    className="shrink-0 btn-primary text-sm"
+                    className="w-full sm:w-auto btn-primary text-sm"
                   >
                     เริ่มทำแบบประเมิน
                   </button>
