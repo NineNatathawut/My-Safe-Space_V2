@@ -67,6 +67,17 @@ export default function NotificationBell() {
     }
   };
 
+  const handleToggle = () => {
+    if (!open) {
+      setOpen(true);
+      if (unreadCount > 0) {
+        handleMarkAllRead();
+      }
+    } else {
+      setOpen(false);
+    }
+  };
+
   const handleNotificationClick = async (n: Notification) => {
     if (!n.is_read) {
       try {
@@ -78,15 +89,15 @@ export default function NotificationBell() {
     setOpen(false);
 
     const targetPath = getNotificationLink(n);
-    if (location.pathname !== targetPath) {
+    if (targetPath && location.pathname !== targetPath) {
       navigate(targetPath);
     }
   };
 
-  const getNotificationLink = (n: Notification): string => {
+  const getNotificationLink = (n: Notification): string | null => {
     if (n.reference_type === 'post') return `/post/${n.reference_id}`;
     if (n.reference_type === 'verification') return '/profile';
-    return '#';
+    return null;
   };
 
   const formatTime = (dateStr: string) => {
@@ -102,7 +113,7 @@ export default function NotificationBell() {
   return (
     <div ref={ref} className="relative">
       <button
-        onClick={() => setOpen(!open)}
+        onClick={handleToggle}
         className="relative p-2.5 bg-owl-soft hover:bg-owl-mint rounded-full transition-colors text-owl-pressed"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -134,18 +145,21 @@ export default function NotificationBell() {
                   <div
                     key={n.id}
                     onClick={() => handleNotificationClick(n)}
-                    className={`cursor-pointer block px-4 py-3 hover:bg-owl-soft/30 transition-colors border-b border-hairline last:border-0 ${!n.is_read ? 'bg-owl-soft/40' : ''}`}
+                    className={`cursor-pointer block px-4 py-3 hover:bg-owl-soft/30 transition-colors border-b border-hairline last:border-0 ${!n.is_read ? 'bg-owl-soft/50 border-l-4 border-l-owl' : ''}`}
                   >
                   <div className="flex items-start gap-3">
                     <span className="text-lg mt-0.5">{TYPE_ICONS[n.type] || '🔔'}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-body-strong leading-relaxed">
+                      <p className={`text-sm leading-relaxed ${!n.is_read ? 'text-ink font-bold' : 'text-body-strong'}`}>
                         {n.content_preview}
                       </p>
                       <p className="text-xs text-body-soft mt-1">{formatTime(n.created_at)}</p>
                     </div>
                     {!n.is_read && (
-                      <span className="w-2 h-2 bg-owl rounded-full mt-2 shrink-0" />
+                      <span className="inline-flex items-center gap-1 mt-1 shrink-0">
+                        <span className="w-2 h-2 bg-owl rounded-full" />
+                        <span className="text-[10px] font-bold text-owl">ใหม่</span>
+                      </span>
                     )}
                   </div>
                   </div>
