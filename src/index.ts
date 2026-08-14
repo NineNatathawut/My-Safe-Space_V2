@@ -425,9 +425,12 @@ app.delete('/api/posts/:id', authMiddleware, async (c) => {
       }
     }
 
-    // 🌟 3. ลบข้อมูลที่ผูกอยู่กับโพสต์นี้ก่อน (ลบ hugs และ comments) เพื่อป้องกัน Database Error (500)
+    // 🌟 3. ลบข้อมูลที่ผูกอยู่กับโพสต์นี้ก่อน (ลบ hugs, comments และ notifications) เพื่อป้องกัน Database Error (500)
     await supabase.from('hugs').delete().eq('post_id', postId)
     await supabase.from('comments').delete().eq('post_id', postId)
+    await supabaseAdmin.from('notifications').delete()
+      .eq('reference_type', 'post')
+      .eq('reference_id', postId)
 
     // 🌟 4. สั่งลบโพสต์หลักออกจากฐานข้อมูล
     const { data, error } = await supabase
