@@ -47,7 +47,7 @@ export default function ImageSlider() {
             key={s.id}
             className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${i === current ? 'opacity-100' : 'opacity-0'}`}
           >
-            <img src={s.image} alt={s.alt} className="absolute inset-0 w-full h-full object-cover" />
+            <img src={s.image} alt={s.alt} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
           </div>
         ))}
       </div>

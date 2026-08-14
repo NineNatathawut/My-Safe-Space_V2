@@ -44,23 +44,31 @@ export default function Layout({ children }: { children?: ReactNode }) {
     setMenuOpen(false);
   }, [location.pathname]);
 
+  // เลื่อนหน้าใหม่ขึ้นบนสุดทุกครั้งที่เปลี่ยน route (ไม่ค้างตำแหน่งเดิม)
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [location.pathname]);
+
   return (
     <div className="min-h-screen bg-canvas flex flex-col font-din">
       {/* ① แถบสายด่วน (คงสีแดงเน้นฉุกเฉิน) */}
-      <div className="bg-cardinal text-white text-xs md:text-sm py-1.5">
+      <div
+        className="bg-cardinal text-white text-xs md:text-sm pb-1.5"
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      >
         <div className="container mx-auto max-w-6xl flex flex-wrap items-center justify-center md:justify-between gap-x-4 gap-y-1 px-4">
           <span className="hidden md:flex items-center gap-1.5">
             <HomeLogo className="w-4 h-4" />
             บ้านพักใจ - พื้นที่ปลอดภัยสำหรับทุกความรู้สึก
           </span>
           <div className="flex flex-wrap items-center justify-center gap-1.5">
-            <a href="tel:1323" className="bg-white text-cardinal font-bold px-3 py-0.5 rounded-full shadow-sm hover:bg-red-50 transition-colors">
+            <a href="tel:1323" className="bg-white text-cardinal font-bold px-3 py-1 rounded-full shadow-sm hover:bg-red-50 transition-colors">
               <span className="inline-flex items-center gap-1"><Icon name="phone" size={12} /> 1323 สุขภาพจิต</span>
             </a>
-            <a href="tel:1669" className="bg-white text-cardinal font-bold px-3 py-0.5 rounded-full shadow-sm hover:bg-red-50 transition-colors">
+            <a href="tel:1669" className="bg-white text-cardinal font-bold px-3 py-1 rounded-full shadow-sm hover:bg-red-50 transition-colors">
               <span className="inline-flex items-center gap-1"><Icon name="phone" size={12} /> 1669 ฉุกเฉิน</span>
             </a>
-            <a href="tel:1385" className="bg-white text-cardinal font-bold px-3 py-0.5 rounded-full shadow-sm hover:bg-red-50 transition-colors">
+            <a href="tel:1385" className="bg-white text-cardinal font-bold px-3 py-1 rounded-full shadow-sm hover:bg-red-50 transition-colors">
               <span className="inline-flex items-center gap-1"><Icon name="phone" size={12} /> 1385 ป้องกันฆ่าตัวตาย</span>
             </a>
             <span className="hidden lg:inline opacity-90">ให้บริการฟรี 24 ชม.</span>
@@ -71,14 +79,14 @@ export default function Layout({ children }: { children?: ReactNode }) {
       {/* ② Header + Nav สไตล์ Duolingo */}
       <header ref={menuRef} className="bg-white sticky top-0 z-40" style={{ boxShadow: '0 2px 3px 0 rgba(0,0,0,0.06)' }}>
         <div className="container mx-auto max-w-6xl px-4">
-          <div className="flex justify-between items-center h-[70px] gap-4">
-            <Link to="/" className="flex items-center gap-2.5 group">
-              <OwlLogo className="w-9 h-9 transition-transform group-hover:scale-105" />
-              <span className="flex flex-col leading-tight">
-                <span className="font-feather text-xl font-black text-ink group-hover:text-ink-deep transition-colors leading-none">
+          <div className="flex justify-between items-center h-[70px] gap-2 sm:gap-4">
+            <Link to="/" className="flex items-center gap-2 group min-w-0">
+              <OwlLogo className="w-9 h-9 shrink-0 transition-transform group-hover:scale-105" />
+              <span className="flex flex-col leading-tight min-w-0">
+                <span className="font-feather text-lg sm:text-xl font-black text-ink group-hover:text-ink-deep transition-colors leading-none truncate">
                   บ้านพักใจ
                 </span>
-                <span className="text-[11px] tracking-btn text-owl uppercase font-bold">
+                <span className="text-[11px] tracking-btn text-owl uppercase font-bold hidden sm:block">
                   My Safe Space
                 </span>
               </span>
@@ -143,12 +151,12 @@ export default function Layout({ children }: { children?: ReactNode }) {
               )}
             </nav>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               <button
                 onClick={toggleMenu}
                 aria-label="เปิดเมนู"
                 aria-expanded={menuOpen}
-                className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg text-body-strong hover:bg-owl-soft hover:text-owl transition"
+                className="tap-target md:hidden w-10 h-10 rounded-lg text-body-strong hover:bg-owl-soft hover:text-owl transition"
               >
                 <Icon name={menuOpen ? 'x' : 'menu'} size={22} />
               </button>
@@ -158,7 +166,7 @@ export default function Layout({ children }: { children?: ReactNode }) {
                   <UserDropdown />
                 </>
               ) : (
-                <Link to="/login" className="btn-primary text-sm min-h-[44px] py-2.5 px-5">
+                <Link to="/login" className="btn-primary text-sm min-h-[44px] py-2.5 px-4 sm:px-5 whitespace-nowrap">
                   เข้าสู่ระบบ
                 </Link>
               )}
@@ -168,7 +176,7 @@ export default function Layout({ children }: { children?: ReactNode }) {
 
         {menuOpen && (
           <div className="md:hidden absolute left-0 right-0 top-full bg-white border-t border-hairline shadow-lg z-[100] animate-fadeIn">
-            <nav className="container mx-auto max-w-6xl px-4 py-2 flex flex-col text-sm font-semibold">
+            <nav className="container mx-auto max-w-6xl px-4 py-2 flex flex-col text-sm font-semibold" style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}>
               {NAV_ITEMS.map((item) => (
                 <NavLink
                   key={item.to}

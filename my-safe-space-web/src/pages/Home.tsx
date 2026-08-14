@@ -1,54 +1,30 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../api/axios';
 import ImageSlider from '../components/ImageSlider';
 import MoodCheckInCard from '../components/MoodCheckInCard';
+import ArticleEditModal from '../components/ArticleEditModal';
 import { Icon } from '../components/Icon';
+import { checkSensitiveKeywords } from '../utils/sensitiveContent';
 import { loadHomeArticles, saveHomeArticles, deleteHomeArticle } from '../services/homeService';
 import cartoon1 from '../assets/cartoons/cartoon-1.png';
 import cartoon3 from '../assets/cartoons/cartoon-3.png';
 import cartoon7 from '../assets/cartoons/cartoon-7.png';
 import { MentalHealthKnowledge } from './MentalHealthKnowledge';
+import { type Article, INITIAL_ARTICLES, BADGE_COLORS } from '../data/homeArticles';
+import { normalizeCategory } from '../data/resourceCategories';
 
-interface Article {
-  id: number;
-  category: string;
-  title: string;
-  description: string;
-  badgeColor: string;
-  actionText: string;
-  link: string;
+interface CommunityPost {
+  id: string;
+  _id?: string;
+  content: string;
+  emotion: string;
+  alias_name?: string;
+  created_at: string;
+  hug_count?: number;
+  comment_count?: number;
 }
-
-const INITIAL_ARTICLES: Article[] = [
-  {
-    id: 1,
-    category: 'การหายใจ',
-    title: 'เทคนิคหายใจ 4-7-8 ลดเครียดใน 5 นาที',
-    description: 'วิธีการหายใจที่ช่วยให้ระบบประสาทสงบลง ลดความวิตกกังวลได้ทันที ทำได้ทุกที่',
-    badgeColor: 'bg-owl-soft text-owl-pressed',
-    actionText: 'ไปฝึกหายใจ',
-    link: '/resources?tab=breathing'
-  },
-  {
-    id: 2,
-    category: 'บทความสุขภาพจิต',
-    title: 'รวมบทความสุขภาพจิตจากกรมสุขภาพจิต',
-    description: 'บทความด้านสุขภาพจิตและจิตเวชจากกรมสุขภาพจิต ครบทุกเรื่อง ช่วยให้เข้าใจและดูแลใจตัวเองง่ายขึ้น',
-    badgeColor: 'bg-fox/10 text-fox',
-    actionText: 'ดูบทความต่อ',
-    link: 'https://dmh.go.th/YamDMH/WebDMH/ViewTable.aspx?indotype=6'
-  }
-];
-
-// ชุดสีป้ายหมวดหมู่ (class เต็มเพื่อให้ Tailwind สร้างสีได้ถูกต้อง)
-const BADGE_COLORS: { label: string; class: string }[] = [
-  { label: 'เขียว (ค้างคาว/นกฮูก)', class: 'bg-owl-soft text-owl-pressed' },
-  { label: 'ส้ม (จิ้งจอก)', class: 'bg-fox/10 text-fox' },
-  { label: 'เขียว (มาคอว์)', class: 'bg-macaw/10 text-macaw' },
-  { label: 'เหลือง (ผึ้ง)', class: 'bg-bee/20 text-ink' },
-  { label: 'แดง (นกคาร์ดินัล)', class: 'bg-cardinal/10 text-cardinal' },
-];
 
 interface FeelingTag {
   label: string;
@@ -91,11 +67,41 @@ const TAG_STYLES = [
   'md:translate-y-0 md:rotate-2',
 ];
 
+const MINUTE_MS = 60 * 1000;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
+
+// หน้าแรกโชว์แค่การ์ดล่าสุดเท่านี้ (การ์ดที่เกินไปอยู่ที่หน้า /resources)
+const HOME_ARTICLE_LIMIT = 3;
+
+function formatRelativeTime(dateStr?: string): string {
+  if (!dateStr) return '';
+  const then = new Date(dateStr).getTime();
+  if (Number.isNaN(then)) return '';
+  const diff = Date.now() - then;
+  if (diff < MINUTE_MS) return 'เมื่อสักครู่';
+  if (diff < HOUR_MS) return `${Math.floor(diff / MINUTE_MS)} นาทีที่แล้ว`;
+  if (diff < DAY_MS) return `${Math.floor(diff / HOUR_MS)} ชั่วโมงที่แล้ว`;
+  if (diff < 2 * DAY_MS) return 'เมื่อวาน';
+  if (diff < 7 * DAY_MS) return `${Math.floor(diff / DAY_MS)} วันที่แล้ว`;
+  return new Date(dateStr).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
 export default function Home() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isAuthenticated } = useAuth();
   const [articles, setArticles] = useState<Article[]>(INITIAL_ARTICLES);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [brokenImages, setBrokenImages] = useState<Set<number>>(new Set());
+
+  // หน้าแรก: ถ้ามีการ์ดปักหมุดให้โชว์การ์ดที่ปัก (สูงสุด 3) — ยังไม่ปักเลยให้โชว์ 3 ล่าสุด
+  const pinnedArticles = articles.filter((a) => a.isPinned);
+  const homeArticles = pinnedArticles.length > 0
+    ? pinnedArticles.slice(0, 3)
+    : [...articles].slice(-HOME_ARTICLE_LIMIT).reverse();
+
+  const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
+  const [communityLoading, setCommunityLoading] = useState(true);
 
   // โหลดการ์ดจริงจาก DB (ถ้า DB ถูก initial แล้วให้ใช้ข้อมูลจาก DB เสมอแม้หมวดจะว่าง)
   useEffect(() => {
@@ -103,11 +109,26 @@ export default function Home() {
     loadHomeArticles().then((data) => {
       if (!active || !data) return;
       if (data.initialized) {
-        setArticles(data.articles as Article[]);
+        setArticles((data.articles as Article[]).map((a) => ({ ...a, category: normalizeCategory(a.category) })));
       } else if (data.articles.length > 0) {
-        setArticles(data.articles as Article[]);
+        setArticles((data.articles as Article[]).map((a) => ({ ...a, category: normalizeCategory(a.category) })));
       }
     });
+    return () => { active = false; };
+  }, []);
+
+  // 💬 ตัวอย่างเรื่องราวจาก Community (Home Preview เท่านั้น — กรองเนื้อหาไวออก ไม่โชว์บนหน้าแรก)
+  useEffect(() => {
+    let active = true;
+    api.get('/api/posts')
+      .then((response) => {
+        if (!active || !response.data.success) return;
+        const all = (response.data.posts as CommunityPost[]) || [];
+        const safe = all.filter((p) => !checkSensitiveKeywords(p.content));
+        setCommunityPosts(safe.slice(0, 3));
+      })
+      .catch(() => { /* เงียบ ๆ — ถ้าโหลดไม่ได้ Home จะแสดง empty state แทน */ })
+      .finally(() => { if (active) setCommunityLoading(false); });
     return () => { active = false; };
   }, []);
 
@@ -124,14 +145,9 @@ export default function Home() {
       badgeColor: BADGE_COLORS[0].class,
       actionText: 'อ่านต่อ',
       link: '',
+      imageUrl: '',
+      isPinned: false,
     });
-  };
-
-  const handleModalChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    if (editingArticle) {
-      setEditingArticle({ ...editingArticle, [name]: value });
-    }
   };
 
   const persistArticles = async (next: Article[]) => {
@@ -145,8 +161,16 @@ export default function Home() {
     return false;
   };
 
-  const handleSaveArticle = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleArticleChange = (field: string, value: string) => {
+    if (!editingArticle) return;
+    if (field === 'isPinned') {
+      setEditingArticle({ ...editingArticle, isPinned: value === 'true' });
+      return;
+    }
+    setEditingArticle({ ...editingArticle, [field]: value });
+  };
+
+  const handleSaveArticle = async () => {
     if (!editingArticle) return;
     if (!editingArticle.title.trim()) {
       alert('กรุณากรอกหัวข้อบทความ');
@@ -154,12 +178,23 @@ export default function Home() {
     }
 
     const isNew = editingArticle.id === 0;
+    // กันปักหมุดเกิน 3 การ์ด (นับเฉพาะการ์ดที่ถูกปักอยู่แล้ว ไม่รวมการ์ดนี้ที่กำลังแก้ไข)
+    if (editingArticle.isPinned) {
+      const pinnedCount = articles.filter((a) => a.isPinned && (isNew || a.id !== editingArticle.id)).length;
+      if (pinnedCount >= 3) {
+        alert('ปักหมุดได้สูงสุด 3 การ์ดสำหรับหน้าแรก');
+        return;
+      }
+    }
+
+    const savedArticle = { ...editingArticle, category: normalizeCategory(editingArticle.category) };
+
     let next: Article[];
     if (isNew) {
-      next = [...articles, { ...editingArticle, id: Date.now() }];
+      next = [...articles, { ...savedArticle, id: Date.now() }];
     } else {
       next = articles.map((a) =>
-        a.id === editingArticle.id ? editingArticle : a
+        a.id === editingArticle.id ? savedArticle : a
       );
     }
 
@@ -188,11 +223,11 @@ export default function Home() {
         {/* Pastel Blobs เฉพาะส่วนบน */}
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-24 -left-24 w-80 h-80 rounded-full bg-gradient-to-br from-[#FFE7D2] to-[#FFD9E8]/30 blur-3xl opacity-80 animate-float-side"
+          className="pointer-events-none absolute -top-24 -left-24 w-80 h-80 rounded-full bg-gradient-to-br from-[#FFE7D2] to-[#FFD9E8]/30 blur-3xl opacity-80 md:[animation:float-side_4s_ease-in-out_infinite]"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -bottom-20 -right-16 w-96 h-96 rounded-full bg-gradient-to-br from-owl-mint/50 to-macaw/15 blur-3xl opacity-70 animate-float-side"
+          className="pointer-events-none absolute -bottom-20 -right-16 w-96 h-96 rounded-full bg-gradient-to-br from-owl-mint/50 to-macaw/15 blur-3xl opacity-70 md:[animation:float-side_4s_ease-in-out_infinite]"
           style={{ animationDelay: '-2s' }}
         />
 
@@ -242,12 +277,7 @@ export default function Home() {
 
       
 
-      {/* 🌿 เช็คอินสุขภาพใจ (Moood widget) */}
-      <MoodCheckInCard />
-
- 
-
-      {/* 🏡 4. About / Introduction — Interactive Tag-Cloud */}
+{/* 🏡 1. About / Introduction — Interactive Tag-Cloud */}
       <section className="w-screen ml-[calc(50%_-_50vw)] bg-orange-100/50 relative">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-16 relative">
           {/* มาสคอตซ้าย — ลอยขอบ ระดับสูง */}
@@ -285,13 +315,13 @@ export default function Home() {
           {/* Tag Cloud */}
           <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
             {FEELING_TAGS.map((tag, idx) => {
-              const isActive = activeTag === tag.label;
-              return (
+const isActive = activeTag === tag.label;
+  return (
                 <button
                   key={tag.label}
                   type="button"
                   onClick={() => setActiveTag(isActive ? null : tag.label)}
-                  className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full border-2 font-bold text-sm transition-all duration-200 active:scale-95 ${TAG_STYLES[idx % TAG_STYLES.length]} ${
+                  className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full border-2 font-bold text-sm transition-all duration-200 active:scale-95 min-h-[44px] ${TAG_STYLES[idx % TAG_STYLES.length]} ${
                     isActive
                       ? 'border-owl bg-owl-mint/60 text-owl-pressed shadow-sm scale-105'
                       : 'border-hairline bg-white text-body-strong hover:border-owl hover:bg-owl-soft/40 hover:-translate-y-0.5'
@@ -327,11 +357,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 📖 4. บทความและคลังความรู้สำหรับคุณ */}
+      {/* 🍃 2. ตอนนี้ฉันรู้สึกอย่างไร? */}
+      <section className="px-4">
+        {!isAdmin && isAuthenticated && <MoodCheckInCard />}
+      </section>
+
+      {/* 📖 3. บทความและเทคนิค */}
       <section className="px-4">
         <div className="text-center mb-10">
-          <h2 className="font-feather text-3xl font-black text-owl mb-2" style={{ letterSpacing: '-0.5px' }}>บทความและเทคนิคสำหรับคุณ</h2>
-          <p className="text-body-muted text-sm md:text-base max-w-2xl mx-auto font-medium">ลองดูเลย</p>
+          <h2 className="font-feather text-3xl font-black text-owl mb-2" style={{ letterSpacing: '-0.5px' }}>บทความและเทคนิค</h2>
           {isAdmin && (
             <button
               onClick={openCreateModal}
@@ -343,10 +377,10 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {articles.map((article) => (
-            <div 
+          {homeArticles.map((article) => (
+            <div
               key={article.id}
-              className="card p-6 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative group/card"
+              className="card overflow-hidden hover:shadow-md transition-all duration-200 flex flex-col relative group/card"
             >
               {isAdmin && (
                 <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
@@ -367,38 +401,58 @@ export default function Home() {
                 </div>
               )}
 
-              <div>
-                <div className="mb-3">
-                  <span className={`text-xs px-3 py-1 rounded-full font-extrabold ${article.badgeColor}`}>
-                    {article.category}
+              {article.imageUrl && !brokenImages.has(article.id) ? (
+                <div className="h-44 bg-owl-soft/40 overflow-hidden relative">
+                  <img
+                    src={article.imageUrl}
+                    alt={article.title}
+                    loading="lazy"
+                    onError={() => setBrokenImages(prev => new Set(prev).add(article.id))}
+                    className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-500"
+                  />
+                </div>
+              ) : (
+                <div className="h-44 bg-gradient-to-br from-owl-soft to-owl-mint/60 p-6 flex items-start relative overflow-hidden">
+                  <span className="text-xs font-semibold px-2.5 py-1 bg-white/70 backdrop-blur-md rounded-full w-fit text-owl-pressed border border-owl-mint inline-flex items-center gap-1">
+                    <Icon name="book" size={12} /> บทความ
                   </span>
                 </div>
-                <h3 className="font-feather font-extrabold text-lg text-ink mb-2 hover:text-owl transition-colors pr-8">
-                  {article.title}
-                </h3>
-                <p className="text-sm text-body-muted mb-4 line-clamp-3 leading-relaxed">
-                  {article.description}
-                </p>
-              </div>
-
-              {article.link.startsWith('http') ? (
-                <a href={article.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-owl hover:text-owl-pressed font-bold text-sm transition-colors group">
-                  <span>{article.actionText}</span>
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
-                </a>
-              ) : (
-                <Link to={article.link} className="inline-flex items-center gap-1 text-owl hover:text-owl-pressed font-bold text-sm transition-colors group">
-                  <span>{article.actionText}</span>
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
-                </Link>
               )}
+
+              <div className="p-5 flex-1 flex flex-col justify-between">
+                <div className="mb-4">
+                  <div className="mb-3">
+                    <span className={`text-xs px-3 py-1 rounded-full font-extrabold ${article.badgeColor}`}>
+                      {article.category}
+                    </span>
+                  </div>
+                  <h3 className="font-feather font-extrabold text-lg text-ink mb-2 hover:text-owl transition-colors">
+                    {article.title}
+                  </h3>
+                  <p className="text-sm text-body-muted line-clamp-3 leading-relaxed">
+                    {article.description}
+                  </p>
+                </div>
+
+                {article.link.startsWith('http') ? (
+                  <a href={article.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-owl hover:text-owl-pressed font-bold text-sm transition-colors group min-h-[44px] py-2 -my-2">
+                    <span>{article.actionText}</span>
+                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </a>
+                ) : (
+                  <Link to={article.link} className="inline-flex items-center gap-1 text-owl hover:text-owl-pressed font-bold text-sm transition-colors group min-h-[44px] py-2 -my-2">
+                    <span>{article.actionText}</span>
+                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </Link>
+                )}
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="text-center">
+        <div className="text-center mt-2">
           <Link to="/resources" className="btn-secondary text-sm inline-flex">
-            ดูบทความและคลังความรู้ทั้งหมด →
+            ดูบทความทั้งหมด →
           </Link>
         </div>
       </section>
@@ -406,122 +460,88 @@ export default function Home() {
       {/* 🧠 ความรู้สุขภาพจิต (การ์ดความรู้จากกรมสุขภาพจิต) */}
       <MentalHealthKnowledge />
 
-      {/* 💚 5. Call to Action ก่อนจบหน้า */}
-      <section className="text-center px-4 bg-owl-soft/50 py-12 rounded-2xl border-2 border-owl-soft">
-        <h2 className="font-feather text-3xl font-black mb-4 text-ink" style={{ letterSpacing: '-0.5px' }}>อยากแชร์เรื่องราว ประสบการณ์ หรืออยากระบายอะไรไหม?</h2>
-        <p className="text-body-muted font-semibold mb-8 max-w-lg mx-auto">
-          ไม่ต้องกังวล ไม่มีใครรู้ว่าคุณเป็นใคร - พิมพ์ได้เลยทันที
-        </p>
-<Link 
-          to="/feed"
-          state={{ openComposer: true }}
-          className="btn-primary px-8 py-3 inline-block text-lg"
-        >
-          แชร์เรื่องราวของคุณ
-        </Link>
+      {/* 💬 5. เรื่องราวจากบ้านพักใจ (ตัวอย่างจาก Community) */}
+      <section className="px-4">
+        <div className="text-center mb-10">
+          <h2 className="font-feather text-3xl font-black text-owl mb-2" style={{ letterSpacing: '-0.5px' }}>เรื่องราวจากบ้านพักใจ</h2>
+          <p className="text-body-muted text-sm md:text-base max-w-2xl mx-auto font-medium">
+            บางเรื่องราวอาจทำให้เรารู้ว่า เราไม่ได้รู้สึกแบบนี้อยู่คนเดียว
+          </p>
+        </div>
+
+        {communityLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 max-w-5xl mx-auto">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="card p-6 animate-pulse">
+                <div className="h-6 w-16 bg-owl-soft rounded-full mb-3" />
+                <div className="h-4 bg-owl-soft rounded mb-2" />
+                <div className="h-4 bg-owl-soft rounded mb-2" />
+                <div className="h-4 w-3/4 bg-owl-soft rounded" />
+              </div>
+            ))}
+          </div>
+        ) : communityPosts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 max-w-5xl mx-auto">
+            {communityPosts.map((post) => (
+              <Link
+                key={post.id || post._id}
+                to={`/post/${post.id || post._id}`}
+                className="card p-6 hover:shadow-md transition-all duration-200 flex flex-col justify-between group/card"
+              >
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">{post.emotion}</span>
+                    <span className="text-xs text-body-soft font-medium truncate">{post.alias_name}</span>
+                  </div>
+                  <p className="text-sm text-body-strong line-clamp-2 leading-relaxed font-medium">{post.content}</p>
+                </div>
+                <div className="flex items-center justify-between pt-4 border-t border-hairline mt-4 text-xs text-body-muted">
+                  <div className="flex items-center gap-3 font-medium">
+                    <span className="flex items-center gap-1">
+                      <Icon name="heart" size={14} className="text-cardinal" />
+                      {typeof post.hug_count === 'number' ? post.hug_count : ''}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Icon name="message" size={14} />
+                      {typeof post.comment_count === 'number' ? post.comment_count : ''}
+                    </span>
+                  </div>
+                  <span className="font-medium">{formatRelativeTime(post.created_at)}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="max-w-xl mx-auto card p-8 rounded-3xl text-center mb-8">
+            <div className="text-3xl mb-3">🤍</div>
+            <h3 className="font-feather text-lg font-black text-ink mb-1">พื้นที่เล็ก ๆ สำหรับเรื่องราวของคุณ</h3>
+            <p className="text-body-muted text-sm font-medium mb-6">อยากแบ่งปันอะไรกับบ้านพักใจไหม?</p>
+            <Link to="/feed" state={{ openComposer: true }} className="btn-primary px-6 py-3 inline-flex">
+              ไปที่ลานสายลม
+            </Link>
+          </div>
+        )}
+
+        {!communityLoading && communityPosts.length > 0 && (
+          <div className="text-center">
+            <Link to="/feed" className="btn-secondary text-sm inline-flex">
+              ไปที่ลานสายลม →
+            </Link>
+          </div>
+        )}
       </section>
 
       {/* Modal แก้ไขบทความ */}
       {editingArticle && (
-        <div className="fixed inset-0 bg-ink-deep/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
-            <h3 className="font-feather text-xl font-black mb-4 text-ink">
-              {editingArticle.id === 0 ? 'เพิ่มบทความใหม่' : 'แก้ไขบทความ'}
-            </h3>
-            
-            <form onSubmit={handleSaveArticle} className="space-y-4">
-              <div>
-                <label className="block text-sm font-bold text-body-strong mb-1">หมวดหมู่</label>
-                <input 
-                  type="text" 
-                  name="category"
-                  value={editingArticle.category} 
-                  onChange={handleModalChange}
-                  className="input text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-body-strong mb-1">สีป้ายหมวดหมู่</label>
-                <select
-                  name="badgeColor"
-                  value={editingArticle.badgeColor}
-                  onChange={handleModalChange}
-                  className="input text-sm"
-                >
-                  {BADGE_COLORS.map((c) => (
-                    <option key={c.class} value={c.class}>{c.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-body-strong mb-1">หัวข้อบทความ</label>
-                <input 
-                  type="text" 
-                  name="title"
-                  value={editingArticle.title} 
-                  onChange={handleModalChange}
-                  className="input text-sm"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-body-strong mb-1">คำอธิบายสั้นๆ</label>
-                <textarea 
-                  name="description"
-                  value={editingArticle.description} 
-                  onChange={handleModalChange}
-                  rows={3}
-                  className="input text-sm resize-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-body-strong mb-1">ข้อความปุ่มกด</label>
-                <input 
-                  type="text" 
-                  name="actionText"
-                  value={editingArticle.actionText} 
-                  onChange={handleModalChange}
-                  className="input text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-body-strong mb-1">ลิงก์ (URL หรือ Path)</label>
-                <input 
-                  type="text" 
-                  name="link"
-                  value={editingArticle.link} 
-                  onChange={handleModalChange}
-                  className="input text-sm"
-                  required
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-hairline">
-                <button 
-                  type="button"
-                  onClick={() => setEditingArticle(null)}
-                  className="btn-secondary text-sm min-h-[40px] py-2"
-                >
-                  ยกเลิก
-                </button>
-                <button 
-                  type="submit"
-                  className="btn-primary text-sm min-h-[40px] py-2"
-                >
-                  {editingArticle.id === 0 ? 'เพิ่มบทความ' : 'บันทึกการแก้ไข'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <ArticleEditModal
+          article={editingArticle}
+          isNew={editingArticle.id === 0}
+          onChange={handleArticleChange}
+          onSubmit={handleSaveArticle}
+          onClose={() => setEditingArticle(null)}
+        />
       )}
 
-    </div>
+      </div>
   );
 }

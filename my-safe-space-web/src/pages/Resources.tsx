@@ -1,68 +1,29 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../api/axios';
 import { HOSPITALS_DATABASE, type Hospital } from '../data/hospitals';
 import PodcastVoiceCard from '../components/PodcastVoiceCard';
+import PodcastEditModal, { type PodcastDraft } from '../components/PodcastEditModal';
+import ArticleEditModal from '../components/ArticleEditModal';
 import { SEED_PODCASTS } from '../data/podcasts';
 import type { PodcastEpisode } from '../types/podcast';
 import {
     loadResourcesContent,
     saveResourcesContent,
     deleteResourceItem,
-    type ResourceArticle,
     type ResourceVideo,
     type ResourceTip,
 } from '../services/resourcesService';
+import { loadHomeArticles, saveHomeArticles, deleteHomeArticle } from '../services/homeService';
+import { type Article, INITIAL_ARTICLES, BADGE_COLORS } from '../data/homeArticles';
+import { normalizeCategory } from '../data/resourceCategories';
 import { parsePodcastLink, describeLink } from '../utils/podcastLink';
 import cartoon1 from '../assets/cartoons/cartoon-1.png';
 import cartoon2 from '../assets/cartoons/cartoon-2.png';
 import cartoon5 from '../assets/cartoons/cartoon-5.png';
 import cartoon6 from '../assets/cartoons/cartoon-6.png';
 import { Icon } from '../components/Icon';
-
-// ข้อมูลหมวดหมู่บทความทั้งหมด
-const ARTICLE_CATEGORIES = [
-    'ทั้งหมด',
-    'ความเครียด',
-    'ความวิตกกังวล',
-    'การนอนหลับ',
-    'สติ & Mindfulness',
-    'ความสัมพันธ์',
-];
-
-// ข้อมูลเริ่มต้นบทความ (ไม่มีการบังคับใส่ภาพ Default ซ้ำกันแล้ว)
-const INITIAL_ARTICLES = [
-    {
-        id: 1,
-        category: 'สติ & Mindfulness',
-        title: 'การฝึก Mindfulness เพื่อลดความเครียด',
-        description: 'เรียนรู้วิธีอยู่อยู่กับปัจจุบัน ลดความคิดฟุ้งซ่าน และสร้างความสงบจากภายใน',
-        readTime: '3 นาที',
-        url: 'https://www.thaihealth.or.th',
-        imageUrl: '', // ลบภาพเดิมออก เพื่อให้แสดงข้อความหัวข้อแทน
-        color: 'bg-owl-soft text-owl-pressed',
-    },
-    {
-        id: 2,
-        category: 'ความเครียด',
-        title: 'แบบทดสอบความเครียด — รู้ตัวเองก่อน',
-        description: 'ประเมินระดับความเครียดของคุณในวันนี้ เพื่อรับมือได้ตรงจุด',
-        readTime: '4 นาที',
-        url: 'https://dmh.go.th',
-        imageUrl: '',
-        color: 'bg-owl-soft text-owl-pressed',
-    },
-    {
-        id: 3,
-        category: 'กาย & จิต',
-        title: 'Body Scan — สแกนร่างกายเพื่อสงบจิต',
-        description: 'สัมผัสความรู้สึกในร่างกายทีละส่วน ช่วยคลายการเกร็งตึง และหยุดคิดฟุ้งซ่าน',
-        readTime: '5 นาที',
-        url: 'https://www.rama.mahidol.ac.th',
-        imageUrl: '',
-        color: 'bg-macaw/10 text-ink',
-    },
-];
 
 // ข้อมูลเริ่มต้นวิดีโอ
 const INITIAL_VIDEOS = [
@@ -151,26 +112,33 @@ const BREATHING_MODES: BreathingMode[] = [
 const BREATH_RING_RADIUS = 85;
 const BREATH_RING_CIRC = 2 * Math.PI * BREATH_RING_RADIUS;
 
+// ทำให้หมวดหมู่ของข้อมูลทุกรายการตรงกับชุดหมวดกลางเสมอ (รองรับข้อมูลเก่าจาก DB)
+function normalizeArticle(a: Article): Article {
+    return { ...a, category: normalizeCategory(a.category) };
+}
+
+function normalizeEpisode(p: PodcastEpisode): PodcastEpisode {
+    return { ...p, category: normalizeCategory(p.category) };
+}
+
 export default function Resources() {
     const { isAdmin } = useAuth();
     const [isEditMode, setIsEditMode] = useState(false);
-
-    // Category Filter State for Articles
-    const [selectedCategory, setSelectedCategory] = useState('ทั้งหมด');
+    const [pinningId, setPinningId] = useState<string | number | null>(null);
 
     // Hospital Search States
     const [searchTerm, setSearchTerm] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false);
 
     // ข้อมูลเริ่มต้น — จะถูกแทนที่ด้วยข้อมูลจากฐานข้อมูล (ทุกคนเห็นชุดเดียวกัน)
-    const [articles, setArticles] = useState<ResourceArticle[]>(INITIAL_ARTICLES as ResourceArticle[]);
+    const [articles, setArticles] = useState<Article[]>(INITIAL_ARTICLES.map(normalizeArticle));
 
     const [videos, setVideos] = useState<ResourceVideo[]>(INITIAL_VIDEOS as ResourceVideo[]);
 
     const [tips, setTips] = useState<ResourceTip[]>(INITIAL_TIPS as ResourceTip[]);
 
     // Podcast States
-    const [podcasts, setPodcasts] = useState<PodcastEpisode[]>(SEED_PODCASTS);
+    const [podcasts, setPodcasts] = useState<PodcastEpisode[]>(SEED_PODCASTS.map(normalizeEpisode));
 
     // โหลดข้อมูลจริงจากฐานข้อมูล (ทุกคนเห็นข้อมูลเดียวกันทุกเบราว์เซอร์)
     // ถ้า DB มีข้อมูลแล้ว (initialized) → ใช้ข้อมูลจาก DB เสมอแม้หมวดใดจะว่าง
@@ -180,40 +148,45 @@ export default function Resources() {
         loadResourcesContent().then((data) => {
             if (!active || !data) return;
             if (data.initialized) {
-                setArticles(data.articles);
                 setVideos(data.videos);
                 setTips(data.tips);
-                setPodcasts(data.podcasts);
+                setPodcasts(data.podcasts.map(normalizeEpisode));
             } else {
-                if (data.articles.length > 0) setArticles(data.articles);
                 if (data.videos.length > 0) setVideos(data.videos);
                 if (data.tips.length > 0) setTips(data.tips);
-                if (data.podcasts.length > 0) setPodcasts(data.podcasts);
+                if (data.podcasts.length > 0) setPodcasts(data.podcasts.map(normalizeEpisode));
             }
         });
         return () => { active = false; };
     }, []);
-    const [podcastCategory, setPodcastCategory] = useState('ทั้งหมด');
+
+    // การ์ดบทความใช้ตารางเดียวกับหน้า Home (home_articles) — อ่าน/เขียนชุดเดียวกัน
+    useEffect(() => {
+        let active = true;
+        loadHomeArticles().then((data) => {
+            if (!active || !data) return;
+            if (data.initialized) {
+                setArticles((data.articles as Article[]).map(normalizeArticle));
+            } else if (data.articles.length > 0) {
+                setArticles((data.articles as Article[]).map(normalizeArticle));
+            }
+        });
+        return () => { active = false; };
+    }, []);
     const [newPodcast, setNewPodcast] = useState({
         title: '',
         speaker: '',
         category: 'การหายใจ',
         link: '',
+        coverImage: '',
     });
+    const [uploadingPodcastCover, setUploadingPodcastCover] = useState(false);
+    const [podcastCoverError, setPodcastCoverError] = useState('');
+    const podcastCoverInputRef = useRef<HTMLInputElement | null>(null);
 
     const podcastSectionRef = useRef<HTMLElement | null>(null);
     const breathingSectionRef = useRef<HTMLElement | null>(null);
     const [searchParams] = useSearchParams();
-
-    const podcastCategories = useMemo(
-        () => ['ทั้งหมด', ...Array.from(new Set(podcasts.map((p) => p.category)))],
-        [podcasts]
-    );
-
-    const filteredPodcasts = useMemo(() => {
-        if (podcastCategory === 'ทั้งหมด') return podcasts;
-        return podcasts.filter((p) => p.category === podcastCategory);
-    }, [podcasts, podcastCategory]);
 
     // พรีวิวการ์ดพอดแคสต์จากฟอร์ม
     const previewEpisode = useMemo<PodcastEpisode>(() => {
@@ -224,6 +197,7 @@ export default function Resources() {
             title: newPodcast.title.trim() || 'ชื่อตอนพอดแคสต์',
             speaker: newPodcast.speaker.trim() || 'ผู้พูดไร้นาม',
             category: newPodcast.category,
+            coverImage: newPodcast.coverImage.trim() || undefined,
         };
         if (parsed?.kind === 'spotify') {
             ep.embedUrl = parsed.embedUrl;
@@ -235,19 +209,23 @@ export default function Resources() {
             ep.externalUrl = link;
         }
         return ep;
-    }, [newPodcast.title, newPodcast.speaker, newPodcast.category, newPodcast.link]);
+    }, [newPodcast.title, newPodcast.speaker, newPodcast.category, newPodcast.link, newPodcast.coverImage]);
 
     // ถ้ามี ?tab=podcast ให้เลื่อนไปที่ Section พอดแคสต์อัตโนมัติ
     useEffect(() => {
         if (searchParams.get('tab') === 'podcast' && podcastSectionRef.current) {
-            podcastSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            requestAnimationFrame(() => {
+                podcastSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
         }
     }, [searchParams]);
 
     // ถ้ามี ?tab=breathing ให้เลื่อนไปที่ Section เทคนิคฝึกหายใจอัตโนมัติ
     useEffect(() => {
         if (searchParams.get('tab') === 'breathing' && breathingSectionRef.current) {
-            breathingSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            requestAnimationFrame(() => {
+                breathingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
         }
     }, [searchParams]);
 
@@ -296,15 +274,8 @@ export default function Resources() {
 
     // Admin Form States
     const [newVideoUrl, setNewVideoUrl] = useState('');
-    const [newArticle, setNewArticle] = useState({
-        category: 'ความเครียด',
-        title: '',
-        description: '',
-        readTime: '3 นาที',
-        url: '',
-        imageUrl: '',
-        color: 'bg-owl-soft text-owl-pressed',
-    });
+    const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+    const [editingPodcast, setEditingPodcast] = useState<PodcastEpisode | null>(null);
     const [newTip, setNewTip] = useState({ icon: '🌸', title: '', desc: '' });
 
     // Logic ฝึกหายใจตามจังหวะของโหมดที่เลือก (หยุดเมื่อครบระยะเวลาที่ตั้ง)
@@ -350,11 +321,10 @@ export default function Resources() {
         circle.style.strokeDashoffset = '0';
     }, [isBreathingActive, phaseIndex, selectedMode]);
 
-    // กรองบทความตามหมวดหมู่
+    // การ์ดที่ปักหมุดขึ้นก่อน
     const filteredArticles = useMemo(() => {
-        if (selectedCategory === 'ทั้งหมด') return articles;
-        return articles.filter((a: any) => a.category === selectedCategory);
-    }, [articles, selectedCategory]);
+        return [...articles].sort((a, b) => Number(Boolean(b.isPinned)) - Number(Boolean(a.isPinned)));
+    }, [articles]);
 
     // บันทึกข้อมูลลงฐานข้อมูล (แทน localStorage เดิม)
     const handleToggleEditMode = async () => {
@@ -363,19 +333,22 @@ export default function Resources() {
             return;
         }
 
-        const result = await saveResourcesContent({
-            articles,
-            videos,
-            tips,
-            breathing: null, // เทคนิคฝึกหายใจเป็นข้อมูลโค้ดคงที่ (แก้ไขได้ในโค้ด)
-            podcasts,
-        });
+        // การ์ดบทความบันทึกที่ตาราง home_articles (ชุดเดียวกับหน้า Home) ส่วนที่เหลือบันทึกที่ resources
+        const [articlesResult, contentResult] = await Promise.all([
+            saveHomeArticles(articles),
+            saveResourcesContent({
+                videos,
+                tips,
+                breathing: null, // เทคนิคฝึกหายใจเป็นข้อมูลโค้ดคงที่ (แก้ไขได้ในโค้ด)
+                podcasts,
+            }),
+        ]);
 
-        if (result.ok) {
+        if (articlesResult.ok && contentResult.ok) {
             alert('บันทึกการแก้ไขเรียบร้อยแล้ว!');
             setIsEditMode(false);
         } else {
-            alert(`❌ ${result.error || 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองอีกครั้ง'}`);
+            alert(`❌ ${articlesResult.error || contentResult.error || 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองอีกครั้ง'}`);
         }
     };
 
@@ -396,11 +369,31 @@ export default function Resources() {
     // ── ลบข้อมูลเข้า DB ทันที ──
     const handleDeleteArticle = async (id: string | number) => {
         if (!window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบบทความนี้?')) return;
-        const result = await deleteResourceItem('articles', id);
+        const result = await deleteHomeArticle(id);
         if (result.ok) {
             setArticles((prev) => prev.filter((a) => a.id !== id));
         } else {
             alert(`❌ ${result.error || 'ไม่สามารถลบบทความได้'}`);
+        }
+    };
+
+    // ปัก/เลิกปักการ์ดโชว์หน้าแรก (สูงสุด 3) — แอดมินกดได้ทันทีโดยไม่ต้องเข้าโหมดแก้ไข และบันทึก DB ทันที
+    const toggleArticlePin = async (article: Article) => {
+        if (pinningId !== null) return;
+        const willPin = !article.isPinned;
+        const pinnedCount = articles.filter((a) => a.isPinned && a.id !== article.id).length;
+        if (willPin && pinnedCount >= 3) {
+            alert('ปักหมุดได้สูงสุด 3 การ์ดสำหรับหน้าแรก');
+            return;
+        }
+        const next = articles.map((a) => (a.id === article.id ? { ...a, isPinned: willPin } : a));
+        setPinningId(article.id);
+        const res = await saveHomeArticles(next);
+        setPinningId(null);
+        if (res.ok) {
+            setArticles(next);
+        } else {
+            alert(`❌ ${res.error || 'ไม่สามารถบันทึกการปักหมุดได้ กรุณาลองอีกครั้ง'}`);
         }
     };
 
@@ -434,24 +427,97 @@ export default function Resources() {
         }
     };
 
-    const handleAddArticle = () => {
-        if (!newArticle.title.trim()) return alert('กรุณากรอกหัวข้อบทความ');
-        setArticles([...articles, { ...newArticle, id: Date.now() }]);
-        setNewArticle({
-            category: 'ความเครียด',
+    const openCreateArticleModal = () => {
+        setEditingArticle({
+            id: 0,
+            category: '',
             title: '',
             description: '',
-            readTime: '3 นาที',
-            url: '',
+            badgeColor: BADGE_COLORS[0].class,
+            actionText: 'อ่านต่อ',
+            link: '',
             imageUrl: '',
-            color: 'bg-owl-soft text-owl-pressed',
+            isPinned: false,
         });
+    };
+
+    const openEditArticleModal = (article: Article) => {
+        setEditingArticle({ ...article });
+    };
+
+    const handleArticleChange = (field: string, value: string) => {
+        if (!editingArticle) return;
+        if (field === 'isPinned') {
+            setEditingArticle({ ...editingArticle, isPinned: value === 'true' });
+            return;
+        }
+        setEditingArticle({ ...editingArticle, [field]: value });
+    };
+
+    // บันทึกบทความจากโมดัล — เขียนตาราง home_articles ชุดเดียวกับหน้า Home ทันที
+    const handleSaveArticle = async () => {
+        if (!editingArticle) return;
+        if (!editingArticle.title.trim()) return alert('กรุณากรอกหัวข้อบทความ');
+
+        const isNew = editingArticle.id === 0;
+        if (editingArticle.isPinned) {
+            const pinnedCount = articles.filter((a) => a.isPinned && (isNew || a.id !== editingArticle.id)).length;
+            if (pinnedCount >= 3) {
+                alert('ปักหมุดได้สูงสุด 3 การ์ดสำหรับหน้าแรก');
+                return;
+            }
+        }
+
+        const savedArticle = { ...editingArticle, category: normalizeCategory(editingArticle.category) };
+        const next: Article[] = isNew
+            ? [...articles, { ...savedArticle, id: Date.now() }]
+            : articles.map((a) => (a.id === editingArticle.id ? savedArticle : a));
+
+        const result = await saveHomeArticles(next);
+        if (result.ok) {
+            setArticles(next);
+            setEditingArticle(null);
+            alert(isNew ? 'เพิ่มบทความเรียบร้อยแล้ว!' : 'บันทึกการแก้ไขบทความสำเร็จ!');
+        } else {
+            alert(`❌ ${result.error || 'ไม่สามารถบันทึกข้อมูลได้'}`);
+        }
     };
 
     const handleAddTip = () => {
         if (!newTip.title.trim() || !newTip.desc.trim()) return alert('กรุณากรอกข้อมูลเคล็ดลับให้ครบถ้วน');
         setTips([...tips, { ...newTip, id: Date.now() }]);
         setNewTip({ icon: '🌸', title: '', desc: '' });
+    };
+
+    const handlePodcastCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            setPodcastCoverError('รองรับเฉพาะไฟล์ JPG, PNG, WebP เท่านั้น');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            setPodcastCoverError('ไฟล์ต้องมีขนาดไม่เกิน 5MB');
+            return;
+        }
+        setUploadingPodcastCover(true);
+        setPodcastCoverError('');
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await api.post('/api/resources/podcasts/upload', formData);
+            if (res.data?.url) {
+                setNewPodcast((prev) => ({ ...prev, coverImage: res.data.url }));
+            } else {
+                setPodcastCoverError(res.data?.error || 'อัปโหลดไม่สำเร็จ');
+            }
+        } catch (err: unknown) {
+            const axiosErr = err as { response?: { data?: { error?: string } } };
+            setPodcastCoverError(axiosErr.response?.data?.error || 'อัปโหลดไม่สำเร็จ กรุณาลองอีกครั้ง');
+        } finally {
+            setUploadingPodcastCover(false);
+            if (podcastCoverInputRef.current) podcastCoverInputRef.current.value = '';
+        }
     };
 
     const handleAddPodcast = () => {
@@ -465,6 +531,7 @@ export default function Resources() {
             title: newPodcast.title.trim(),
             speaker: newPodcast.speaker.trim() || 'ผู้พูดไร้นาม',
             category: newPodcast.category,
+            coverImage: newPodcast.coverImage.trim() || undefined,
         };
         if (parsed.kind === 'spotify') {
             newEpisode.embedUrl = parsed.embedUrl;
@@ -482,7 +549,50 @@ export default function Resources() {
             speaker: '',
             category: 'การหายใจ',
             link: '',
+            coverImage: '',
         });
+    };
+
+    // แก้ไขพอดแคสต์จากโมดัล — เก็บบันทึกลง DB ทันที
+    const handleSavePodcast = async (draft: PodcastDraft) => {
+        if (!editingPodcast) return;
+        const link = draft.link.trim();
+        const parsed = parsePodcastLink(link);
+        const updatedEpisode: PodcastEpisode = {
+            ...editingPodcast,
+            title: draft.title.trim(),
+            speaker: draft.speaker.trim() || 'ผู้พูดไร้นาม',
+            category: editingPodcast.category,
+            coverImage: draft.coverImage.trim() || undefined,
+            embedUrl: undefined,
+            audioUrl: undefined,
+            externalUrl: undefined,
+            externalLabel: undefined,
+        };
+        if (parsed.kind === 'spotify') {
+            updatedEpisode.embedUrl = parsed.embedUrl;
+            updatedEpisode.externalUrl = link;
+            updatedEpisode.externalLabel = 'Spotify';
+        } else if (parsed.kind === 'audio') {
+            updatedEpisode.audioUrl = link;
+        } else {
+            updatedEpisode.externalUrl = link;
+        }
+
+        const next = podcasts.map((p) => (p.id === editingPodcast.id ? updatedEpisode : p));
+        const result = await saveResourcesContent({
+            videos,
+            tips,
+            breathing: null,
+            podcasts: next,
+        });
+        if (result.ok) {
+            setPodcasts(next);
+            setEditingPodcast(null);
+            alert('บันทึกการแก้ไขพอดแคสต์เรียบร้อยแล้ว!');
+        } else {
+            alert(`❌ ${result.error || 'ไม่สามารถบันทึกการแก้ไขได้'}`);
+        }
     };
 
     // Hospital Autocomplete
@@ -560,104 +670,37 @@ export default function Resources() {
                             </div>
                         </div>
                     <div className="flex flex-col gap-4">
-                        <div className="flex items-center gap-2">
-                            <Icon name="book" size={26} />
-                            <h2 className="text-2xl font-black text-ink">บทความจัดการความเครียด</h2>
-                        </div>
-
-                        {/* Filter Categories */}
-                        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                            {ARTICLE_CATEGORIES.map((category) => (
-                                <button
-                                    key={category}
-                                    onClick={() => setSelectedCategory(category)}
-                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${selectedCategory === category
-                                        ? 'bg-owl text-white shadow-lip-sm'
-                                        : 'bg-white text-body-strong hover:bg-owl-soft border border-hairline'
-                                        }`}
-                                >
-                                    {category}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* ฟอร์มสำหรับ Admin เพิ่มบทความใหม่ */}
-                    {isEditMode && (
-                        <div className="p-5 bg-amber-50 border-2 border-dashed border-amber-300 rounded-2xl space-y-3">
-                            <span className="font-bold text-sm text-amber-900 block">เพิ่มบทความใหม่ (Admin)</span>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label className="text-xs font-bold text-amber-900">หมวดหมู่</label>
-                                    <select
-                                        value={newArticle.category}
-                                        onChange={(e) => setNewArticle({ ...newArticle, category: e.target.value })}
-                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                                <Icon name="book" size={26} />
+                                <h2 className="text-2xl font-black text-ink">บทความจัดการความเครียด</h2>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                                {isEditMode && (
+                                    <button
+                                        onClick={openCreateArticleModal}
+                                        className="inline-flex items-center gap-1.5 text-sm font-bold text-white bg-owl hover:bg-owl-pressed px-4 py-2 rounded-xl transition-colors min-h-[44px]"
                                     >
-                                        {ARTICLE_CATEGORIES.filter((c) => c !== 'ทั้งหมด').map((cat) => (
-                                            <option key={cat} value={cat}>{cat}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-amber-900">หัวข้อบทความ</label>
-                                    <input
-                                        type="text"
-                                        placeholder="เช่น การฝึก Mindfulness เพื่อลดความเครียด"
-                                        value={newArticle.title}
-                                        onChange={(e) => setNewArticle({ ...newArticle, title: e.target.value })}
-                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
-                                    />
-                                </div>
+                                        เพิ่มบทความ <span aria-hidden="true">+</span>
+                                    </button>
+                                )}
+                                <a
+                                    href="https://mhc7.dmh.go.th/articles"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-sm font-bold text-macaw hover:text-owl-pressed transition-colors min-h-[44px] px-1 -my-2"
+                                >
+                                    เพิ่มเติม <Icon name="external" size={14} />
+                                </a>
                             </div>
-
-                            <div>
-                                <label className="text-xs font-bold text-amber-900">คำอธิบายสั้นๆ</label>
-                                <input
-                                    type="text"
-                                    placeholder="เช่น เรียนรู้วิธีอยู่กับปัจจุบัน..."
-                                    value={newArticle.description}
-                                    onChange={(e) => setNewArticle({ ...newArticle, description: e.target.value })}
-                                    className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label className="text-xs font-bold text-amber-900">ลิงก์เว็บสำหรับอ่านต่อ (URL)</label>
-                                    <input
-                                        type="url"
-                                        placeholder="https://example.com/article"
-                                        value={newArticle.url}
-                                        onChange={(e) => setNewArticle({ ...newArticle, url: e.target.value })}
-                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-amber-900">ลิงก์รูปภาพหน้าปก (ถ้าไม่ใส่จะโชร์หัวข้อแทน)</label>
-                                    <input
-                                        type="url"
-                                        placeholder="เว้นว่างไว้หากต้องการให้แสดงหัวข้อแทนรูป"
-                                        value={newArticle.imageUrl}
-                                        onChange={(e) => setNewArticle({ ...newArticle, imageUrl: e.target.value })}
-                                        className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
-                                    />
-                                </div>
-                            </div>
-
-                            <button
-                                onClick={handleAddArticle}
-                                className="bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-amber-700 transition-colors"
-                            >
-                                + เพิ่มบทความนี้ลงในการ์ด
-                            </button>
                         </div>
-                    )}
+
+                        </div>
 
                     {/* รายการบทความ (Cards Grid) */}
                     {filteredArticles.length === 0 ? (
                         <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-hairline">
-                            <p className="text-body-soft">ไม่พบบทความในหมวดหมู่ "{selectedCategory}"</p>
+                            <p className="text-body-soft">ยังไม่มีบทความ</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -672,6 +715,7 @@ export default function Resources() {
                                             <img
                                                 src={article.imageUrl}
                                                 alt={article.title}
+                                                loading="lazy"
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                             />
                                         </div>
@@ -689,115 +733,82 @@ export default function Resources() {
                                     {/* เนื้อหาภายในการ์ด */}
                                     <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                                         <div className="space-y-2">
-                                            <span className="text-xs px-3 py-1 rounded-full font-medium bg-owl-soft text-owl-pressed inline-block">
-                                                {article.category}
-                                            </span>
-
-                                            {/* โหมดแก้ไขบทความ */}
-                                            {isEditMode ? (
-                                                <div className="space-y-2 pt-2 border-t border-amber-200 bg-amber-50/50 p-2 rounded-xl">
-                                                    <div>
-                                                        <label className="text-[10px] font-bold text-amber-900 block">เปลี่ยนรูปภาพ (เว้นว่างเพื่อโชว์ข้อความ):</label>
-                                                        <input
-                                                            type="text"
-                                                            value={article.imageUrl || ''}
-                                                            onChange={(e) => {
-                                                                const updated = articles.map((a: any) =>
-                                                                    a.id === article.id ? { ...a, imageUrl: e.target.value } : a
-                                                                );
-                                                                setArticles(updated);
-                                                            }}
-                                                            placeholder="ลบลิงก์ออกเพื่อแสดงข้อความแทนรูป..."
-                                                            className="text-xs text-amber-900 w-full border border-amber-300 bg-white rounded p-1 outline-none mt-0.5"
-                                                        />
-                                                    </div>
-
-                                                    <div>
-                                                        <label className="text-[10px] font-bold text-amber-900 block">หัวข้อบทความ:</label>
-                                                        <input
-                                                            type="text"
-                                                            value={article.title}
-                                                            onChange={(e) => {
-                                                                const updated = articles.map((a: any) =>
-                                                                    a.id === article.id ? { ...a, title: e.target.value } : a
-                                                                );
-                                                                setArticles(updated);
-                                                            }}
-                                                            className="font-bold text-ink w-full border border-amber-300 bg-white rounded text-sm outline-none p-1 mt-0.5"
-                                                        />
-                                                    </div>
-
-                                                    <div>
-                                                        <label className="text-[10px] font-bold text-amber-900 block">คำอธิบายสั้น:</label>
-                                                        <textarea
-                                                            value={article.description || ''}
-                                                            onChange={(e) => {
-                                                                const updated = articles.map((a: any) =>
-                                                                    a.id === article.id ? { ...a, description: e.target.value } : a
-                                                                );
-                                                                setArticles(updated);
-                                                            }}
-                                                            placeholder="คำอธิบาย..."
-                                                            className="text-xs text-body-strong w-full border border-amber-300 bg-white rounded p-1 outline-none mt-0.5"
-                                                        />
-                                                    </div>
-
-                                                    <div>
-                                                        <label className="text-[10px] font-bold text-amber-900 block">ลิงก์อ่านเพิ่มเติม (URL):</label>
-                                                        <input
-                                                            type="text"
-                                                            value={article.url || ''}
-                                                            onChange={(e) => {
-                                                                const updated = articles.map((a: any) =>
-                                                                    a.id === article.id ? { ...a, url: e.target.value } : a
-                                                                );
-                                                                setArticles(updated);
-                                                            }}
-                                                            placeholder="https://..."
-                                                            className="text-xs text-owl-pressed w-full border border-amber-300 bg-white rounded p-1 outline-none mt-0.5"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    <h3 className="font-bold text-ink text-base leading-snug line-clamp-2">
-                                                        {article.title}
-                                                    </h3>
-                                                    <p className="text-xs text-body-muted font-medium leading-relaxed line-clamp-3">
-                                                        {article.description || 'กดอ่านเพิ่มเติมเพื่อดูเนื้อหาบทความฉบับเต็ม'}
-                                                    </p>
-                                                </>
+                                            {article.isPinned && (
+                                                <span className="text-xs px-2.5 py-1 rounded-full font-bold bg-owl text-white inline-flex items-center gap-1">
+                                                    <Icon name="map-pin" size={12} /> ปักหมุดหน้าแรก
+                                                </span>
                                             )}
+
+                                            <h3 className="font-bold text-ink text-base leading-snug line-clamp-2">
+                                                {article.title}
+                                            </h3>
+                                            <p className="text-xs text-body-muted font-medium leading-relaxed line-clamp-3">
+                                                {article.description || 'กดอ่านเพิ่มเติมเพื่อดูเนื้อหาบทความฉบับเต็ม'}
+                                            </p>
                                         </div>
 
                                         {/* ปุ่มลิงก์อ่านเพิ่มเติม */}
-                                        <div className="pt-3 border-t border-hairline flex items-center justify-between">
-                                            <span className="text-xs text-body-soft flex items-center gap-1"><Icon name="clock" size={12} /> อ่าน {article.readTime || '3 นาที'}</span>
-                                            {article.url ? (
-                                                <a
-                                                    href={article.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-xs font-bold text-macaw hover:text-owl-pressed flex items-center gap-1 hover:underline group-hover:translate-x-0.5 transition-transform"
-                                                >
-                                                    <span>อ่านต่อ</span>
-                                                    <Icon name="chevron-right" size={12} />
-                                                </a>
+                                        <div className="pt-3 border-t border-hairline flex items-center justify-end">
+                                            {article.link ? (
+                                                article.link.startsWith('http') ? (
+                                                    <a
+                                                        href={article.link}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-xs font-bold text-macaw hover:text-owl-pressed flex items-center gap-1 hover:underline group-hover:translate-x-0.5 transition-transform"
+                                                    >
+                                                        <span>{article.actionText || 'อ่านต่อ'}</span>
+                                                        <Icon name="chevron-right" size={12} />
+                                                    </a>
+                                                ) : (
+                                                    <Link
+                                                        to={article.link}
+                                                        className="text-xs font-bold text-macaw hover:text-owl-pressed flex items-center gap-1 hover:underline group-hover:translate-x-0.5 transition-transform"
+                                                    >
+                                                        <span>{article.actionText || 'อ่านต่อ'}</span>
+                                                        <Icon name="chevron-right" size={12} />
+                                                    </Link>
+                                                )
                                             ) : (
                                                 <span className="text-xs text-body-soft">ไม่มีลิงก์</span>
                                             )}
                                         </div>
                                     </div>
 
-                                    {/* ปุ่มลบสำหรับการ์ด */}
-                                    {isEditMode && (
-                                        <button
-                                            onClick={() => handleDeleteArticle(article.id)}
-                                            className="absolute top-2 right-2 bg-cardinal text-white p-1.5 rounded-full shadow-md hover:bg-cardinal text-xs z-10 inline-flex items-center justify-center"
-                                            title="ลบบทความนี้"
-                                        >
-                                            <Icon name="trash" size={14} />
-                                        </button>
+                                    {/* ปุ่มปักหมุด (แอดมินเห็นเสมอ) + ปุ่มลบ (เฉพาะโหมดแก้ไข) */}
+                                    {isAdmin && (
+                                        <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
+                                            <button
+                                                onClick={() => toggleArticlePin(article)}
+                                                disabled={pinningId === article.id}
+                                                className={`p-1.5 rounded-full shadow-md transition-colors disabled:opacity-50 ${article.isPinned
+                                                    ? 'bg-owl text-white hover:bg-owl-pressed'
+                                                    : 'bg-white text-owl-pressed border border-hairline hover:bg-owl-soft'
+                                                    }`}
+                                                title={article.isPinned ? 'เลิกปักหมุดจากหน้าแรก' : 'ปักหมุดโชว์หน้าแรก'}
+                                                aria-label={article.isPinned ? 'เลิกปักหมุดจากหน้าแรก' : 'ปักหมุดโชว์หน้าแรก'}
+                                            >
+                                                <Icon name="map-pin" size={14} />
+                                            </button>
+                                            {isEditMode && (
+                                                <>
+                                                    <button
+                                                        onClick={() => openEditArticleModal(article)}
+                                                        className="bg-white text-owl-pressed border border-hairline p-1.5 rounded-full shadow-md hover:bg-owl-soft transition-colors z-10 inline-flex items-center justify-center"
+                                                        title="แก้ไขบทความ"
+                                                    >
+                                                        <Icon name="pencil" size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteArticle(article.id)}
+                                                        className="bg-cardinal text-white p-1.5 rounded-full shadow-md hover:bg-cardinal text-xs z-10 inline-flex items-center justify-center"
+                                                        title="ลบบทความนี้"
+                                                    >
+                                                        <Icon name="trash" size={14} />
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             ))}
@@ -841,7 +852,7 @@ export default function Resources() {
                                                 type="button"
                                                 onClick={() => handleSelectBreathMode(mode.id)}
                                                 disabled={isBreathingActive}
-                                                className={`rounded-xl py-2 font-mono text-sm font-bold border transition-all ${isActive
+                                                className={`rounded-xl py-2 font-mono text-sm font-bold border transition-all min-h-[44px] ${isActive
                                                     ? mode.accentTab
                                                     : 'border-hairline bg-white/70 text-body-strong hover:bg-white'
                                                     } ${isBreathingActive ? 'opacity-40 cursor-not-allowed' : ''}`}
@@ -865,7 +876,7 @@ export default function Resources() {
                                                     : 'border-hairline'
                                                     }`}
                                             >
-                                                <span className={`w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-[11px] font-bold ${active
+                                                <span className={`w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-xs font-bold ${active
                                                     ? 'bg-owl text-white'
                                                     : done
                                                         ? 'bg-macaw text-white'
@@ -1098,16 +1109,43 @@ export default function Resources() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs font-bold text-amber-900 block">หมวดหมู่</label>
-                                        <select
-                                            value={newPodcast.category}
-                                            onChange={(e) => setNewPodcast({ ...newPodcast, category: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-1"
-                                        >
-                                            {['การหายใจ', 'Mindfulness', 'จัดการความเครียด', 'การนอนหลับ', 'กำลังใจ'].map((cat) => (
-                                                <option key={cat} value={cat}>{cat}</option>
-                                            ))}
-                                        </select>
+                                        <label className="text-xs font-bold text-amber-900 block">รูปปกพอดแคสต์</label>
+                                        <div className="flex items-center gap-3 mt-1">
+                                            {newPodcast.coverImage && (
+                                                <img
+                                                    src={newPodcast.coverImage}
+                                                    alt="ปกพอดแคสต์"
+                                                    className="w-16 h-16 rounded-xl object-cover border border-amber-200 shrink-0"
+                                                />
+                                            )}
+                                            <button
+                                                type="button"
+                                                onClick={() => podcastCoverInputRef.current?.click()}
+                                                disabled={uploadingPodcastCover}
+                                                className="px-3 py-2 rounded-xl text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 transition-colors disabled:opacity-50"
+                                            >
+                                                {uploadingPodcastCover ? 'กำลังอัปโหลด...' : 'อัปโหลดรูป'}
+                                            </button>
+                                            <input
+                                                ref={podcastCoverInputRef}
+                                                type="file"
+                                                accept="image/jpeg,image/png,image/webp"
+                                                className="hidden"
+                                                onChange={handlePodcastCoverUpload}
+                                            />
+                                        </div>
+                                        <input
+                                            type="url"
+                                            placeholder="หรือวาง URL รูปปกโดยตรง ..."
+                                            value={newPodcast.coverImage}
+                                            onChange={(e) => setNewPodcast({ ...newPodcast, coverImage: e.target.value })}
+                                            className="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none mt-2"
+                                        />
+                                        {podcastCoverError && (
+                                            <p className="text-[11px] mt-1 font-medium text-cardinal flex items-center gap-1">
+                                                <Icon name="alert" size={12} /> {podcastCoverError}
+                                            </p>
+                                        )}
                                     </div>
                                     <div>
                                         <label className="text-xs font-bold text-amber-900 block">ลิงก์ (Spotify หรือไฟล์เสียง mp3)</label>
@@ -1139,47 +1177,41 @@ export default function Resources() {
 
                                 <div>
                                     <span className="text-xs font-bold text-amber-900 block mb-2">พรีวิวการ์ด</span>
-                                    <div className="max-w-sm">
-                                        <PodcastVoiceCard episode={previewEpisode} fill />
+                                    <div className="max-w-md">
+                                        <PodcastVoiceCard episode={previewEpisode} />
                                     </div>
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    <div className="flex items-center gap-2 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
-                        {podcastCategories.map((cat) => (
-                            <button
-                                key={cat}
-                                onClick={() => setPodcastCategory(cat)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${podcastCategory === cat
-                                    ? 'bg-owl text-white shadow-lip-sm'
-                                    : 'bg-white text-body-strong hover:bg-owl-soft border border-hairline'
-                                    }`}
-                            >
-                                {cat}
-                            </button>
-                        ))}
-                    </div>
-
-                    {filteredPodcasts.length === 0 ? (
+                    {podcasts.length === 0 ? (
                         <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-hairline">
-                            <p className="text-body-soft">ไม่พบพอดแคสต์ในหมวดหมู่ "{podcastCategory}"</p>
+                            <p className="text-body-soft">ยังไม่มีพอดแคสต์</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredPodcasts.map((episode) => (
+                        <div className="flex flex-col gap-3">
+                            {podcasts.map((episode) => (
                                 <div key={episode.id} className="relative group">
-                                    <PodcastVoiceCard episode={episode} fill />
+                                    <PodcastVoiceCard episode={episode} />
 
                                     {isEditMode && (
-                                        <button
-                                            onClick={() => handleDeletePodcast(episode.id)}
-                                            className="absolute top-2 right-2 bg-cardinal text-white p-1.5 rounded-full shadow-md hover:bg-cardinal text-xs z-10 inline-flex items-center justify-center"
-                                            title="ลบตอนนี้"
-                                        >
-                                            <Icon name="trash" size={14} />
-                                        </button>
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 z-10">
+                                            <button
+                                                onClick={() => setEditingPodcast({ ...episode })}
+                                                className="bg-white text-owl-pressed border border-hairline p-1.5 rounded-full shadow-md hover:bg-owl-soft transition-colors text-xs inline-flex items-center justify-center"
+                                                title="แก้ไขตอนนี้"
+                                            >
+                                                <Icon name="pencil" size={14} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeletePodcast(episode.id)}
+                                                className="bg-cardinal text-white p-1.5 rounded-full shadow-md hover:bg-cardinal text-xs inline-flex items-center justify-center"
+                                                title="ลบตอนนี้"
+                                            >
+                                                <Icon name="trash" size={14} />
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             ))}
@@ -1388,6 +1420,27 @@ export default function Resources() {
                     )}
                     </div>
                 </section>
+
+            {/* Modal แก้ไขบทความ */}
+            {editingArticle && (
+                <ArticleEditModal
+                    article={editingArticle}
+                    isNew={editingArticle.id === 0}
+                    showCategory={false}
+                    onChange={handleArticleChange}
+                    onSubmit={handleSaveArticle}
+                    onClose={() => setEditingArticle(null)}
+                />
+            )}
+
+            {/* Modal แก้ไขพอดแคสต์ */}
+            {editingPodcast && (
+                <PodcastEditModal
+                    episode={editingPodcast}
+                    onSave={handleSavePodcast}
+                    onClose={() => setEditingPodcast(null)}
+                />
+            )}
         </div>
     );
 }

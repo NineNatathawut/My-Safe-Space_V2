@@ -307,8 +307,8 @@ export default function PostDetail() {
                       ) : (
                         <span className="font-bold text-sm text-body-strong">{comment.alias_name || 'เพื่อนร่วมทาง'}</span>
                       )}
-                      {isOwner && <span className="text-[10px] px-2 py-0.5 bg-bee/30 text-ink rounded-full font-bold">เจ้าของเรื่อง</span>}
-                      {comment.role === 'expert' && <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 bg-macaw/10 text-ink rounded-full font-bold"><Icon name="stethoscope" size={11} className="text-macaw" /> ผู้เชี่ยวชาญ</span>}
+                      {isOwner && <span className="text-xs px-2 py-0.5 bg-bee/30 text-ink rounded-full font-bold">เจ้าของเรื่อง</span>}
+                      {comment.role === 'expert' && <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-macaw/10 text-ink rounded-full font-bold"><Icon name="stethoscope" size={11} className="text-macaw" /> ผู้เชี่ยวชาญ</span>}
                     </div>
                     <span className="text-xs text-body-soft font-medium">{formatDate(comment.created_at)}</span>
                   </div>

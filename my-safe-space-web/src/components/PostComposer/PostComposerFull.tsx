@@ -1,4 +1,6 @@
 import { usePostComposer } from './usePostComposer';
+import { useAuth } from '../../contexts/AuthContext';
+import { LoginRequiredCard } from './LoginRequiredCard';
 import { SafetyModal } from '../SafetyModal';
 
 interface PostComposerFullProps {
@@ -6,17 +8,21 @@ interface PostComposerFullProps {
 }
 
 export function PostComposerFull({ onClose }: PostComposerFullProps) {
+  const { isAuthenticated } = useAuth();
   const {
     content, setContent,
     selectedEmotion, setSelectedEmotion,
     isLoading, error, successMsg,
     showSafetyModal, setShowSafetyModal,
+    loginRequired,
     EMOTIONS, handleClear, handleSubmit, handleProceedPost,
   } = usePostComposer();
 
+  const showLoginCard = !isAuthenticated || loginRequired;
+
   return (
     <>
-      <div className="fixed inset-0 bg-white z-50 flex flex-col" onClick={onClose}>
+      <div className="fixed inset-0 bg-white z-50 flex flex-col">
         <div className="flex items-center justify-between px-4 py-3 border-b border-hairline shrink-0">
           <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-owl-soft text-body-strong transition-colors">←</button>
           <h2 className="font-feather text-base font-extrabold text-ink">พื้นที่แบ่งปันเรื่องราว</h2>
@@ -24,6 +30,10 @@ export function PostComposerFull({ onClose }: PostComposerFullProps) {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
+          {showLoginCard ? (
+            <LoginRequiredCard />
+          ) : (
+          <>
           {successMsg && (
             <div className="mb-4 p-3 bg-owl-soft text-owl-pressed rounded-xl border border-owl-mint text-sm animate-pulse">{successMsg}</div>
           )}
@@ -74,6 +84,8 @@ export function PostComposerFull({ onClose }: PostComposerFullProps) {
           </form>
 
           <p className="text-[10px] text-body-soft mt-4 flex gap-1 items-start"><span>🔒</span> ความเป็นส่วนตัวของคุณสำคัญมาก — ข้อความนี้ไม่มีการบันทึกชื่อ อีเมล หรือข้อมูลส่วนตัวใดๆ</p>
+          </>
+          )}
         </div>
       </div>
 

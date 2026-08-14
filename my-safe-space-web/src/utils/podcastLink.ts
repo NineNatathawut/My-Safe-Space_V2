@@ -43,3 +43,24 @@ export function describeLink(url: string): string {
       return '⚠️ เป็นลิงก์ทั่วไป — กดฟังจะเปิดแท็บใหม่';
   }
 }
+
+export type PodcastPlatform = 'spotify' | 'youtube' | 'soundcloud' | 'apple' | 'generic';
+
+export function platformFor(input: {
+  embedUrl?: string;
+  externalUrl?: string;
+  externalLabel?: string;
+  audioUrl?: string;
+}): PodcastPlatform {
+  const haystack = `${input.embedUrl || ''} ${input.externalUrl || ''} ${input.externalLabel || ''}`.toLowerCase();
+
+  if (/open\.spotify\.com|spotify/.test(haystack)) return 'spotify';
+  if (/youtube\.com|youtu\.be|youtube/.test(haystack)) return 'youtube';
+  if (/soundcloud\.com|soundcloud/.test(haystack)) return 'soundcloud';
+  if (/podcasts\.apple\.com|apple podcasts|applepodcasts/.test(haystack)) return 'apple';
+
+  const hasAudio = !!(input.audioUrl || input.embedUrl);
+  if (hasAudio) return 'generic';
+  if (input.externalUrl) return 'generic';
+  return 'generic';
+}

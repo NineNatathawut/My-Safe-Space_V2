@@ -81,7 +81,7 @@ export function InlinePostBox({ onPost }: { onPost?: () => void }) {
                       key={emo.label}
                       type="button"
                       onClick={() => setSelectedEmotion(emo.icon)}
-                      className={`px-2.5 py-1 rounded-full text-xs font-bold transition-colors ${
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors min-h-[44px] ${
                         selectedEmotion === emo.icon
                           ? 'bg-owl-soft text-owl-pressed border border-owl-mint'
                           : 'bg-body-soft/10 text-body-muted border border-hairline hover:bg-owl-soft/40'
@@ -93,7 +93,7 @@ export function InlinePostBox({ onPost }: { onPost?: () => void }) {
                   <button
                     type="button"
                     onClick={() => setShowEmotions(!showEmotions)}
-                    className="px-2.5 py-1 rounded-full text-xs font-bold bg-white text-body-muted border border-hairline hover:bg-owl-soft/40"
+                    className="px-3 py-1.5 rounded-full text-xs font-bold bg-white text-body-muted border border-hairline hover:bg-owl-soft/40 min-h-[44px]"
                   >
                     {showEmotions ? 'ซ่อน' : 'อารมณ์ทั้งหมด'}
                   </button>
@@ -106,7 +106,7 @@ export function InlinePostBox({ onPost }: { onPost?: () => void }) {
                         key={emo.label}
                         type="button"
                         onClick={() => { setSelectedEmotion(emo.icon); setShowEmotions(false); }}
-                        className={`px-2.5 py-1 rounded-full text-xs font-bold transition-colors ${
+                        className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors min-h-[44px] ${
                           selectedEmotion === emo.icon
                             ? 'bg-owl-soft text-owl-pressed border border-owl-mint'
                             : 'bg-body-soft/10 text-body-muted border border-hairline hover:bg-owl-soft/40'
@@ -123,7 +123,7 @@ export function InlinePostBox({ onPost }: { onPost?: () => void }) {
                     <button
                       type="button"
                       onClick={() => setIsAnonymous(!isAnonymous)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors min-h-[44px] ${
                         isAnonymous
                           ? 'bg-owl-soft text-owl-pressed border border-owl-mint'
                           : 'bg-white text-body-muted border border-hairline'
@@ -132,10 +132,10 @@ export function InlinePostBox({ onPost }: { onPost?: () => void }) {
                       <Icon name={isAnonymous ? 'lock' : 'user'} size={13} />
                       {isAnonymous ? 'ไม่ระบุนาม' : 'แสดงนาม'}
                     </button>
-                    <button type="button" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-owl-soft text-body-soft transition-colors" title="แนบรูปภาพ">
+                    <button type="button" className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-owl-soft text-body-soft transition-colors" title="แนบรูปภาพ">
                       <Icon name="camera" size={16} />
                     </button>
-                    <button type="button" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-owl-soft text-body-soft transition-colors" title="อีโมจิ">
+                    <button type="button" className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-owl-soft text-body-soft transition-colors" title="อีโมจิ">
                       <Icon name="smile" size={16} />
                     </button>
                   </div>

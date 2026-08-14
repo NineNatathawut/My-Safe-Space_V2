@@ -518,14 +518,14 @@ export default function AssessmentHistory() {
           <div className="card p-4 text-center">
             <div className="text-xs text-body-muted font-medium">ผลครั้งแรก (Baseline)</div>
             <div className="text-2xl font-black text-ink mt-1">{firstPoint?.scoreRaw ?? '-'}</div>
-            <div className="text-[10px] text-body-soft font-medium">
+            <div className="text-xs text-body-soft font-medium">
               {METRIC_LABELS[activeMetric]}
             </div>
           </div>
           <div className="card p-4 text-center">
             <div className="text-xs text-body-muted font-medium">ล่าสุด</div>
             <div className="text-2xl font-black text-ink mt-1">{lastPoint?.scoreRaw ?? '-'}</div>
-            <div className="text-[10px] text-body-soft font-medium">
+            <div className="text-xs text-body-soft font-medium">
               {METRIC_LABELS[activeMetric]}
             </div>
           </div>

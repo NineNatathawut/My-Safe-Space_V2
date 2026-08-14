@@ -25,6 +25,11 @@
   button {
     font-family: inherit;
   }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
 }
 
 @layer components {
@@ -93,6 +98,25 @@
   .badge {
     @apply inline-flex items-center gap-1 rounded-full px-3 py-1 font-bold uppercase tracking-btn;
   }
+
+  /* ปุ่ม/องค์ประกอบที่แตะได้: กำหนดขนาดขั้นต่ำเพื่อความสะดวกบนมือถือ (>=44px) */
+  .tap-target {
+    @apply relative inline-flex items-center justify-center;
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ปิด animation สำหรับผู้ใช้ที่ตั้งค่าลดการเคลื่อนไหว (ช่วยเรื่องแบตและเครื่องที่อ่อน) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @keyframes mascot-bob {
@@ -104,9 +128,6 @@
     transform: translate(-50%, -6px);
   }
 }
-.animate-mascot-bob {
-  animation: mascot-bob 1.5s ease-in-out infinite;
-}
 
 @keyframes float-side {
   0%,
@@ -117,6 +138,13 @@
     transform: translateY(-10px);
   }
 }
-.animate-float-side {
-  animation: float-side 4s ease-in-out infinite;
+
+@layer utilities {
+  .animate-mascot-bob {
+    animation: mascot-bob 1.5s ease-in-out infinite;
+  }
+
+  .animate-float-side {
+    animation: float-side 4s ease-in-out infinite;
+  }
 }

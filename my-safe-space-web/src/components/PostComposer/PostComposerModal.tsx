@@ -1,4 +1,6 @@
 import { usePostComposer } from './usePostComposer';
+import { useAuth } from '../../contexts/AuthContext';
+import { LoginRequiredCard } from './LoginRequiredCard';
 import { SafetyModal } from '../SafetyModal';
 
 interface PostComposerModalProps {
@@ -6,13 +8,17 @@ interface PostComposerModalProps {
 }
 
 export function PostComposerModal({ onClose }: PostComposerModalProps) {
+  const { isAuthenticated } = useAuth();
   const {
     content, setContent,
     selectedEmotion, setSelectedEmotion,
     isLoading, error, successMsg,
     showSafetyModal, setShowSafetyModal,
+    loginRequired,
     EMOTIONS, handleClear, handleSubmit, handleProceedPost,
   } = usePostComposer();
+
+  const showLoginCard = !isAuthenticated || loginRequired;
 
   return (
     <>
@@ -24,6 +30,10 @@ export function PostComposerModal({ onClose }: PostComposerModalProps) {
           </div>
 
           <div className="p-6 max-h-[70vh] overflow-y-auto">
+            {showLoginCard ? (
+              <LoginRequiredCard />
+            ) : (
+            <>
             {successMsg && (
               <div className="mb-4 p-3 bg-owl-soft text-owl-pressed rounded-xl border border-owl-mint text-sm animate-pulse">{successMsg}</div>
             )}
@@ -74,6 +84,8 @@ export function PostComposerModal({ onClose }: PostComposerModalProps) {
             </form>
 
             <p className="text-[10px] text-body-soft mt-4 flex gap-1 items-start"><span>🔒</span> ความเป็นส่วนตัวของคุณสำคัญมาก — ข้อความนี้ไม่มีการบันทึกชื่อ อีเมล หรือข้อมูลส่วนตัวใดๆ</p>
+            </>
+            )}
           </div>
         </div>
       </div>

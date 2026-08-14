@@ -1,15 +1,20 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { OwlLogo } from '../components/Icon';
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, loginWithGoogle, user, isLoading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const locationState = location.state as { from?: string; openComposer?: boolean } | null;
+  const returnTo = locationState?.from || '/';
+  const shouldOpenComposer = Boolean(locationState?.openComposer);
 
   const isWelcomeVisible = !!user && !authLoading && user.role !== 'admin';
   const alias = localStorage.getItem('alias_name') || 'ผู้ใช้ไร้นาม';
@@ -23,11 +28,11 @@ export default function Login() {
     }
 
     const timer = setTimeout(() => {
-      navigate('/');
+      navigate(returnTo, { state: shouldOpenComposer ? { openComposer: true } : undefined });
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, returnTo, shouldOpenComposer]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

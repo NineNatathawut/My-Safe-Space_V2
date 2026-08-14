@@ -8,6 +8,7 @@ export interface HomeArticle {
   badgeColor: string;
   actionText: string;
   link: string;
+  imageUrl?: string;
 }
 
 export interface HomeArticlesLoadResult {

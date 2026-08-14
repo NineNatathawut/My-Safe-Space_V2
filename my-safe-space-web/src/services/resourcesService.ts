@@ -47,7 +47,7 @@ export interface ResourcesContent {
 }
 
 export interface ResourcesSavePayload {
-  articles: ResourceArticle[];
+  articles?: ResourceArticle[];
   videos: ResourceVideo[];
   tips: ResourceTip[];
   breathing: ResourceBreathing | null;

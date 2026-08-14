@@ -77,7 +77,7 @@ export default function MiniPlayer() {
   };
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-hairline shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+    <div className="fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-hairline shadow-[0_-4px_16px_rgba(0,0,0,0.06)]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
         <button
           type="button"
@@ -120,7 +120,7 @@ export default function MiniPlayer() {
             <div className="h-full bg-owl rounded-full" style={{ width: `${progress}%` }} />
           </div>
 
-          <p className="text-[11px] text-body-soft mt-0.5 truncate">{current.speaker}</p>
+          <p className="text-xs text-body-soft mt-0.5 truncate">{current.speaker}</p>
         </div>
 
         {current.externalUrl && (

@@ -1,13 +1,7 @@
 import { useState, useCallback } from 'react';
 import api from '../../api/axios';
-
-const SENSITIVE_KEYWORDS = [
-  'คิดสั้น', 'คิดส้น',
-  'อยากตาย', 'ไม่อยากอยู่', 'อยากฆ่า',
-  'ฆ่าตัว', 'จบชีวิต', 'ลาโลก',
-  'ฆ่า ตต', 'ฆ่าตต', 'ตัดช่องน้อย',
-  'ไม่อยากตื่น', 'ตายดีกว่า', 'ไม่อยากมีชีวิต'
-];
+import { useAuth } from '../../contexts/AuthContext';
+import { checkSensitiveKeywords } from '../../utils/sensitiveContent';
 
 const EMOTIONS = [
   { label: 'เศร้า', icon: '😭' },
@@ -20,22 +14,15 @@ const EMOTIONS = [
   { label: 'โอเค', icon: '🙂' },
 ];
 
-const checkSensitiveKeywords = (text: string): boolean => {
-  if (!text) return false;
-  const normalizedText = text.replace(/\s+/g, '').toLowerCase();
-  return SENSITIVE_KEYWORDS.some(keyword => {
-    const normalizedKeyword = keyword.replace(/\s+/g, '').toLowerCase();
-    return normalizedText.includes(normalizedKeyword);
-  });
-};
-
 export function usePostComposer() {
+  const { isAuthenticated } = useAuth();
   const [content, setContent] = useState('');
   const [selectedEmotion, setSelectedEmotion] = useState('🙂');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [showSafetyModal, setShowSafetyModal] = useState(false);
+  const [loginRequired, setLoginRequired] = useState(false);
 
   const handleClear = useCallback(() => {
     setContent('');
@@ -53,7 +40,7 @@ export function usePostComposer() {
       const aliasName = localStorage.getItem('alias_name') || 'ผู้ใช้ไร้นาม';
 
       if (!token) {
-        setError('กรุณาเข้าสู่ระบบก่อนแชร์เรื่องราวครับ');
+        setLoginRequired(true);
         setIsLoading(false);
         return;
       }
@@ -82,12 +69,17 @@ export function usePostComposer() {
     e.preventDefault();
     if (!content.trim() || isLoading) return;
 
+    if (!isAuthenticated) {
+      setLoginRequired(true);
+      return;
+    }
+
     if (checkSensitiveKeywords(content)) {
       setShowSafetyModal(true);
     } else {
       submitPostToBackend();
     }
-  }, [content, isLoading, submitPostToBackend]);
+  }, [content, isLoading, isAuthenticated, submitPostToBackend]);
 
   const handleProceedPost = useCallback(() => {
     setShowSafetyModal(false);
@@ -104,6 +96,8 @@ export function usePostComposer() {
     successMsg,
     showSafetyModal,
     setShowSafetyModal,
+    loginRequired,
+    setLoginRequired,
     EMOTIONS,
     handleClear,
     handleSubmit,

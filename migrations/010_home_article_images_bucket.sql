@@ -1,0 +1,13 @@
+-- =============================================
+-- Migration 010: สร้าง Storage Bucket สำหรับรูปภาพปกการ์ด "บทความและเทคนิค"
+--
+-- NOTE: ต้องรันผ่าน Supabase Dashboard (Storage) หรือ SQL Editor เอง เช่นเดียวกับ bucket
+-- อื่น ๆ (ดู 002_friend_profile.sql) ถ้าไม่สร้าง bucket นี้ การอัปโหลดรูปปกจะ error
+--
+-- วิธีสร้างผ่าน Dashboard:
+--   Storage → New bucket → Name: home-article-images → Public bucket: ON
+--
+-- หรือรัน SQL นี้ (ต้องมีสิทธิ์สร้าง bucket):
+--   INSERT INTO storage.buckets (id, name, public)
+--   VALUES ('home-article-images', 'home-article-images', true);
+-- =============================================

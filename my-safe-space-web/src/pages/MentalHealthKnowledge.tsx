@@ -130,13 +130,13 @@ export const MentalHealthKnowledge: React.FC = () => {
 
               {/* ข้อความชื่อหัวข้อ */}
               <div className="flex-1 flex items-center justify-center w-full">
-                <span className="font-din font-bold text-xs sm:text-sm text-slate-700 group-hover:text-owl transition-colors line-clamp-2">
+                <span className="font-din font-bold text-sm text-slate-700 group-hover:text-owl transition-colors line-clamp-2">
                   {item.title}
                 </span>
               </div>
 
               {/* ไอคอนลิงก์ออกภายนอก */}
-              <div className="flex items-center gap-1 text-[10px] font-din text-slate-400 group-hover:text-owl transition-colors">
+              <div className="flex items-center gap-1 text-xs font-din text-slate-400 group-hover:text-owl transition-colors">
                 <span>อ่านต่อ</span>
                 <ExternalLink className="w-3 h-3" />
               </div>

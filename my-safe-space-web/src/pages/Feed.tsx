@@ -164,7 +164,7 @@ export default function Feed() {
                       </div>
                     </div>
                     {isAdmin && (
-                      <button onClick={() => handleDeletePost(activeId)} className="text-body-soft hover:text-cardinal transition-colors p-1" title="ลบโพสต์"><Icon name="trash" size={16} /></button>
+                      <button onClick={() => handleDeletePost(activeId)} className="text-body-soft hover:text-cardinal transition-colors w-10 h-10 flex items-center justify-center rounded-lg" title="ลบโพสต์"><Icon name="trash" size={16} /></button>
                     )}
                   </div>
                   <p className="text-body-strong whitespace-pre-wrap mb-4 font-medium">{post.content}</p>
@@ -173,14 +173,12 @@ export default function Feed() {
                   <button
                     onClick={() => handleHug(activeId)}
                     disabled={isHugging}
-                    className={`flex items-center gap-1.5 transition-colors active:scale-95 transform font-medium ${
-                      hasHugged ? 'text-cardinal hover:text-cardinal' : 'text-body-muted hover:text-cardinal'
-                    }`}
+                    className={`flex items-center gap-1.5 transition-colors active:scale-95 transform font-medium min-h-[44px] px-1 ${hasHugged ? 'text-cardinal hover:text-cardinal' : 'text-body-muted hover:text-cardinal'}`}
                   >
                     <Icon name="heart" size={17} className={hasHugged ? 'fill-cardinal text-cardinal' : ''} />
                     กอด {post.hug_count > 0 && <span className={`font-bold ${hasHugged ? 'text-cardinal' : 'text-ink'}`}>({post.hug_count})</span>}
                   </button>
-                  <Link to={`/post/${activeId}`} className="flex items-center gap-1.5 text-body-muted hover:text-owl transition-colors font-medium">
+                  <Link to={`/post/${activeId}`} className="flex items-center gap-1.5 text-body-muted hover:text-owl transition-colors font-medium min-h-[44px] px-1">
                     <Icon name="message" size={16} /> คอมเมนต์ {post.comment_count > 0 && <span className="font-bold text-owl">({post.comment_count})</span>}
                   </Link>
                 </div>
@@ -194,7 +192,7 @@ export default function Feed() {
       {!showComposer && (
         <button
           onClick={() => setShowComposer(true)}
-          className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-owl hover:bg-owl-pressed text-white rounded-full shadow-lip flex items-center justify-center text-2xl transition-all active:scale-90"
+          className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-[calc(1.5rem+env(safe-area-inset-right))] z-40 w-14 h-14 bg-owl hover:bg-owl-pressed text-white rounded-full shadow-lip flex items-center justify-center text-2xl transition-all active:scale-90"
         >
           <Icon name="pencil" size={22} />
         </button>

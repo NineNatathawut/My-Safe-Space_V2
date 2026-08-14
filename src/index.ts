@@ -1620,7 +1620,7 @@ app.get('/api/user/:id', async (c) => {
     let avatarValue: string | null = null
     if (avatar) {
       if (avatar.avatar_type === 'expert_upload' && avatar.is_approved) {
-        avatarValue = `${supabaseUrl}/storage/v1/object/public/${avatar.avatar_value}`
+        avatarValue = `${supabaseUrl}/storage/v1/object/public/expert-avatars/${avatar.avatar_value}`
       } else if (avatar.avatar_type !== 'expert_upload') {
         avatarValue = avatar.avatar_value
       }
@@ -1778,7 +1778,7 @@ app.post('/api/user/avatar/upload', authMiddleware, async (c) => {
   }
 
   const ext = file.name.split('.').pop() || 'jpg'
-  const filePath = `expert-avatars/${user.id}/${Date.now()}.${ext}`
+  const filePath = `${user.id}/${Date.now()}.${ext}`
 
   const { error: uploadError } = await supabaseAdmin.storage
     .from('expert-avatars')
@@ -1828,7 +1828,7 @@ app.get('/api/admin/avatars/pending', authMiddleware, async (c) => {
 
   const result = await Promise.all((data || []).map(async (a: any) => {
     const url = a.avatar_value
-      ? `${supabaseUrl}/storage/v1/object/public/${a.avatar_value}`
+      ? `${supabaseUrl}/storage/v1/object/public/expert-avatars/${a.avatar_value}`
       : null
     return { ...a, avatar_url: url }
   }))
@@ -2111,6 +2111,8 @@ app.get('/api/home/articles', async (c) => {
       badgeColor: a.badge_color,
       actionText: a.action_text,
       link: a.link,
+      imageUrl: a.image_url,
+      isPinned: a.is_pinned === true,
     })),
   })
 })
@@ -2140,6 +2142,8 @@ app.put('/api/home/articles', authMiddleware, async (c) => {
           badge_color: a.badgeColor || 'bg-owl-soft text-owl-pressed',
           action_text: a.actionText || 'อ่านต่อ',
           link: a.link || '',
+          image_url: a.imageUrl || '',
+          is_pinned: a.isPinned === true,
           sort_order: i + 1,
         }))
       )
@@ -2185,6 +2189,108 @@ app.delete('/api/home/articles/:id', authMiddleware, async (c) => {
   } catch (err: any) {
     console.error('❌ DELETE home article error:', err)
     return c.json({ success: false, error: err.message || 'ไม่สามารถลบข้อมูลได้' }, 500)
+  }
+})
+
+// 🟢 อัปโหลดรูปภาพไปยัง public bucket (เฉพาะแอดมิน)
+const HOME_ARTICLE_BUCKET = 'home-article-images'
+const PODCAST_COVER_BUCKET = 'podcast-cover-images'
+
+// ตรวจ/สร้าง bucket ให้อัตโนมัติ ถ้ายังไม่มี (service key มีสิทธิ์เต็ม)
+async function ensurePublicBucket(bucket: string) {
+  const { data: existing, error: getError } = await supabaseAdmin.storage.getBucket(bucket)
+  const notFound =
+    getError &&
+    (getError.status === 404 ||
+      String(getError.statusCode) === '404' ||
+      (getError.message || '').toLowerCase().includes('not found'))
+  if (notFound) {
+    const { error: createError } = await supabaseAdmin.storage.createBucket(bucket, { public: true })
+    if (createError) {
+      throw new Error(`ไม่สามารถสร้าง bucket ได้: ${createError.message || 'unknown'}`)
+    }
+    return
+  }
+  if (getError) {
+    throw new Error(`ไม่สามารถตรวจสอบ bucket ได้: ${getError.message || 'unknown'}`)
+  }
+  // bucket มีอยู่แล้ว แต่ไม่เป็น public → ปรับให้เป็น public เพื่อให้ URL เปิดได้
+  if (!existing?.public) {
+    await supabaseAdmin.storage.updateBucket(bucket, { public: true })
+  }
+}
+
+async function uploadImageToPublicBucket(
+  c: any,
+  bucket: string
+): Promise<{ url?: string; error?: string; status?: 400 | 500 }> {
+  const body = await c.req.parseBody()
+  const file = body['file'] as File | undefined
+
+  if (!file) {
+    return { error: 'กรุณาเลือกรูปภาพ', status: 400 }
+  }
+
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    return { error: 'รองรับเฉพาะไฟล์ JPG, PNG, WebP เท่านั้น', status: 400 }
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    return { error: 'ไฟล์ต้องมีขนาดไม่เกิน 5MB', status: 400 }
+  }
+
+  await ensurePublicBucket(bucket)
+
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
+  const filePath = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`
+
+  const { error: uploadError } = await supabaseAdmin.storage
+    .from(bucket)
+    .upload(filePath, file, { contentType: file.type })
+
+  if (uploadError) {
+    return { error: uploadError.message || 'อัปโหลดไม่สำเร็จ กรุณาลองอีกครั้ง', status: 500 }
+  }
+
+  const url = `${supabaseUrl}/storage/v1/object/public/${bucket}/${filePath}`
+  return { url }
+}
+
+app.post('/api/home/articles/upload', authMiddleware, async (c) => {
+  try {
+    const user = c.get('user')
+    if (!isAdminUser(user)) {
+      return c.json({ success: false, error: 'Forbidden: เฉพาะแอดมินเท่านั้น' }, 403)
+    }
+
+    const result = await uploadImageToPublicBucket(c, HOME_ARTICLE_BUCKET)
+    if (result.url) {
+      return c.json({ success: true, url: result.url, message: 'อัปโหลดรูปภาพเรียบร้อยแล้ว' })
+    }
+    return c.json({ success: false, error: result.error }, result.status ?? 400)
+  } catch (err: any) {
+    console.error('❌ Home article image upload exception:', err)
+    return c.json({ success: false, error: err.message || 'อัปโหลดไม่สำเร็จ กรุณาลองอีกครั้ง' }, 500)
+  }
+})
+
+// 🟢 POST /api/resources/podcasts/upload — อัปโหลดรูปปกพอดแคสต์ (เฉพาะแอดมิน)
+app.post('/api/resources/podcasts/upload', authMiddleware, async (c) => {
+  try {
+    const user = c.get('user')
+    if (!isAdminUser(user)) {
+      return c.json({ success: false, error: 'Forbidden: เฉพาะแอดมินเท่านั้น' }, 403)
+    }
+
+    const result = await uploadImageToPublicBucket(c, PODCAST_COVER_BUCKET)
+    if (result.url) {
+      return c.json({ success: true, url: result.url, message: 'อัปโหลดรูปปกเรียบร้อยแล้ว' })
+    }
+    return c.json({ success: false, error: result.error }, result.status ?? 400)
+  } catch (err: any) {
+    console.error('❌ Podcast cover image upload exception:', err)
+    return c.json({ success: false, error: err.message || 'อัปโหลดไม่สำเร็จ กรุณาลองอีกครั้ง' }, 500)
   }
 })
 

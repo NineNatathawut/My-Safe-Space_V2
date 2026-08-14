@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getActiveAssessments, submitAssessmentResult } from '../services/assessmentService';
 import type {
   Assessment as AssessmentType,
+  AssessmentQuestion,
   InterpretationRule,
   DimensionResult,
 } from '../types/assessment';
@@ -101,6 +102,22 @@ export default function Assessment() {
   const [totalScore, setTotalScore] = useState(0);
   const [savedNote, setSavedNote] = useState<string | null>(null);
 
+  // refs ของการ์ดคำถามแต่ละข้อ ใช้เลื่อนไปข้อถัดไป/ก่อนหน้า (ช่วยใช้งานด้วยนิ้วบนมือถือ)
+  const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const isQAnswered = (q: AssessmentQuestion, index: number): boolean => {
+    const answer = answers[index];
+    if (q.type === 'TEXT') return typeof answer === 'string' && answer.trim().length > 0;
+    return answer !== undefined && answer !== null;
+  };
+
+  const scrollToQuestion = (index: number) => {
+    const el = questionRefs.current[index];
+    if (!el) return;
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+  };
+
   useEffect(() => {
     const loadAssessment = async () => {
       const list = await getActiveAssessments();
@@ -139,7 +156,15 @@ export default function Assessment() {
   };
 
   const handleSelectOption = (questionIndex: number, score: number) => {
+    if (answers[questionIndex] === score) return;
     setAnswers((prev) => ({ ...prev, [questionIndex]: score }));
+
+    // เลื่อนไปข้อถัดไปที่ยังไม่ตอบอัตโนมัติ — ถนัดมือบนมือถือ
+    const qs = assessment?.questions || [];
+    const next = qs.findIndex((q, i) => i > questionIndex && !isQAnswered(q, i));
+    if (next !== -1) {
+      window.setTimeout(() => scrollToQuestion(next), 400);
+    }
   };
 
   const handleTextChange = (questionIndex: number, value: string) => {
@@ -193,6 +218,7 @@ export default function Assessment() {
     setTotalScore(scoreSum);
     setResult(overall);
     setIsSubmitted(true);
+    window.scrollTo({ top: 0, behavior: 'auto' });
 
     // ── แบบประเมินมาตรฐาน (มี code) → บันทึกผลลงประวัติสุขภาพใจ ──
     if (assessment.code && isAuthenticated) {
@@ -262,7 +288,7 @@ export default function Assessment() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <h2 className="font-bold text-ink">{a.title}</h2>
                     <span
-                      className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                      className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                         a.type === 'EXTERNAL'
                           ? 'bg-bee/20 text-ink'
                           : 'bg-owl-soft text-owl-pressed'
@@ -369,6 +395,15 @@ export default function Assessment() {
 
   const questions = assessment.questions;
 
+  let answeredCount = 0;
+  let requiredTotal = 0;
+  questions.forEach((q, i) => {
+    if (q.is_required === false) return;
+    requiredTotal += 1;
+    if (isQAnswered(q, i)) answeredCount += 1;
+  });
+  const progressPct = requiredTotal > 0 ? Math.round((answeredCount / requiredTotal) * 100) : 0;
+
   return (
     <div className="min-h-screen py-10 px-4">
       <div className="max-w-2xl mx-auto space-y-8">
@@ -397,7 +432,11 @@ export default function Assessment() {
               const prevDim = index > 0 ? questions[index - 1].dimension : undefined;
               const showSectionHeader = !!q.dimension && q.dimension !== prevDim;
               return (
-              <div key={q.id || index}>
+              <div
+                key={q.id || index}
+                ref={(el) => { questionRefs.current[index] = el; }}
+                className="scroll-mt-28"
+              >
                 {showSectionHeader && (
                   <div className="mb-3 text-sm font-bold text-owl-pressed inline-flex items-center gap-2 bg-owl-soft px-3 py-1.5 rounded-full">
                     <Icon name="chart" size={14} /> {dimensionLabel(q.dimension!)}
@@ -420,7 +459,7 @@ export default function Assessment() {
                         <button
                           key={optIdx}
                           onClick={() => handleSelectOption(index, opt.score)}
-                          className={`py-3 px-4 rounded-xl border text-left transition-all ${
+                          className={`min-h-[48px] py-3.5 px-4 rounded-xl border text-left transition-all active:scale-[0.98] ${
                             isSelected
                               ? 'bg-owl-soft border-owl-mint text-ink font-bold shadow-lip-sm'
                               : 'bg-white border-hairline text-body-strong hover:border-macaw hover:bg-owl-soft/40'
@@ -447,19 +486,7 @@ export default function Assessment() {
               );
             })}
 
-            <div className="pt-4 pb-10">
-              <button
-                onClick={calculateResult}
-                disabled={!isAllAnswered}
-                className={`w-full text-lg ${
-                  isAllAnswered
-                    ? 'btn-primary'
-                    : 'bg-owl-soft text-body-soft cursor-not-allowed rounded-2xl py-4 font-bold'
-                }`}
-              >
-                {isAllAnswered ? 'ดูผลประเมิน' : 'กรุณาตอบคำถามให้ครบทุกข้อ'}
-              </button>
-            </div>
+            <div className="pt-4 pb-28" aria-hidden="true" />
           </div>
         ) : (
           <div className="card p-8 rounded-3xl text-center space-y-6 animate-fadeIn">
@@ -606,6 +633,52 @@ export default function Assessment() {
                 className="mt-6 w-full btn-primary"
               >
                 เข้าสู่พื้นที่ปลอดภัย (หน้าหลัก)
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* แถบนำทางล่างแบบลอย (Sticky) — ใช้สะดวกด้วยนิ้วบนมือถือ */}
+        {!isSubmitted && (
+          <div
+            className="sticky bottom-0 z-30 -mx-4 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] bg-gradient-to-t from-canvas via-canvas/95 to-transparent"
+          >
+            <div className="bg-white rounded-2xl border border-hairline shadow-[0_-4px_16px_rgba(0,0,0,0.06)] p-3 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  let target = 0;
+                  for (let i = questions.length - 1; i >= 0; i--) {
+                    if (isQAnswered(questions[i], i)) { target = i; break; }
+                  }
+                  scrollToQuestion(target);
+                }}
+                className="tap-target w-11 h-11 shrink-0 rounded-xl bg-owl-soft text-owl-pressed hover:bg-owl-mint transition-colors"
+                aria-label="ย้อนกลับข้อก่อนหน้า"
+              >
+                <Icon name="chevron-left" size={20} />
+              </button>
+
+              <div className="flex-1 min-w-0" aria-live="polite">
+                <div className="flex items-center justify-between text-xs font-bold mb-1.5 gap-2">
+                  <span className="text-body-muted">ตอบแล้ว {answeredCount}/{requiredTotal}</span>
+                  <span className="text-owl-pressed">{progressPct}%</span>
+                </div>
+                <div className="h-2 bg-hairline rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-owl rounded-full transition-all duration-300"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={calculateResult}
+                disabled={!isAllAnswered}
+                className="shrink-0 min-h-[46px] px-5 rounded-xl font-bold text-sm transition-all active:scale-95 bg-owl text-white shadow-lip-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ดูผลประเมิน
               </button>
             </div>
           </div>
